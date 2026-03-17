@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { SimpleMarkdown } from "@/components/shared/simple-markdown";
 
 export function AthenaChat() {
   const [isOpen, setIsOpen] = useState(false);
@@ -108,8 +109,17 @@ export function AthenaChat() {
                       : "bg-muted"
                   )}
                 >
-                  {message.parts?.map((part, i) =>
-                    part.type === "text" ? <span key={i}>{part.text}</span> : null
+                  {message.role === "assistant" ? (
+                    <SimpleMarkdown
+                      content={message.parts
+                        ?.filter((p) => p.type === "text")
+                        .map((p) => ("text" in p ? p.text : ""))
+                        .join("") ?? ""}
+                    />
+                  ) : (
+                    message.parts?.map((part, i) =>
+                      part.type === "text" ? <span key={i}>{"text" in part ? part.text : ""}</span> : null
+                    )
                   )}
                 </div>
               </div>
