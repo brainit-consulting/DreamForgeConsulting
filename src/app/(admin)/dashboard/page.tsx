@@ -1,8 +1,28 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { KpiCards } from "@/components/admin/dashboard/kpi-cards";
 import { RevenueChart } from "@/components/admin/dashboard/revenue-chart";
 import { ActivityFeed } from "@/components/admin/dashboard/activity-feed";
 import { ProjectOverview } from "@/components/admin/dashboard/project-overview";
+
+interface Stats {
+  totalRevenue: number;
+  revenueChange: string;
+  activeProjects: number;
+  newLeads: number;
+  activeClients: number;
+}
+
 export default function DashboardPage() {
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [revenue, setRevenue] = useState<{ month: string; revenue: number }[]>([]);
+
+  useEffect(() => {
+    fetch("/api/dashboard/stats").then((r) => r.json()).then(setStats);
+    fetch("/api/dashboard/revenue").then((r) => r.json()).then(setRevenue);
+  }, []);
+
   return (
     <div className="space-y-6">
       <div>
@@ -12,10 +32,10 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <KpiCards />
+      <KpiCards stats={stats} />
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <RevenueChart />
+        <RevenueChart data={revenue} />
         <ActivityFeed />
       </div>
 

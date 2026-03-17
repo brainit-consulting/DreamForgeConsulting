@@ -1,0 +1,34 @@
+import { NextResponse } from "next/server";
+import { db } from "@/lib/db";
+
+export async function GET() {
+  const invoices = await db.invoice.findMany({
+    where: { status: "PAID", paidAt: { not: null } },
+    select: { amount: true, paidAt: true },
+    orderBy: { paidAt: "asc" },
+  });
+
+  // Group by month (last 6 months)
+  const months: Record<string, number> = {};
+  const now = new Date();
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = d.toLocaleString("en-US", { month: "short" });
+    months[key] = 0;
+  }
+
+  for (const inv of invoices) {
+    if (!inv.paidAt) continue;
+    const key = inv.paidAt.toLocaleString("en-US", { month: "short" });
+    if (key in months) {
+      months[key] += inv.amount;
+    }
+  }
+
+  const data = Object.entries(months).map(([month, revenue]) => ({
+    month,
+    revenue,
+  }));
+
+  return NextResponse.json(data);
+}

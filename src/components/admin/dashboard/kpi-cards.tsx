@@ -1,86 +1,54 @@
 "use client";
 
-import {
-  DollarSign,
-  FolderKanban,
-  UserPlus,
-  Users,
-  TrendingUp,
-  TrendingDown,
-} from "lucide-react";
+import { DollarSign, FolderKanban, UserPlus, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
-interface KpiCardProps {
-  title: string;
-  value: string;
-  change: string;
-  trend: "up" | "down";
-  icon: React.ElementType;
+interface Stats {
+  totalRevenue: number;
+  revenueChange: string;
+  activeProjects: number;
+  newLeads: number;
+  activeClients: number;
 }
 
-function KpiCard({ title, value, change, trend, icon: Icon }: KpiCardProps) {
-  return (
-    <Card className="relative overflow-hidden">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
-          {title}
-        </CardTitle>
-        <div className="rounded-md bg-primary/10 p-2">
-          <Icon className="h-4 w-4 text-primary" />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="font-display text-3xl">{value}</div>
-        <div className="mt-1 flex items-center gap-1 text-xs">
-          {trend === "up" ? (
-            <TrendingUp className="h-3 w-3 text-emerald-500" />
-          ) : (
-            <TrendingDown className="h-3 w-3 text-red-500" />
-          )}
-          <span
-            className={cn(
-              "font-medium",
-              trend === "up" ? "text-emerald-500" : "text-red-500"
-            )}
-          >
-            {change}
-          </span>
-          <span className="text-muted-foreground">vs last month</span>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
+export function KpiCards({ stats }: { stats: Stats | null }) {
+  if (!stats) {
+    return (
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i}>
+            <CardHeader className="pb-2"><Skeleton className="h-4 w-24" /></CardHeader>
+            <CardContent><Skeleton className="h-8 w-20" /></CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
 
-export function KpiCards() {
-  const kpis: KpiCardProps[] = [
+  const kpis = [
     {
       title: "Total Revenue",
-      value: "$194,000",
-      change: "+12.5%",
-      trend: "up",
+      value: `$${stats.totalRevenue.toLocaleString()}`,
+      change: stats.revenueChange,
       icon: DollarSign,
     },
     {
       title: "Active Projects",
-      value: "4",
-      change: "+1",
-      trend: "up",
+      value: String(stats.activeProjects),
+      change: "",
       icon: FolderKanban,
     },
     {
       title: "New Leads",
-      value: "6",
-      change: "+3",
-      trend: "up",
+      value: String(stats.newLeads),
+      change: "",
       icon: UserPlus,
     },
     {
       title: "Active Clients",
-      value: "4",
-      change: "+1",
-      trend: "up",
+      value: String(stats.activeClients),
+      change: "",
       icon: Users,
     },
   ];
@@ -88,7 +56,22 @@ export function KpiCards() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {kpis.map((kpi) => (
-        <KpiCard key={kpi.title} {...kpi} />
+        <Card key={kpi.title}>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              {kpi.title}
+            </CardTitle>
+            <div className="rounded-md bg-primary/10 p-2">
+              <kpi.icon className="h-4 w-4 text-primary" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="font-display text-3xl">{kpi.value}</div>
+            {kpi.change && (
+              <p className="mt-1 text-xs text-emerald-500">{kpi.change} vs last month</p>
+            )}
+          </CardContent>
+        </Card>
       ))}
     </div>
   );
