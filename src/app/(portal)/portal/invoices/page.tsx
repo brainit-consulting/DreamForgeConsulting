@@ -23,12 +23,17 @@ interface Invoice {
 
 export default function PortalInvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
+  function fetchInvoices() {
+    setError(false);
     fetch("/api/portal/data")
-      .then((r) => r.json())
-      .then((data) => setInvoices(data.invoices ?? []));
-  }, []);
+      .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
+      .then((data) => setInvoices(data.invoices ?? []))
+      .catch(() => setError(true));
+  }
+
+  useEffect(() => { fetchInvoices(); }, []);
 
   async function handlePay(invoiceId: string) {
     try {
@@ -55,7 +60,14 @@ export default function PortalInvoicesPage() {
         <p className="mt-1 text-muted-foreground">View and pay your invoices.</p>
       </div>
 
-      {invoices.length === 0 && (
+      {error && (
+        <div className="flex flex-col items-center gap-4 py-12">
+          <p className="text-muted-foreground">Failed to load invoices.</p>
+          <button type="button" onClick={fetchInvoices} className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">Retry</button>
+        </div>
+      )}
+
+      {!error && invoices.length === 0 && (
         <p className="py-8 text-center text-muted-foreground">No invoices yet.</p>
       )}
 

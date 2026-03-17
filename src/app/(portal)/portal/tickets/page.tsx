@@ -46,11 +46,19 @@ export default function PortalTicketsPage() {
   const [projectId, setProjectId] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  const [error, setError] = useState(false);
+
   const fetchData = useCallback(async () => {
-    const res = await fetch("/api/portal/data");
-    const data = await res.json();
-    setTickets(data.tickets ?? []);
-    setProjects(data.projects ?? []);
+    try {
+      const res = await fetch("/api/portal/data");
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      setTickets(data.tickets ?? []);
+      setProjects(data.projects ?? []);
+      setError(false);
+    } catch {
+      setError(true);
+    }
   }, []);
 
   useEffect(() => { fetchData(); }, [fetchData]);
@@ -134,7 +142,13 @@ export default function PortalTicketsPage() {
       )}
 
       <div className="space-y-4">
-        {tickets.length === 0 && !showForm && (
+        {error && (
+          <div className="flex flex-col items-center gap-4 py-12">
+            <p className="text-muted-foreground">Failed to load tickets.</p>
+            <button type="button" onClick={fetchData} className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">Retry</button>
+          </div>
+        )}
+        {!error && tickets.length === 0 && !showForm && (
           <p className="py-8 text-center text-muted-foreground">No tickets submitted yet.</p>
         )}
         {tickets.map((ticket) => (

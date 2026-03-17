@@ -15,7 +15,8 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { AddProjectDialog } from "@/components/admin/projects/add-project-dialog";
 import { ActionTooltip } from "@/components/shared/action-tooltip";
 import { useConfirm } from "@/components/shared/confirm-dialog";
-import { Trash2 } from "lucide-react";
+import { Trash2, Search } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import type { ProjectStatus } from "@/types";
 
@@ -37,12 +38,19 @@ interface ProjectRow {
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<ProjectRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [error, setError] = useState(false);
   const confirm = useConfirm();
 
   const fetchProjects = useCallback(async () => {
-    const res = await fetch("/api/projects");
-    const data = await res.json();
-    setProjects(data);
+    try {
+      const res = await fetch("/api/projects");
+      if (!res.ok) throw new Error();
+      setProjects(await res.json());
+      setError(false);
+    } catch {
+      setError(true);
+    }
     setLoading(false);
   }, []);
 
@@ -75,6 +83,14 @@ export default function ProjectsPage() {
     fetchProjects();
   }
 
+  const filtered = search
+    ? projects.filter((p) =>
+        [p.name, p.client?.company].some((f) =>
+          f?.toLowerCase().includes(search.toLowerCase())
+        )
+      )
+    : projects;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -87,7 +103,24 @@ export default function ProjectsPage() {
         <AddProjectDialog onCreated={fetchProjects} />
       </div>
 
-      <div className="rounded-lg border border-border">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Search projects by name, client..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-9"
+        />
+      </div>
+
+      {error && (
+        <div className="flex flex-col items-center gap-4 py-12">
+          <p className="text-muted-foreground">Failed to load projects.</p>
+          <button type="button" onClick={fetchProjects} className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">Retry</button>
+        </div>
+      )}
+
+      {!error && <div className="rounded-lg border border-border">
         <Table>
           <TableHeader>
             <TableRow>
@@ -104,10 +137,10 @@ export default function ProjectsPage() {
             {loading && (
               <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
             )}
-            {!loading && projects.length === 0 && (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No projects yet. Create one for a client!</TableCell></TableRow>
+            {!loading && filtered.length === 0 && (
+              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">{search ? "No projects match your search." : "No projects yet. Create one for a client!"}</TableCell></TableRow>
             )}
-            {projects.map((project) => (
+            {filtered.map((project) => (
               <TableRow key={project.id}>
                 <TableCell>
                   <Link href={`/projects/${project.id}`} className="font-medium hover:text-primary">
@@ -158,7 +191,7 @@ export default function ProjectsPage() {
             ))}
           </TableBody>
         </Table>
-      </div>
+      </div>}
     </div>
   );
 }

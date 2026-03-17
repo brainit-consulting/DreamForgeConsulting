@@ -20,6 +20,7 @@ export const helpContent: Record<string, HelpSection> = {
     content:
       "Leads are potential clients you're tracking through your sales pipeline. Each lead has a status that progresses through: New → Contacted → Qualified → Proposal → Converted (or Lost). Use the 'Add Lead' button to create a new lead with their name, email, company, phone, source, estimated value, and notes. You can change a lead's status directly from the dropdown in the table. When a lead is ready to become a client, click the green checkmark icon to promote them — this creates a user account, a client record, and sends them a portal invite email via Resend from noreply@dreamforgeworld.com.",
     tips: [
+      "Use the search bar to filter leads by name, email, company, or source",
       "The status dropdown in each row lets you update pipeline stage instantly",
       "Promoting a lead (green ✓ icon) creates their portal login and sends credentials via email",
       "The pipeline summary at the top shows how many leads are in each stage",
@@ -31,6 +32,7 @@ export const helpContent: Record<string, HelpSection> = {
     content:
       "Clients are converted leads who have active portal accounts. Each client has a company name, email, phone, and a count of their projects. Click a client's name to view their detail page showing all their projects (with progress bars and workflow status) and invoices (with amounts and payment status). Use the 'Invite Client' button to manually create a new client without going through the lead pipeline — this creates their account and sends a portal invite email with temporary login credentials.",
     tips: [
+      "Use the search bar to filter clients by company name, email, or phone",
       "Click a client's company name to see their full detail page with projects and invoices",
       "The 'Invite Client' dialog creates the user account, client record, and sends the email in one step",
       "The temporary password is shown after invite in case the email doesn't arrive",
@@ -42,6 +44,7 @@ export const helpContent: Record<string, HelpSection> = {
     content:
       "Projects represent the SaaS applications you're building for clients. Each project tracks through a 7-stage workflow: Discovery & Planning → Design & Wireframing → Development → Testing & QA → Deployment & Launch → Launched → Support. Use 'New Project' to create one (select a client, set name, description, dates, and budget). The status dropdown in each row lets you change the workflow stage directly. Progress percentage auto-calculates based on the current stage.",
     tips: [
+      "Use the search bar to filter projects by name or client company",
       "Click a project name to open its detail page with the interactive workflow tracker",
       "On the detail page, click workflow stage circles to advance or revert the project",
       "Each stage has its own Tasks checklist and Notes — use them to track work details",
@@ -52,18 +55,19 @@ export const helpContent: Record<string, HelpSection> = {
   invoices: {
     title: "Invoices — Billing & Payments",
     content:
-      "Track all client invoices across your projects. The stat cards at the top show Collected (paid), Pending (sent but unpaid), Overdue, and Draft counts. Use the filter buttons to view invoices by status. Each invoice shows the description, client, project, status, amount, and due date. Invoices integrate with Stripe — clients can pay directly through their portal via Stripe Checkout. Invoice notifications are sent via Resend email.",
+      "Track all client invoices across your projects. The stat cards at the top show Collected (paid), Pending (sent but unpaid), Overdue, and Draft counts. Use the filter buttons to view invoices by status. Each invoice shows the description, client, project, status, amount, and due date. Invoices integrate with Stripe — clients pay through their portal via Stripe Checkout, and the invoice is automatically marked as PAID via webhook when the payment completes. Invoice notifications are sent via Resend email.",
     tips: [
       "Filter buttons (All, Draft, Sent, Paid, Overdue) let you quickly find specific invoices",
       "The Collected stat shows total revenue from paid invoices",
       "Clients see their invoices in the portal and can click 'Pay Now' to pay via Stripe",
+      "After Stripe payment completes, the invoice status updates to PAID automatically via webhook",
       "Overdue invoices are automatically highlighted in red",
     ],
   },
   settings: {
     title: "Settings — Athena & Configuration",
     content:
-      "The Settings page currently houses Athena Preferences — the configuration panel for the AI assistant. You can edit Athena's system prompt to change her personality and response style, adjust the max output tokens (controls response length — 350 ≈ 2-3 sentences), set the temperature (0 = focused, 2 = creative), manage the list of free OpenRouter models she cycles through, and toggle the OpenAI fallback. Changes take effect immediately after saving.",
+      "The Settings page has two sections: Athena Preferences and Backups & Cron. In Athena Preferences, you can edit the AI assistant's system prompt, adjust max output tokens (controls response length — 350 ≈ 2-3 sentences), set the temperature (0 = focused, 2 = creative), manage the list of free OpenRouter models she cycles through, and toggle the OpenAI fallback. The Backups section shows your automated daily database backups with stats, a manual trigger, and downloadable backup files. Changes take effect immediately after saving.",
     tips: [
       "Edit the system prompt to customize how Athena responds to you and your clients",
       "Lower temperature (0.3-0.5) gives more consistent answers; higher (0.8-1.2) is more creative",
@@ -75,11 +79,13 @@ export const helpContent: Record<string, HelpSection> = {
   portal: {
     title: "Client Portal — Your Project Hub",
     content:
-      "Welcome to your DreamForge Consulting client portal. Here you can track the real-time status of all your projects with visual workflow indicators, view and pay outstanding invoices directly via Stripe, and submit support tickets for any questions or issues. The dashboard shows a summary of your active projects, pending invoices, and open tickets.",
+      "Welcome to your DreamForge Consulting client portal. Here you can track the real-time status of all your projects with visual workflow indicators, view and pay outstanding invoices directly via Stripe, and submit support tickets for any questions or issues. The dashboard shows a summary of your active projects, pending invoices, and open tickets. Payments are processed securely through Stripe and your invoice status updates automatically.",
     tips: [
       "The Projects tab shows your projects with full workflow visualization",
       "The Invoices tab lets you view all invoices and pay outstanding ones with a single click",
+      "After paying via Stripe, the invoice automatically updates to PAID — no manual steps needed",
       "Use the Tickets tab to submit new support requests — select the project and priority level",
+      "If you forget your password, use the 'Forgot your password?' link on the login page",
       "The Athena AI assistant (bottom-right) can answer questions about your projects and invoices",
     ],
   },
@@ -98,11 +104,11 @@ export const helpContent: Record<string, HelpSection> = {
   clientDetail: {
     title: "Client Detail — Overview & History",
     content:
-      "The client detail page shows everything about a single client in one place. At the top you'll find the client's company name, email, phone, and address — click 'Edit' to update any of these fields inline. Below that, the Projects section lists all projects assigned to this client with their current workflow stage, progress bar, and status. Click any project name to jump to its detail page. The Invoices section shows all invoices for this client with amounts, status badges (Draft, Sent, Paid, Overdue), and due dates. Use this page to get a quick snapshot of your relationship with any client.",
+      "The client detail page shows everything about a single client in one place. At the top you'll see the client's company name, email, phone number, and how long they've been a client. Below that, the Projects section lists all projects assigned to this client with their current workflow stage, progress bar, and status. The Invoices section shows all invoices for this client with amounts, status badges (Draft, Sent, Paid, Overdue), and due dates. Use this page to get a quick snapshot of your relationship with any client.",
     tips: [
       "Click a project row to navigate directly to the project detail page",
       "Invoice status badges are color-coded: amber for Draft, blue for Sent, green for Paid, red for Overdue",
-      "Edit client details (company, email, phone, address) directly from this page",
+      "The total projects count card gives a quick overview of client engagement",
     ],
   },
   tickets: {

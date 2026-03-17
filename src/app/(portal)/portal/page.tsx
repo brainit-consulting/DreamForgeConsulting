@@ -21,10 +21,28 @@ interface PortalData {
 
 export default function PortalDashboardPage() {
   const [data, setData] = useState<PortalData | null>(null);
+  const [error, setError] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/portal/data").then((r) => r.json()).then(setData);
-  }, []);
+  function fetchData() {
+    setError(false);
+    fetch("/api/portal/data")
+      .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
+      .then(setData)
+      .catch(() => setError(true));
+  }
+
+  useEffect(() => { fetchData(); }, []);
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center gap-4 py-16">
+        <p className="text-muted-foreground">Failed to load your data.</p>
+        <button type="button" onClick={fetchData} className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   if (!data) return <div className="py-12 text-center text-muted-foreground">Loading...</div>;
 

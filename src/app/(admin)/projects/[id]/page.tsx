@@ -42,9 +42,20 @@ export default function ProjectDetailPage() {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [error, setError] = useState(false);
+
   const fetchProject = useCallback(async () => {
-    const res = await fetch(`/api/projects/${id}`);
-    if (res.ok) setProject(await res.json());
+    try {
+      const res = await fetch(`/api/projects/${id}`);
+      if (res.ok) {
+        setProject(await res.json());
+        setError(false);
+      } else {
+        setError(true);
+      }
+    } catch {
+      setError(true);
+    }
     setLoading(false);
   }, [id]);
 
@@ -74,8 +85,24 @@ export default function ProjectDetailPage() {
     }
   }
 
-  if (loading || !project) {
+  if (loading) {
     return <div className="py-12 text-center text-muted-foreground">Loading...</div>;
+  }
+
+  if (error || !project) {
+    return (
+      <div className="flex flex-col items-center gap-4 py-16">
+        <p className="text-muted-foreground">Failed to load project.</p>
+        <div className="flex gap-2">
+          <button type="button" onClick={fetchProject} className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+            Retry
+          </button>
+          <a href="/projects" className="rounded-md border border-border px-4 py-2 text-sm font-medium hover:bg-muted">
+            Back to Projects
+          </a>
+        </div>
+      </div>
+    );
   }
 
   return (
