@@ -1,17 +1,13 @@
-import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
 import { KpiCards } from "@/components/admin/dashboard/kpi-cards";
 import { ProjectOverview } from "@/components/admin/dashboard/project-overview";
 import { ActivityFeed } from "@/components/admin/dashboard/activity-feed";
 
-// Mock recharts to avoid canvas issues in jsdom
+// Mock recharts
 vi.mock("recharts", () => ({
-  ResponsiveContainer: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="responsive-container">{children}</div>
-  ),
-  BarChart: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="bar-chart">{children}</div>
-  ),
+  ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  BarChart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   Bar: () => null,
   XAxis: () => null,
   YAxis: () => null,
@@ -19,9 +15,17 @@ vi.mock("recharts", () => ({
   Tooltip: () => null,
 }));
 
+const mockStats = {
+  totalRevenue: 105000,
+  revenueChange: "+12.5%",
+  activeProjects: 4,
+  newLeads: 5,
+  activeClients: 4,
+};
+
 describe("KpiCards", () => {
-  it("renders all 4 KPI cards", () => {
-    render(<KpiCards />);
+  it("renders all 4 KPI cards with real data", () => {
+    render(<KpiCards stats={mockStats} />);
     expect(screen.getByText("Total Revenue")).toBeInTheDocument();
     expect(screen.getByText("Active Projects")).toBeInTheDocument();
     expect(screen.getByText("New Leads")).toBeInTheDocument();
@@ -29,32 +33,46 @@ describe("KpiCards", () => {
   });
 
   it("displays revenue value", () => {
-    render(<KpiCards />);
-    expect(screen.getByText("$194,000")).toBeInTheDocument();
+    render(<KpiCards stats={mockStats} />);
+    expect(screen.getByText("$105,000")).toBeInTheDocument();
+  });
+
+  it("shows loading skeletons when stats is null", () => {
+    const { container } = render(<KpiCards stats={null} />);
+    expect(container.querySelectorAll("[data-slot='skeleton']").length).toBeGreaterThan(0);
   });
 });
 
 describe("ProjectOverview", () => {
-  it("renders active projects with progress bars", () => {
-    render(<ProjectOverview />);
-    expect(screen.getByText("DataStream Dashboard")).toBeInTheDocument();
-    expect(screen.getByText("NovaPay Merchant Portal")).toBeInTheDocument();
-    expect(screen.getByText("UrbanPulse Mobile App")).toBeInTheDocument();
+  beforeEach(() => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      json: () => Promise.resolve([
+        { id: "1", name: "Test Project", status: "DEVELOPMENT", progress: 45, client: { company: "Test Co" } },
+      ]),
+    }));
   });
 
-  it("shows project progress percentages", () => {
+  it("renders projects from API", async () => {
     render(<ProjectOverview />);
-    expect(screen.getByText("45%")).toBeInTheDocument();
-    expect(screen.getByText("20%")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Test Project")).toBeInTheDocument();
+    });
   });
 });
 
 describe("ActivityFeed", () => {
-  it("renders activity items", () => {
+  beforeEach(() => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      json: () => Promise.resolve([
+        { id: "1", type: "stage_transition", description: "Project moved to Design", createdAt: new Date().toISOString() },
+      ]),
+    }));
+  });
+
+  it("renders activities from API", async () => {
     render(<ActivityFeed />);
-    expect(
-      screen.getByText(/DataStream Dashboard moved to Development/)
-    ).toBeInTheDocument();
-    expect(screen.getByText(/NovaPay paid invoice/)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("Project moved to Design")).toBeInTheDocument();
+    });
   });
 });

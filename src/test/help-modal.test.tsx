@@ -3,7 +3,6 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HelpProvider, HelpButton } from "@/components/shared/help-modal";
 
-// Mock react-rnd since it uses DOM measurements
 vi.mock("react-rnd", () => ({
   Rnd: ({ children, className }: { children: React.ReactNode; className: string }) => (
     <div data-testid="rnd-container" className={className}>
@@ -34,7 +33,7 @@ describe("HelpModal", () => {
     await user.click(
       screen.getByRole("button", { name: /help for dashboard/i })
     );
-    expect(screen.getByText("Dashboard Overview")).toBeInTheDocument();
+    expect(screen.getByText(/Dashboard.*Command Center/)).toBeInTheDocument();
     expect(screen.getByText("Tips")).toBeInTheDocument();
   });
 
@@ -48,10 +47,10 @@ describe("HelpModal", () => {
     await user.click(
       screen.getByRole("button", { name: /help for dashboard/i })
     );
-    expect(screen.getByText("Dashboard Overview")).toBeInTheDocument();
+    expect(screen.getByText(/Dashboard.*Command Center/)).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /close help/i }));
-    expect(screen.queryByText("Dashboard Overview")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Dashboard.*Command Center/)).not.toBeInTheDocument();
   });
 
   it("displays context-specific content for different sections", async () => {
@@ -64,7 +63,7 @@ describe("HelpModal", () => {
     await user.click(
       screen.getByRole("button", { name: /help for leads/i })
     );
-    expect(screen.getByText("Lead Management")).toBeInTheDocument();
-    expect(screen.getByText(/sales pipeline/i)).toBeInTheDocument();
+    expect(screen.getByText(/Leads.*Sales Pipeline/)).toBeInTheDocument();
+    expect(screen.getByText(/Leads are potential clients/i)).toBeInTheDocument();
   });
 });
