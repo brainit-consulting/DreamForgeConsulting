@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Progress } from "@/components/ui/progress";
-import { HelpButton } from "@/components/shared/help-modal";
 import { mockProjects, mockInvoices, mockTickets } from "@/lib/mock-data";
 import type { ProjectStatus, InvoiceStatus, TicketStatus } from "@/types";
 import { FolderKanban, Receipt, TicketCheck } from "lucide-react";
@@ -29,14 +28,11 @@ export default function PortalDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-display">Welcome back</h1>
-          <p className="mt-1 text-muted-foreground">
-            Here&apos;s an overview of your projects and account.
-          </p>
-        </div>
-        <HelpButton sectionKey="portal" />
+      <div>
+        <h1 className="text-3xl font-display">Welcome back</h1>
+        <p className="mt-1 text-muted-foreground">
+          Here&apos;s an overview of your projects and account.
+        </p>
       </div>
 
       {/* Summary cards */}

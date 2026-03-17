@@ -28,7 +28,7 @@ describe("AdminSidebar", () => {
 
   it("renders the DreamForge logo", () => {
     render(<AdminSidebar />);
-    expect(screen.getByText("DreamForge")).toBeInTheDocument();
+    expect(screen.getByText("Dream")).toBeInTheDocument();
   });
 
   it("highlights the active nav item", () => {

@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/shared/logo";
-import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -44,7 +43,7 @@ export function AdminSidebar() {
       )}
     >
       {/* Logo */}
-      <div className="flex h-16 items-center justify-between px-4">
+      <div className="flex h-20 items-center justify-between px-4">
         <Logo collapsed={collapsed} />
         <Button
           variant="ghost"
@@ -102,14 +101,9 @@ export function AdminSidebar() {
 
       {/* Footer */}
       <div className="border-t border-sidebar-border p-3">
-        <div className="flex items-center justify-between">
-          <ThemeToggle />
-          {!collapsed && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Image src="/DreamForgeConsultingLogo.png" alt="" width={14} height={14} className="rounded-sm" />
-              <span>v0.1.0</span>
-            </div>
-          )}
+        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <Image src="/DreamForgeConsultingLogo.png" alt="" width={14} height={14} className="rounded-sm" />
+          {!collapsed && <span>v0.1.0</span>}
         </div>
       </div>
     </aside>

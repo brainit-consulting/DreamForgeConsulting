@@ -1,5 +1,4 @@
 import { ClientsTable } from "@/components/admin/clients/clients-table";
-import { HelpButton } from "@/components/shared/help-modal";
 import { mockClients, mockProjects } from "@/lib/mock-data";
 
 export default function ClientsPage() {
@@ -13,14 +12,11 @@ export default function ClientsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-display">Clients</h1>
-          <p className="mt-1 text-muted-foreground">
-            Your active client roster and history.
-          </p>
-        </div>
-        <HelpButton sectionKey="clients" />
+      <div>
+        <h1 className="text-3xl font-display">Clients</h1>
+        <p className="mt-1 text-muted-foreground">
+          Your active client roster and history.
+        </p>
       </div>
 
       <ClientsTable clients={mockClients} projectCounts={projectCounts} />

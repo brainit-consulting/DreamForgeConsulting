@@ -33,7 +33,7 @@ describe("Login Page", () => {
 
   it("renders the DreamForge logo", () => {
     render(<LoginPage />);
-    expect(screen.getByText("DreamForge")).toBeInTheDocument();
+    expect(screen.getByText("Dream")).toBeInTheDocument();
   });
 });
 

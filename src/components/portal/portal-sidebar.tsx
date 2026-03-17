@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/shared/logo";
-import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { Button } from "@/components/ui/button";
 
 const portalNav = [
@@ -27,7 +26,7 @@ export function PortalSidebar() {
   return (
     <aside className="flex h-screen w-[260px] flex-col border-r border-sidebar-border bg-sidebar">
       {/* Logo */}
-      <div className="flex h-16 items-center px-4">
+      <div className="flex h-20 items-center px-4">
         <Logo />
       </div>
 
@@ -66,13 +65,10 @@ export function PortalSidebar() {
 
       {/* Footer */}
       <div className="border-t border-sidebar-border p-3">
-        <div className="flex items-center justify-between">
-          <ThemeToggle />
-          <Button variant="ghost" size="sm" className="text-muted-foreground">
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign out
-          </Button>
-        </div>
+        <Button variant="ghost" size="sm" className="w-full text-muted-foreground">
+          <LogOut className="mr-2 h-4 w-4" />
+          Sign out
+        </Button>
       </div>
     </aside>
   );

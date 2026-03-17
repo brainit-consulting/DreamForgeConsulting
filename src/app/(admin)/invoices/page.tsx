@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { InvoicesTable } from "@/components/admin/invoices/invoices-table";
 import { InvoiceStats } from "@/components/admin/invoices/invoice-stats";
-import { HelpButton } from "@/components/shared/help-modal";
 import { Button } from "@/components/ui/button";
 import { mockInvoices } from "@/lib/mock-data";
 import type { InvoiceStatus } from "@/types";
@@ -21,14 +20,11 @@ export default function InvoicesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-display">Invoices</h1>
-          <p className="mt-1 text-muted-foreground">
-            Billing and payment tracking.
-          </p>
-        </div>
-        <HelpButton sectionKey="invoices" />
+      <div>
+        <h1 className="text-3xl font-display">Invoices</h1>
+        <p className="mt-1 text-muted-foreground">
+          Billing and payment tracking.
+        </p>
       </div>
 
       <InvoiceStats invoices={mockInvoices} />

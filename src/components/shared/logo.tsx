@@ -16,14 +16,14 @@ export function Logo({ collapsed = false, className }: LogoProps) {
       <Image
         src="/DreamForgeConsultingLogo.png"
         alt="DreamForge Consulting"
-        width={80}
-        height={80}
+        width={64}
+        height={64}
         className="rounded-lg forge-glow"
       />
       {!collapsed && (
         <div className="flex flex-col">
-          <span className="font-display text-lg leading-tight tracking-tight">
-            DreamForge
+          <span className="font-display text-xl leading-tight tracking-tight">
+            <span className="text-primary">Dream</span>Forge
           </span>
           <span className="text-[10px] uppercase tracking-widest text-muted-foreground">
             Consulting
