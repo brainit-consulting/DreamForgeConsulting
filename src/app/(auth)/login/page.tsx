@@ -89,16 +89,14 @@ export default function LoginPage() {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
-              <Button
+              <button
                 type="submit"
-                className="w-full"
                 disabled={loading}
+                className="flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 disabled:opacity-50"
               >
-                {loading ? (
-                  <Flame className="mr-2 h-4 w-4 animate-pulse" />
-                ) : null}
+                {loading && <Flame className="h-4 w-4 animate-pulse" />}
                 {loading ? "Signing in..." : "Sign In"}
-              </Button>
+              </button>
               <p className="text-center text-xs text-muted-foreground">
                 Access is by invitation only.
               </p>
