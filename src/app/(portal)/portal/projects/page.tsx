@@ -1,11 +1,26 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { WorkflowTracker } from "@/components/shared/workflow-tracker";
-import { mockProjects } from "@/lib/mock-data";
+import type { ProjectStatus } from "@/types";
 
-const CLIENT_ID = "client-3";
+interface Project {
+  id: string;
+  name: string;
+  description?: string;
+  status: ProjectStatus;
+  progress: number;
+}
 
 export default function PortalProjectsPage() {
-  const projects = mockProjects.filter((p) => p.clientId === CLIENT_ID);
+  const [projects, setProjects] = useState<Project[]>([]);
+
+  useEffect(() => {
+    fetch("/api/portal/data")
+      .then((r) => r.json())
+      .then((data) => setProjects(data.projects ?? []));
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -16,21 +31,18 @@ export default function PortalProjectsPage() {
         </p>
       </div>
 
+      {projects.length === 0 && (
+        <p className="py-8 text-center text-muted-foreground">No projects yet.</p>
+      )}
+
       {projects.map((project) => (
         <Card key={project.id}>
           <CardHeader>
-            <CardTitle className="font-display text-xl">
-              {project.name}
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              {project.description}
-            </p>
+            <CardTitle className="font-display text-xl">{project.name}</CardTitle>
+            <p className="text-sm text-muted-foreground">{project.description}</p>
           </CardHeader>
           <CardContent>
-            <WorkflowTracker
-              currentStatus={project.status}
-              progress={project.progress}
-            />
+            <WorkflowTracker currentStatus={project.status} progress={project.progress} />
           </CardContent>
         </Card>
       ))}

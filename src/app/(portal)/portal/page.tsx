@@ -1,30 +1,35 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Progress } from "@/components/ui/progress";
-import { mockProjects, mockInvoices, mockTickets } from "@/lib/mock-data";
-import type { ProjectStatus, InvoiceStatus, TicketStatus } from "@/types";
 import { FolderKanban, Receipt, TicketCheck } from "lucide-react";
+import type { ProjectStatus } from "@/types";
 
 const statusVariant: Record<ProjectStatus, "info" | "ember" | "warning" | "success" | "default"> = {
-  DISCOVERY: "info",
-  DESIGN: "ember",
-  DEVELOPMENT: "ember",
-  TESTING: "warning",
-  DEPLOYMENT: "warning",
-  LAUNCHED: "success",
-  SUPPORT: "default",
+  DISCOVERY: "info", DESIGN: "ember", DEVELOPMENT: "ember",
+  TESTING: "warning", DEPLOYMENT: "warning", LAUNCHED: "success", SUPPORT: "default",
 };
 
-// Simulating a logged-in client (client-3: UrbanPulse)
-const CLIENT_ID = "client-3";
+interface PortalData {
+  client: { company: string };
+  projects: Array<{ id: string; name: string; description?: string; status: ProjectStatus; progress: number }>;
+  invoices: Array<{ id: string; status: string }>;
+  tickets: Array<{ id: string; status: string }>;
+}
 
 export default function PortalDashboardPage() {
-  const projects = mockProjects.filter((p) => p.clientId === CLIENT_ID);
-  const invoices = mockInvoices.filter((i) => i.clientId === CLIENT_ID);
-  const tickets = mockTickets.filter((t) => t.clientId === CLIENT_ID);
-  const pendingInvoices = invoices.filter(
-    (i) => i.status === "SENT" || i.status === "OVERDUE"
-  );
+  const [data, setData] = useState<PortalData | null>(null);
+
+  useEffect(() => {
+    fetch("/api/portal/data").then((r) => r.json()).then(setData);
+  }, []);
+
+  if (!data) return <div className="py-12 text-center text-muted-foreground">Loading...</div>;
+
+  const pendingInvoices = data.invoices.filter((i) => i.status === "SENT" || i.status === "OVERDUE");
+  const openTickets = data.tickets.filter((t) => t.status === "OPEN");
 
   return (
     <div className="space-y-6">
@@ -35,72 +40,44 @@ export default function PortalDashboardPage() {
         </p>
       </div>
 
-      {/* Summary cards */}
       <div className="grid gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm text-muted-foreground">
-              Active Projects
-            </CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">Active Projects</CardTitle>
             <FolderKanban className="h-4 w-4 text-primary" />
           </CardHeader>
-          <CardContent>
-            <p className="font-display text-3xl">{projects.length}</p>
-          </CardContent>
+          <CardContent><p className="font-display text-3xl">{data.projects.length}</p></CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm text-muted-foreground">
-              Pending Invoices
-            </CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">Pending Invoices</CardTitle>
             <Receipt className="h-4 w-4 text-amber-500" />
           </CardHeader>
-          <CardContent>
-            <p className="font-display text-3xl">{pendingInvoices.length}</p>
-          </CardContent>
+          <CardContent><p className="font-display text-3xl">{pendingInvoices.length}</p></CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm text-muted-foreground">
-              Open Tickets
-            </CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">Open Tickets</CardTitle>
             <TicketCheck className="h-4 w-4 text-blue-500" />
           </CardHeader>
-          <CardContent>
-            <p className="font-display text-3xl">
-              {tickets.filter((t) => t.status === "OPEN").length}
-            </p>
-          </CardContent>
+          <CardContent><p className="font-display text-3xl">{openTickets.length}</p></CardContent>
         </Card>
       </div>
 
-      {/* Projects overview */}
       <Card>
-        <CardHeader>
-          <CardTitle className="font-display text-xl">Your Projects</CardTitle>
-        </CardHeader>
+        <CardHeader><CardTitle className="font-display text-xl">Your Projects</CardTitle></CardHeader>
         <CardContent className="space-y-4">
-          {projects.map((project) => (
-            <div
-              key={project.id}
-              className="flex items-center justify-between rounded-lg border border-border p-4"
-            >
+          {data.projects.length === 0 && <p className="text-sm text-muted-foreground">No projects yet.</p>}
+          {data.projects.map((project) => (
+            <div key={project.id} className="flex items-center justify-between rounded-lg border border-border p-4">
               <div className="space-y-1">
                 <p className="font-medium">{project.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {project.description}
-                </p>
+                <p className="text-xs text-muted-foreground">{project.description}</p>
               </div>
               <div className="flex items-center gap-4">
                 <Progress value={project.progress} className="w-24" />
-                <span className="text-xs text-muted-foreground w-8">
-                  {project.progress}%
-                </span>
-                <StatusBadge
-                  label={project.status}
-                  variant={statusVariant[project.status]}
-                  dot
-                />
+                <span className="text-xs text-muted-foreground w-8">{project.progress}%</span>
+                <StatusBadge label={project.status} variant={statusVariant[project.status]} dot />
               </div>
             </div>
           ))}
