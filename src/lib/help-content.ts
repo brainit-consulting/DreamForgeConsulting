@@ -126,13 +126,15 @@ export const helpContent: Record<string, HelpSection> = {
   backups: {
     title: "Database Backups — Automated & Versioned",
     content:
-      "DreamForge automatically backs up your entire database every day at approximately 2:00 AM UTC (±59 min on Vercel Hobby) using a scheduled cron job. Each backup exports all tables — Leads, Clients, Projects, Invoices, Tickets, Activities, and more — as a single JSON file stored in Vercel Blob private storage. Backups follow a tiered promotion cycle: every daily backup is kept for 7 days; on Sundays, the latest daily is promoted to a weekly backup (kept for 4 weeks); on the 1st of each month, a monthly snapshot is created (kept for 6 months). You can also trigger a manual backup instantly using the 'Backup Now' button. To restore from a backup, download the JSON file and re-import the data using Prisma seed scripts or a database client. Total maximum storage is around 85MB across 17 backup files — well within Vercel Blob Hobby limits.",
+      "DreamForge automatically backs up your entire database every day at approximately 2:00 AM UTC (±59 min on Vercel Hobby) using a scheduled cron job. Each backup exports all tables — Leads, Clients, Projects, Invoices, Tickets, Activities, and more — as a single JSON file stored in Vercel Blob private storage. Backups follow a tiered promotion cycle: every daily backup is kept for 7 days; on Sundays, the latest daily is promoted to a weekly backup (kept for 4 weeks); on the 1st of each month, a monthly snapshot is created (kept for 6 months). You can also trigger a manual backup instantly using the 'Backup Now' button. To restore from any backup, click the restore icon next to it — this replaces all current data with the backup snapshot (a safety backup is created first, and your admin account is always preserved). Total maximum storage is around 85MB across 17 backup files — well within Vercel Blob Hobby limits.",
     tips: [
       "Daily backups run at ~2:00 AM UTC — Vercel Hobby plan has ±59 minute timing variance",
       "Weekly backups are created every Sunday; monthly backups on the 1st of each month",
       "Retention: 7 daily, 4 weekly, 6 monthly — older backups are deleted automatically",
       "Use 'Backup Now' before major data operations (bulk imports, migrations, etc.)",
-      "Download any backup as JSON for offline archiving or manual restore",
+      "Click the restore icon (cloud arrow) on any backup to replace all current data with that snapshot",
+      "Restoring creates a safety backup first — your admin account is always preserved",
+      "Download any backup as JSON for offline archiving",
       "The cron secret (CRON_SECRET) is auto-injected by Vercel — the endpoint is not publicly accessible",
       "If Blob storage is exhausted on Hobby, the account locks for 30 days — monitor usage in Vercel dashboard",
     ],

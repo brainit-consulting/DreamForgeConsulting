@@ -162,6 +162,112 @@ export async function runBackup(): Promise<BackupResult> {
   }
 }
 
+export interface RestoreResult {
+  success: boolean;
+  counts?: Record<string, number>;
+  error?: string;
+  durationMs?: number;
+}
+
+// Restore database from backup JSON — preserves the admin user to prevent lockout
+export async function restoreDatabase(
+  data: Record<string, unknown[]>,
+  adminUserId: string
+): Promise<RestoreResult> {
+  const start = Date.now();
+
+  // Validate structure
+  const required = ["users", "leads", "clients", "projects", "invoices", "tickets", "activities"];
+  for (const key of required) {
+    if (!Array.isArray(data[key])) {
+      return { success: false, error: `Missing or invalid "${key}" in backup`, durationMs: Date.now() - start };
+    }
+  }
+
+  try {
+    // Pre-restore safety backup
+    await runBackup();
+
+    const counts: Record<string, number> = {};
+
+    await db.$transaction(async (tx) => {
+      // Delete children first (reverse FK order), skip admin user
+      await tx.activity.deleteMany();
+      await tx.ticket.deleteMany();
+      await tx.invoice.deleteMany();
+      await tx.stageNote.deleteMany();
+      await tx.stageTask.deleteMany();
+      await tx.project.deleteMany();
+      await tx.client.deleteMany();
+      await tx.lead.deleteMany();
+      // Delete all users EXCEPT the current admin
+      await tx.user.deleteMany({ where: { id: { not: adminUserId } } });
+
+      // Insert parents first (FK order)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const any = (v: unknown) => v as any;
+
+      const users = (data.users as Array<Record<string, unknown>>).filter(
+        (u) => u.id !== adminUserId
+      );
+      if (users.length > 0) {
+        await tx.user.createMany({ data: any(users), skipDuplicates: true });
+      }
+      counts.users = users.length;
+
+      if (data.leads.length > 0) {
+        await tx.lead.createMany({ data: any(data.leads) });
+      }
+      counts.leads = data.leads.length;
+
+      if (data.clients.length > 0) {
+        await tx.client.createMany({ data: any(data.clients) });
+      }
+      counts.clients = data.clients.length;
+
+      if (data.projects.length > 0) {
+        await tx.project.createMany({ data: any(data.projects) });
+      }
+      counts.projects = data.projects.length;
+
+      const stageTasks = data.stageTasks ?? [];
+      if (stageTasks.length > 0) {
+        await tx.stageTask.createMany({ data: any(stageTasks) });
+      }
+      counts.stageTasks = stageTasks.length;
+
+      const stageNotes = data.stageNotes ?? [];
+      if (stageNotes.length > 0) {
+        await tx.stageNote.createMany({ data: any(stageNotes) });
+      }
+      counts.stageNotes = stageNotes.length;
+
+      if (data.invoices.length > 0) {
+        await tx.invoice.createMany({ data: any(data.invoices) });
+      }
+      counts.invoices = data.invoices.length;
+
+      if (data.tickets.length > 0) {
+        await tx.ticket.createMany({ data: any(data.tickets) });
+      }
+      counts.tickets = data.tickets.length;
+
+      if (data.activities.length > 0) {
+        await tx.activity.createMany({ data: any(data.activities) });
+      }
+      counts.activities = data.activities.length;
+    });
+
+    return { success: true, counts, durationMs: Date.now() - start };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : String(err),
+      durationMs: Date.now() - start,
+    };
+  }
+}
+
 // List backups grouped by tier
 export async function listBackups(): Promise<{
   daily: BackupEntry[];

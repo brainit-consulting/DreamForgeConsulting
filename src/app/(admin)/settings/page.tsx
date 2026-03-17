@@ -23,12 +23,14 @@ import {
   XCircle,
   Clock,
   CalendarDays,
+  UploadCloud,
 } from "lucide-react";
 import Image from "next/image";
 import type { AthenaConfig } from "@/lib/athena-config";
 import type { BackupEntry } from "@/lib/backup";
 import { HelpButton } from "@/components/shared/help-modal";
 import { ActionTooltip } from "@/components/shared/action-tooltip";
+import { useConfirm } from "@/components/shared/confirm-dialog";
 import { toast } from "sonner";
 
 interface BackupList {
@@ -63,7 +65,7 @@ function tierBadge(tier: BackupEntry["tier"]) {
   );
 }
 
-function BackupTable({ entries }: { entries: BackupEntry[] }) {
+function BackupTable({ entries, onRestore }: { entries: BackupEntry[]; onRestore: (url: string, label: string) => void }) {
   if (entries.length === 0) {
     return (
       <p className="py-8 text-center text-sm text-muted-foreground">
@@ -86,17 +88,29 @@ function BackupTable({ entries }: { entries: BackupEntry[] }) {
             <span>{formatBytes(entry.size)}</span>
             <span className="hidden sm:inline">{formatDate(entry.uploadedAt)}</span>
           </div>
-          <ActionTooltip label="Download backup JSON">
-            <a
-              href={entry.url}
-              download={`${entry.label}.json`}
-              title={`Download ${entry.label}.json`}
-            >
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Download className="h-3.5 w-3.5" />
+          <div className="flex gap-1">
+            <ActionTooltip label="Restore from this backup">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-amber-500"
+                onClick={() => onRestore(entry.url, entry.label)}
+              >
+                <UploadCloud className="h-3.5 w-3.5" />
               </Button>
-            </a>
-          </ActionTooltip>
+            </ActionTooltip>
+            <ActionTooltip label="Download backup JSON">
+              <a
+                href={entry.url}
+                download={`${entry.label}.json`}
+                title={`Download ${entry.label}.json`}
+              >
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Download className="h-3.5 w-3.5" />
+                </Button>
+              </a>
+            </ActionTooltip>
+          </div>
         </div>
       ))}
     </div>
@@ -206,6 +220,43 @@ export default function SettingsPage() {
       if (data.success) await loadBackups();
     } finally {
       setBackupRunning(false);
+    }
+  }
+
+  const confirmAction = useConfirm();
+  const [restoring, setRestoring] = useState(false);
+
+  async function handleRestore(url: string, label: string) {
+    const ok = await confirmAction({
+      title: "Restore Database",
+      description: `This will replace ALL current data with the backup "${label}". A safety backup will be created first. This action cannot be undone.`,
+      confirmLabel: "Restore",
+      variant: "danger",
+    });
+    if (!ok) return;
+    setRestoring(true);
+    setBackupResult(null);
+    try {
+      const res = await fetch("/api/admin/backup/restore", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        const summary = Object.entries(data.counts ?? {})
+          .filter(([, v]) => (v as number) > 0)
+          .map(([k, v]) => `${v} ${k}`)
+          .join(", ");
+        toast.success(`Restored in ${data.durationMs}ms — ${summary}`);
+        await loadBackups();
+      } else {
+        toast.error(`Restore failed: ${data.error}`);
+      }
+    } catch {
+      toast.error("Restore failed — network error");
+    } finally {
+      setRestoring(false);
     }
   }
 
@@ -556,13 +607,13 @@ export default function SettingsPage() {
               </TabsTrigger>
             </TabsList>
             <TabsContent value="daily" className="mt-4">
-              <BackupTable entries={backups?.daily ?? []} />
+              <BackupTable entries={backups?.daily ?? []} onRestore={handleRestore} />
             </TabsContent>
             <TabsContent value="weekly" className="mt-4">
-              <BackupTable entries={backups?.weekly ?? []} />
+              <BackupTable entries={backups?.weekly ?? []} onRestore={handleRestore} />
             </TabsContent>
             <TabsContent value="monthly" className="mt-4">
-              <BackupTable entries={backups?.monthly ?? []} />
+              <BackupTable entries={backups?.monthly ?? []} onRestore={handleRestore} />
             </TabsContent>
           </Tabs>
         </CardContent>
