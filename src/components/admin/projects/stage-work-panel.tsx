@@ -311,7 +311,7 @@ export function StageWorkPanel({ projectId, currentStage }: StageWorkPanelProps)
                       value={editingNoteContent}
                       onChange={(e) => handleNoteEdit(e.target.value)}
                       rows={3}
-                      className="text-sm"
+                      className="font-notes text-lg leading-snug"
                       autoFocus
                     />
                     <div className="flex items-center gap-2">
@@ -342,7 +342,7 @@ export function StageWorkPanel({ projectId, currentStage }: StageWorkPanelProps)
                   </div>
                 ) : (
                   <>
-                    <p className="text-sm whitespace-pre-wrap">{note.content}</p>
+                    <p className="font-notes text-lg leading-snug whitespace-pre-wrap">{note.content}</p>
                     <div className="mt-1.5 flex items-center justify-between">
                       <p className="text-[10px] text-muted-foreground">
                         {format(new Date(note.createdAt), "MMM d, yyyy 'at' h:mm a")}

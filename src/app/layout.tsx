@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Patrick_Hand, DM_Sans } from "next/font/google";
+import { Patrick_Hand, DM_Sans, Caveat } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
@@ -8,6 +8,12 @@ import "./globals.css";
 const patrickHand = Patrick_Hand({
   weight: "400",
   variable: "--font-patrick-hand",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const caveat = Caveat({
+  variable: "--font-caveat",
   subsets: ["latin"],
   display: "swap",
 });
@@ -32,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${patrickHand.variable} ${dmSans.variable} antialiased`}
+        className={`${patrickHand.variable} ${caveat.variable} ${dmSans.variable} antialiased`}
       >
         <ThemeProvider>
           <TooltipProvider>
