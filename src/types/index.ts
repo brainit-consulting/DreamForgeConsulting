@@ -114,3 +114,26 @@ export const WORKFLOW_STAGES: { key: ProjectStatus; label: string }[] = [
   { key: "LAUNCHED", label: "Launched" },
   { key: "SUPPORT", label: "Post-Launch Support" },
 ];
+
+// Auto-calculated progress per stage
+export const STAGE_PROGRESS: Record<ProjectStatus, number> = {
+  DISCOVERY: 8,
+  DESIGN: 22,
+  DEVELOPMENT: 45,
+  TESTING: 68,
+  DEPLOYMENT: 85,
+  LAUNCHED: 100,
+  SUPPORT: 100,
+};
+
+export function stageIndex(status: ProjectStatus): number {
+  return WORKFLOW_STAGES.findIndex((s) => s.key === status);
+}
+
+export function canTransitionTo(current: ProjectStatus, target: ProjectStatus): boolean {
+  if (current === target) return false;
+  const from = stageIndex(current);
+  const to = stageIndex(target);
+  // Can go to any previous stage or exactly 1 ahead
+  return to <= from || to === from + 1;
+}

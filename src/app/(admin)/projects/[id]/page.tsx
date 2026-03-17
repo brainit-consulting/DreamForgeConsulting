@@ -1,35 +1,81 @@
-import { notFound } from "next/navigation";
-import { format } from "date-fns";
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { useParams } from "next/navigation";
+import { format, formatDistanceToNow } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { WorkflowTracker } from "@/components/shared/workflow-tracker";
-import { db } from "@/lib/db";
-import type { ProjectStatus, InvoiceStatus, TicketPriority } from "@/types";
+import { toast } from "sonner";
+import { ArrowRight, Clock } from "lucide-react";
+import type { ProjectStatus, InvoiceStatus, TicketPriority, Activity } from "@/types";
 
 const statusVariant: Record<ProjectStatus, "info" | "ember" | "warning" | "success" | "default"> = {
   DISCOVERY: "info", DESIGN: "ember", DEVELOPMENT: "ember",
   TESTING: "warning", DEPLOYMENT: "warning", LAUNCHED: "success", SUPPORT: "default",
 };
-
 const invoiceStatusVariant: Record<InvoiceStatus, "default" | "info" | "success" | "destructive" | "warning"> = {
   DRAFT: "default", SENT: "info", PAID: "success", OVERDUE: "destructive", CANCELLED: "warning",
 };
-
 const priorityVariant: Record<TicketPriority, "default" | "info" | "warning" | "destructive"> = {
   LOW: "default", MEDIUM: "info", HIGH: "warning", URGENT: "destructive",
 };
 
-export default async function ProjectDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  const project = await db.project.findUnique({
-    where: { id },
-    include: { client: true, invoices: true, tickets: true },
-  });
-  if (!project) notFound();
+interface ProjectDetail {
+  id: string;
+  name: string;
+  description?: string;
+  status: ProjectStatus;
+  progress: number;
+  budget?: number;
+  startDate?: string;
+  deadline?: string;
+  client?: { company: string };
+  invoices: Array<{ id: string; description?: string; amount: number; status: string; dueDate?: string }>;
+  tickets: Array<{ id: string; subject: string; priority: string; status: string; createdAt: string }>;
+}
+
+export default function ProjectDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const [project, setProject] = useState<ProjectDetail | null>(null);
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProject = useCallback(async () => {
+    const res = await fetch(`/api/projects/${id}`);
+    if (res.ok) setProject(await res.json());
+    setLoading(false);
+  }, [id]);
+
+  const fetchActivities = useCallback(async () => {
+    const res = await fetch(`/api/activities?entityType=project&entityId=${id}`);
+    if (res.ok) setActivities(await res.json());
+  }, [id]);
+
+  useEffect(() => {
+    fetchProject();
+    fetchActivities();
+  }, [fetchProject, fetchActivities]);
+
+  async function handleStageClick(newStatus: ProjectStatus) {
+    const res = await fetch(`/api/projects/${id}/transition`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: newStatus }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setProject(data);
+      fetchActivities();
+      toast.success(`Moved to ${newStatus.toLowerCase().replace("_", " ")}`);
+    } else {
+      toast.error(data.error);
+    }
+  }
+
+  if (loading || !project) {
+    return <div className="py-12 text-center text-muted-foreground">Loading...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -40,103 +86,102 @@ export default async function ProjectDetailPage({
             {project.client?.company} &middot; {project.description}
           </p>
         </div>
-        <StatusBadge
-          label={project.status}
-          variant={statusVariant[project.status as ProjectStatus]}
-          dot
-        />
+        <StatusBadge label={project.status} variant={statusVariant[project.status]} dot />
       </div>
 
+      {/* Interactive Workflow */}
       <Card>
         <CardHeader>
           <CardTitle className="font-display text-xl">Project Workflow</CardTitle>
+          <p className="text-sm text-muted-foreground">Click the next stage to advance, or a previous stage to revert.</p>
         </CardHeader>
         <CardContent>
           <WorkflowTracker
-            currentStatus={project.status as ProjectStatus}
+            currentStatus={project.status}
             progress={project.progress}
+            onStageClick={handleStageClick}
           />
         </CardContent>
       </Card>
 
+      {/* Metrics */}
       <div className="grid gap-4 sm:grid-cols-4">
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Budget</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xl font-medium">
-              {project.budget ? `$${project.budget.toLocaleString()}` : "TBD"}
-            </p>
-          </CardContent>
+          <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Budget</CardTitle></CardHeader>
+          <CardContent><p className="text-xl font-medium">{project.budget ? `$${project.budget.toLocaleString()}` : "TBD"}</p></CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Progress</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xl font-medium">{project.progress}%</p>
-          </CardContent>
+          <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Progress</CardTitle></CardHeader>
+          <CardContent><p className="text-xl font-medium">{project.progress}%</p></CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Start Date</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xl font-medium">
-              {project.startDate ? format(project.startDate, "MMM d, yyyy") : "—"}
-            </p>
-          </CardContent>
+          <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Start Date</CardTitle></CardHeader>
+          <CardContent><p className="text-xl font-medium">{project.startDate ? format(new Date(project.startDate), "MMM d, yyyy") : "—"}</p></CardContent>
         </Card>
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Deadline</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xl font-medium">
-              {project.deadline ? format(project.deadline, "MMM d, yyyy") : "—"}
-            </p>
-          </CardContent>
+          <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">Deadline</CardTitle></CardHeader>
+          <CardContent><p className="text-xl font-medium">{project.deadline ? format(new Date(project.deadline), "MMM d, yyyy") : "—"}</p></CardContent>
         </Card>
       </div>
 
+      {/* Timeline */}
+      {activities.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-display text-xl">Timeline</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {activities.map((activity) => (
+                <div key={activity.id} className="flex items-start gap-3">
+                  <div className="mt-0.5 rounded-md bg-primary/10 p-1.5">
+                    <ArrowRight className="h-3.5 w-3.5 text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm">{activity.description}</p>
+                    <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Invoices */}
       <Card>
-        <CardHeader>
-          <CardTitle className="font-display text-xl">Invoices</CardTitle>
-        </CardHeader>
+        <CardHeader><CardTitle className="font-display text-xl">Invoices</CardTitle></CardHeader>
         <CardContent className="space-y-3">
-          {project.invoices.length === 0 && (
-            <p className="text-sm text-muted-foreground">No invoices yet.</p>
-          )}
-          {project.invoices.map((invoice) => (
-            <div key={invoice.id} className="flex items-center justify-between rounded-lg border border-border p-3">
-              <p className="text-sm">{invoice.description}</p>
+          {project.invoices.length === 0 && <p className="text-sm text-muted-foreground">No invoices yet.</p>}
+          {project.invoices.map((inv) => (
+            <div key={inv.id} className="flex items-center justify-between rounded-lg border border-border p-3">
+              <p className="text-sm">{inv.description}</p>
               <div className="flex items-center gap-3">
-                <span className="font-medium">${invoice.amount.toLocaleString()}</span>
-                <StatusBadge label={invoice.status} variant={invoiceStatusVariant[invoice.status as InvoiceStatus]} dot />
+                <span className="font-medium">${inv.amount.toLocaleString()}</span>
+                <StatusBadge label={inv.status} variant={invoiceStatusVariant[inv.status as InvoiceStatus]} dot />
               </div>
             </div>
           ))}
         </CardContent>
       </Card>
 
+      {/* Tickets */}
       <Card>
-        <CardHeader>
-          <CardTitle className="font-display text-xl">Support Tickets</CardTitle>
-        </CardHeader>
+        <CardHeader><CardTitle className="font-display text-xl">Support Tickets</CardTitle></CardHeader>
         <CardContent className="space-y-3">
-          {project.tickets.length === 0 && (
-            <p className="text-sm text-muted-foreground">No tickets.</p>
-          )}
-          {project.tickets.map((ticket) => (
-            <div key={ticket.id} className="flex items-center justify-between rounded-lg border border-border p-3">
+          {project.tickets.length === 0 && <p className="text-sm text-muted-foreground">No tickets.</p>}
+          {project.tickets.map((t) => (
+            <div key={t.id} className="flex items-center justify-between rounded-lg border border-border p-3">
               <div>
-                <p className="text-sm font-medium">{ticket.subject}</p>
-                <p className="text-xs text-muted-foreground">{format(ticket.createdAt, "MMM d, yyyy")}</p>
+                <p className="text-sm font-medium">{t.subject}</p>
+                <p className="text-xs text-muted-foreground">{format(new Date(t.createdAt), "MMM d, yyyy")}</p>
               </div>
               <div className="flex items-center gap-2">
-                <StatusBadge label={ticket.priority} variant={priorityVariant[ticket.priority as TicketPriority]} />
-                <StatusBadge label={ticket.status.replace("_", " ")} dot />
+                <StatusBadge label={t.priority} variant={priorityVariant[t.priority as TicketPriority]} />
+                <StatusBadge label={t.status.replace("_", " ")} dot />
               </div>
             </div>
           ))}

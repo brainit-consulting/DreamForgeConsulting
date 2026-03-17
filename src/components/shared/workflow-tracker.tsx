@@ -10,7 +10,12 @@ import {
   Star,
   Headphones,
 } from "lucide-react";
-import { WORKFLOW_STAGES, type ProjectStatus } from "@/types";
+import {
+  WORKFLOW_STAGES,
+  canTransitionTo,
+  stageIndex as getStageIndex,
+  type ProjectStatus,
+} from "@/types";
 
 const stageIcons: Record<ProjectStatus, React.ElementType> = {
   DISCOVERY: Search,
@@ -22,21 +27,20 @@ const stageIcons: Record<ProjectStatus, React.ElementType> = {
   SUPPORT: Headphones,
 };
 
-const stageIndex = (status: ProjectStatus): number =>
-  WORKFLOW_STAGES.findIndex((s) => s.key === status);
-
 interface WorkflowTrackerProps {
   currentStatus: ProjectStatus;
   progress: number;
   compact?: boolean;
+  onStageClick?: (stage: ProjectStatus) => void;
 }
 
 export function WorkflowTracker({
   currentStatus,
   progress,
   compact = false,
+  onStageClick,
 }: WorkflowTrackerProps) {
-  const activeIdx = stageIndex(currentStatus);
+  const activeIdx = getStageIndex(currentStatus);
 
   return (
     <div className={cn("flex items-center", compact ? "gap-1" : "gap-2")}>
@@ -45,22 +49,40 @@ export function WorkflowTracker({
         const isActive = idx === activeIdx;
         const isCompleted = idx < activeIdx;
         const isFuture = idx > activeIdx;
+        const canClick =
+          onStageClick && canTransitionTo(currentStatus, stage.key);
 
         return (
           <div
             key={stage.key}
-            className={cn("flex items-center", idx < WORKFLOW_STAGES.length - 1 && "flex-1")}
+            className={cn(
+              "flex items-center",
+              idx < WORKFLOW_STAGES.length - 1 && "flex-1"
+            )}
           >
             {/* Stage node */}
             <div className="flex flex-col items-center">
-              <div
+              <button
+                type="button"
+                disabled={!canClick}
+                onClick={() => canClick && onStageClick?.(stage.key)}
                 className={cn(
                   "flex items-center justify-center rounded-full border-2 transition-all",
                   compact ? "h-8 w-8" : "h-12 w-12",
                   isActive && "border-primary bg-primary/15 ember-pulse",
                   isCompleted && "border-emerald-500 bg-emerald-500/15",
-                  isFuture && "border-border bg-muted"
+                  isFuture && "border-border bg-muted",
+                  canClick &&
+                    "cursor-pointer hover:ring-2 hover:ring-primary/40 hover:scale-110",
+                  !canClick && !isActive && !isCompleted && "cursor-default"
                 )}
+                title={
+                  canClick
+                    ? `Move to ${stage.label}`
+                    : isActive
+                      ? `Current stage`
+                      : undefined
+                }
               >
                 <Icon
                   className={cn(
@@ -70,7 +92,7 @@ export function WorkflowTracker({
                     isFuture && "text-muted-foreground"
                   )}
                 />
-              </div>
+              </button>
               {!compact && (
                 <div className="mt-2 text-center">
                   <p
