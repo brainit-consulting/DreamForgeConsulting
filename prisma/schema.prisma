@@ -140,11 +140,42 @@ model Project {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
-  client   Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  invoices Invoice[]
-  tickets  Ticket[]
+  client     Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  invoices   Invoice[]
+  tickets    Ticket[]
+  stageTasks StageTask[]
+  stageNotes StageNote[]
 
   @@map("projects")
+}
+
+model StageTask {
+  id        String        @id @default(cuid())
+  projectId String
+  stage     ProjectStatus
+  title     String
+  completed Boolean       @default(false)
+  sortOrder Int           @default(0)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, stage])
+  @@map("stage_tasks")
+}
+
+model StageNote {
+  id        String        @id @default(cuid())
+  projectId String
+  stage     ProjectStatus
+  content   String        @db.Text
+  createdAt DateTime      @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, stage])
+  @@map("stage_notes")
 }
 
 enum ProjectStatus {

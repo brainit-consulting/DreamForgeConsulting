@@ -6,6 +6,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { WorkflowTracker } from "@/components/shared/workflow-tracker";
+import { StageWorkPanel } from "@/components/admin/projects/stage-work-panel";
 import { toast } from "sonner";
 import { ArrowRight, Clock } from "lucide-react";
 import type { ProjectStatus, InvoiceStatus, TicketPriority, Activity } from "@/types";
@@ -103,6 +104,9 @@ export default function ProjectDetailPage() {
           />
         </CardContent>
       </Card>
+
+      {/* Stage Work — Tasks + Notes */}
+      <StageWorkPanel projectId={project.id} currentStage={project.status} />
 
       {/* Metrics */}
       <div className="grid gap-4 sm:grid-cols-4">
