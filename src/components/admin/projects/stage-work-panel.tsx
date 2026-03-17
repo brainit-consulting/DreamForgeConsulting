@@ -20,6 +20,7 @@ import {
   CloudCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ActionTooltip } from "@/components/shared/action-tooltip";
 import { WORKFLOW_STAGES, type ProjectStatus } from "@/types";
 import { toast } from "sonner";
 
@@ -208,13 +209,15 @@ export function StageWorkPanel({ projectId, currentStage }: StageWorkPanelProps)
                 key={task.id}
                 className="group flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted/50"
               >
-                <button type="button" onClick={() => toggleTask(task)} className="shrink-0">
-                  {task.completed ? (
-                    <CheckCircle2 className="h-4.5 w-4.5 text-emerald-500" />
-                  ) : (
-                    <Circle className="h-4.5 w-4.5 text-muted-foreground" />
-                  )}
-                </button>
+                <ActionTooltip label={task.completed ? "Mark incomplete" : "Mark complete"}>
+                  <button type="button" onClick={() => toggleTask(task)} className="shrink-0">
+                    {task.completed ? (
+                      <CheckCircle2 className="h-4.5 w-4.5 text-emerald-500" />
+                    ) : (
+                      <Circle className="h-4.5 w-4.5 text-muted-foreground" />
+                    )}
+                  </button>
+                </ActionTooltip>
 
                 {editingTaskId === task.id ? (
                   <Input
@@ -225,13 +228,13 @@ export function StageWorkPanel({ projectId, currentStage }: StageWorkPanelProps)
                       if (e.key === "Enter") saveTaskTitle(task.id, editingTaskTitle);
                       if (e.key === "Escape") setEditingTaskId(null);
                     }}
-                    className="h-7 flex-1 text-sm"
+                    className="h-8 flex-1 font-notes text-base"
                     autoFocus
                   />
                 ) : (
                   <span
                     className={cn(
-                      "flex-1 text-sm cursor-pointer",
+                      "flex-1 font-notes text-base cursor-pointer",
                       task.completed && "line-through text-muted-foreground"
                     )}
                     onClick={() => {
@@ -244,23 +247,27 @@ export function StageWorkPanel({ projectId, currentStage }: StageWorkPanelProps)
                   </span>
                 )}
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingTaskId(task.id);
-                    setEditingTaskTitle(task.title);
-                  }}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <Pencil className="h-3 w-3 text-muted-foreground" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => deleteTask(task.id)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                </button>
+                <ActionTooltip label="Edit task">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingTaskId(task.id);
+                      setEditingTaskTitle(task.title);
+                    }}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Pencil className="h-3 w-3 text-muted-foreground" />
+                  </button>
+                </ActionTooltip>
+                <ActionTooltip label="Delete task">
+                  <button
+                    type="button"
+                    onClick={() => deleteTask(task.id)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                  </button>
+                </ActionTooltip>
               </div>
             ))}
           </div>
@@ -270,12 +277,14 @@ export function StageWorkPanel({ projectId, currentStage }: StageWorkPanelProps)
               value={newTask}
               onChange={(e) => setNewTask(e.target.value)}
               placeholder="Add a task..."
-              className="flex-1"
+              className="flex-1 font-notes text-base"
               disabled={addingTask}
             />
-            <Button type="submit" size="icon" variant="outline" disabled={addingTask || !newTask.trim()}>
-              <Plus className="h-4 w-4" />
-            </Button>
+            <ActionTooltip label="Add task">
+              <Button type="submit" size="icon" variant="outline" disabled={addingTask || !newTask.trim()}>
+                <Plus className="h-4 w-4" />
+              </Button>
+            </ActionTooltip>
           </form>
         </div>
 
@@ -294,12 +303,14 @@ export function StageWorkPanel({ projectId, currentStage }: StageWorkPanelProps)
               onChange={(e) => setNewNote(e.target.value)}
               placeholder="Add a note about this stage..."
               rows={2}
-              className="flex-1"
+              className="flex-1 font-notes !text-base"
               disabled={addingNote}
             />
-            <Button type="submit" size="icon" variant="outline" disabled={addingNote || !newNote.trim()} className="self-end">
-              <Send className="h-4 w-4" />
-            </Button>
+            <ActionTooltip label="Add note">
+              <Button type="submit" size="icon" variant="outline" disabled={addingNote || !newNote.trim()} className="self-end">
+                <Send className="h-4 w-4" />
+              </Button>
+            </ActionTooltip>
           </form>
 
           <div className="space-y-2">
@@ -311,7 +322,7 @@ export function StageWorkPanel({ projectId, currentStage }: StageWorkPanelProps)
                       value={editingNoteContent}
                       onChange={(e) => handleNoteEdit(e.target.value)}
                       rows={3}
-                      className="font-notes text-lg leading-snug"
+                      className="font-notes !text-base leading-snug"
                       autoFocus
                     />
                     <div className="flex items-center gap-2">
@@ -342,26 +353,29 @@ export function StageWorkPanel({ projectId, currentStage }: StageWorkPanelProps)
                   </div>
                 ) : (
                   <>
-                    <p className="font-notes text-lg leading-snug whitespace-pre-wrap">{note.content}</p>
+                    <p className="font-notes text-base leading-snug whitespace-pre-wrap">{note.content}</p>
                     <div className="mt-1.5 flex items-center justify-between">
                       <p className="text-[10px] text-muted-foreground">
                         {format(new Date(note.createdAt), "MMM d, yyyy 'at' h:mm a")}
                       </p>
                       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          type="button"
-                          title="Edit note"
-                          onClick={() => {
-                            setEditingNoteId(note.id);
-                            setEditingNoteContent(note.content);
-                            setNoteSaved(false);
-                          }}
-                        >
-                          <Pencil className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-                        </button>
-                        <button type="button" title="Delete note" onClick={() => deleteNote(note.id)}>
-                          <Trash2 className="h-3 w-3 text-destructive" />
-                        </button>
+                        <ActionTooltip label="Edit note">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingNoteId(note.id);
+                              setEditingNoteContent(note.content);
+                              setNoteSaved(false);
+                            }}
+                          >
+                            <Pencil className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                          </button>
+                        </ActionTooltip>
+                        <ActionTooltip label="Delete note">
+                          <button type="button" onClick={() => deleteNote(note.id)}>
+                            <Trash2 className="h-3 w-3 text-destructive" />
+                          </button>
+                        </ActionTooltip>
                       </div>
                     </div>
                   </>

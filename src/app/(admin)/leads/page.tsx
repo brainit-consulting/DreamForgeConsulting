@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { AddLeadDialog } from "@/components/admin/leads/add-lead-dialog";
+import { ActionTooltip } from "@/components/shared/action-tooltip";
 import { Trash2, UserCheck } from "lucide-react";
 import type { Lead, LeadStatus } from "@/types";
 
@@ -130,21 +131,23 @@ export default function LeadsPage() {
                 <TableCell>
                   <div className="flex gap-1">
                     {lead.status !== "CONVERTED" && lead.status !== "LOST" && (
-                      <Button
-                        variant="ghost" size="icon" className="h-7 w-7 text-emerald-500"
-                        onClick={() => promoteLead(lead.id)}
-                        title="Promote to Client"
-                      >
-                        <UserCheck className="h-3.5 w-3.5" />
-                      </Button>
+                      <ActionTooltip label="Promote to Client">
+                        <Button
+                          variant="ghost" size="icon" className="h-7 w-7 text-emerald-500"
+                          onClick={() => promoteLead(lead.id)}
+                        >
+                          <UserCheck className="h-3.5 w-3.5" />
+                        </Button>
+                      </ActionTooltip>
                     )}
-                    <Button
-                      variant="ghost" size="icon" className="h-7 w-7 text-destructive"
-                      onClick={() => deleteLead(lead.id)}
-                      title="Delete"
+                    <ActionTooltip label="Delete lead">
+                      <Button
+                        variant="ghost" size="icon" className="h-7 w-7 text-destructive"
+                        onClick={() => deleteLead(lead.id)}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
+                    </ActionTooltip>
                   </div>
                 </TableCell>
               </TableRow>

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useSession, signOut } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
+import { ActionTooltip } from "@/components/shared/action-tooltip";
 import { Logo } from "@/components/shared/logo";
 import { Button } from "@/components/ui/button";
 import {
@@ -47,20 +48,21 @@ export function AdminSidebar() {
       {/* Logo */}
       <div className="flex h-20 items-center justify-between px-4">
         <Logo collapsed={collapsed} />
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 text-muted-foreground"
-          onClick={() => setCollapsed(!collapsed)}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          <ChevronLeft
-            className={cn(
-              "h-4 w-4 transition-transform",
-              collapsed && "rotate-180"
-            )}
-          />
-        </Button>
+        <ActionTooltip label={collapsed ? "Expand sidebar" : "Collapse sidebar"} side="right">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-muted-foreground"
+            onClick={() => setCollapsed(!collapsed)}
+          >
+            <ChevronLeft
+              className={cn(
+                "h-4 w-4 transition-transform",
+                collapsed && "rotate-180"
+              )}
+            />
+          </Button>
+        </ActionTooltip>
       </div>
 
       {/* Navigation */}
@@ -73,7 +75,7 @@ export function AdminSidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-lg px-3 py-2.5 font-display text-base font-medium transition-colors",
                 isActive
                   ? "bg-primary/10 text-primary forge-glow"
                   : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
@@ -125,15 +127,16 @@ export function AdminSidebar() {
             </Button>
           </div>
         ) : (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="w-full text-muted-foreground"
-            onClick={() => signOut().then(() => window.location.href = "/login")}
-            aria-label="Sign out"
-          >
-            <LogOut className="h-4 w-4" />
-          </Button>
+          <ActionTooltip label="Sign out" side="right">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="w-full text-muted-foreground"
+              onClick={() => signOut().then(() => window.location.href = "/login")}
+            >
+              <LogOut className="h-4 w-4" />
+            </Button>
+          </ActionTooltip>
         )}
       </div>
     </aside>

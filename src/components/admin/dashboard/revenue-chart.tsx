@@ -38,11 +38,15 @@ export function RevenueChart() {
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "oklch(0.16 0.015 270)",
-                  border: "1px solid oklch(1 0 0 / 10%)",
+                  backgroundColor: "oklch(0.14 0.015 270 / 85%)",
+                  backdropFilter: "blur(8px)",
+                  border: "1px solid oklch(1 0 0 / 8%)",
                   borderRadius: "8px",
-                  color: "oklch(0.92 0.01 80)",
+                  color: "oklch(0.85 0.01 80)",
+                  fontSize: "13px",
+                  boxShadow: "0 4px 12px oklch(0 0 0 / 30%)",
                 }}
+                cursor={{ fill: "oklch(1 0 0 / 5%)" }}
                 formatter={(value: number) => [
                   `$${value.toLocaleString()}`,
                   "Revenue",

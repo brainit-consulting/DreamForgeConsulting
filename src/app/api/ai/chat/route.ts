@@ -75,18 +75,41 @@ export async function POST(req: Request) {
 
   // All free models failed — OpenAI fallback
   if (config.enableOpenAIFallback) {
-    console.log(`[Athena] Fallback → OpenAI ${config.openAIFallbackModel}`);
-    const result = streamText({
-      model: openai(config.openAIFallbackModel),
-      system: config.systemPrompt,
-      messages: normalized,
-      maxOutputTokens: config.maxOutputTokens,
-      temperature: config.temperature,
-    });
-    return result.toTextStreamResponse();
+    try {
+      console.log(`[Athena] Fallback → OpenAI ${config.openAIFallbackModel}`);
+      const result = streamText({
+        model: openai(config.openAIFallbackModel),
+        system: config.systemPrompt,
+        messages: normalized,
+        maxOutputTokens: config.maxOutputTokens,
+        temperature: config.temperature,
+      });
+
+      const reader = result.textStream[Symbol.asyncIterator]();
+      const first = await reader.next();
+      if (!first.done) {
+        console.log("[Athena] OpenAI streaming OK");
+        const stream = new ReadableStream({
+          async start(controller) {
+            controller.enqueue(new TextEncoder().encode(first.value));
+            try {
+              for await (const chunk of { [Symbol.asyncIterator]: () => reader }) {
+                controller.enqueue(new TextEncoder().encode(chunk));
+              }
+            } catch { /* close gracefully */ }
+            controller.close();
+          },
+        });
+        return new Response(stream, {
+          headers: { "Content-Type": "text/plain; charset=utf-8" },
+        });
+      }
+    } catch (error) {
+      console.error("[Athena] OpenAI fallback failed:", error instanceof Error ? error.message : error);
+    }
   }
 
-  return new Response("All AI models are currently unavailable. Please try again shortly.", {
-    headers: { "Content-Type": "text/plain" },
+  return new Response("I'm temporarily unavailable — all AI models are busy. Please try again in a moment!", {
+    headers: { "Content-Type": "text/plain; charset=utf-8" },
   });
 }

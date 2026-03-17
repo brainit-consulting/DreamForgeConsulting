@@ -13,6 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { AddProjectDialog } from "@/components/admin/projects/add-project-dialog";
+import { ActionTooltip } from "@/components/shared/action-tooltip";
 import { Trash2 } from "lucide-react";
 import type { ProjectStatus } from "@/types";
 
@@ -129,13 +130,14 @@ export default function ProjectsPage() {
                   {project.deadline ? format(new Date(project.deadline), "MMM d, yyyy") : "—"}
                 </TableCell>
                 <TableCell>
-                  <Button
-                    variant="ghost" size="icon" className="h-7 w-7 text-destructive"
-                    onClick={() => deleteProject(project.id)}
-                    title="Delete"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
+                  <ActionTooltip label="Delete project">
+                    <Button
+                      variant="ghost" size="icon" className="h-7 w-7 text-destructive"
+                      onClick={() => deleteProject(project.id)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </ActionTooltip>
                 </TableCell>
               </TableRow>
             ))}

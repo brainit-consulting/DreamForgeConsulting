@@ -9,6 +9,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { InviteClientDialog } from "@/components/admin/clients/invite-client-dialog";
+import { ActionTooltip } from "@/components/shared/action-tooltip";
 import { Trash2 } from "lucide-react";
 
 interface ClientRow {
@@ -89,13 +90,14 @@ export default function ClientsPage() {
                     {format(new Date(client.createdAt), "MMM yyyy")}
                   </TableCell>
                   <TableCell>
+                    <ActionTooltip label="Delete client">
                     <Button
                       variant="ghost" size="icon" className="h-7 w-7 text-destructive"
                       onClick={() => deleteClient(client.id)}
-                      title="Delete"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
+                    </ActionTooltip>
                   </TableCell>
                 </TableRow>
               );

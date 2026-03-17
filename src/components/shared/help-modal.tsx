@@ -6,6 +6,7 @@ import { HelpCircle, X, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { helpContent, type HelpSection } from "@/lib/help-content";
+import { ActionTooltip } from "@/components/shared/action-tooltip";
 import { cn } from "@/lib/utils";
 
 interface HelpModalState {
@@ -129,14 +130,16 @@ export function HelpButton({
   const { openHelp } = useHelp();
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      onClick={() => openHelp(sectionKey)}
-      className={cn("h-8 w-8 text-muted-foreground hover:text-primary", className)}
-      aria-label={`Help for ${sectionKey}`}
-    >
-      <HelpCircle className="h-4 w-4" />
-    </Button>
+    <ActionTooltip label="Help & tips">
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => openHelp(sectionKey)}
+        className={cn("h-8 w-8 text-muted-foreground hover:text-primary", className)}
+        aria-label={`Help for ${sectionKey}`}
+      >
+        <HelpCircle className="h-4 w-4" />
+      </Button>
+    </ActionTooltip>
   );
 }
