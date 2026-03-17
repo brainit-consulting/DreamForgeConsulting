@@ -34,9 +34,10 @@ export default function LoginPage() {
       if (result.error) {
         setError(result.error.message ?? "Invalid credentials");
       } else {
-        router.push("/dashboard");
+        window.location.href = "/dashboard";
       }
-    } catch {
+    } catch (err) {
+      console.error("[Login] Sign-in failed:", err);
       setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
