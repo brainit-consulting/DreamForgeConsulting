@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useChat } from "@ai-sdk/react";
+import { TextStreamChatTransport } from "ai";
 import { Rnd } from "react-rnd";
 import { Bot, X, Send, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,8 +12,20 @@ import { cn } from "@/lib/utils";
 
 export function AthenaChat() {
   const [isOpen, setIsOpen] = useState(false);
-  const { messages, input, handleInputChange, handleSubmit, isLoading } =
-    useChat({ api: "/api/ai/chat" });
+  const [inputValue, setInputValue] = useState("");
+  const { messages, sendMessage, status } = useChat({
+    transport: new TextStreamChatTransport({ api: "/api/ai/chat" }),
+  });
+
+  const isLoading = status === "streaming" || status === "submitted";
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!inputValue.trim() || isLoading) return;
+    const msg = inputValue;
+    setInputValue("");
+    await sendMessage({ parts: [{ type: "text", text: msg }], role: "user" });
+  }
 
   if (!isOpen) {
     return (
@@ -98,7 +111,9 @@ export function AthenaChat() {
                       : "bg-muted"
                   )}
                 >
-                  {message.content}
+                  {message.parts?.map((part, i) =>
+                    part.type === "text" ? <span key={i}>{part.text}</span> : null
+                  )}
                 </div>
               </div>
             ))}
@@ -120,8 +135,8 @@ export function AthenaChat() {
         <div className="border-t border-border p-3">
           <form onSubmit={handleSubmit} className="flex gap-2">
             <Input
-              value={input}
-              onChange={handleInputChange}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
               placeholder="Ask Athena anything..."
               className="flex-1"
               disabled={isLoading}
@@ -129,7 +144,7 @@ export function AthenaChat() {
             <Button
               type="submit"
               size="icon"
-              disabled={isLoading || !input.trim()}
+              disabled={isLoading || !inputValue.trim()}
               aria-label="Send message"
             >
               <Send className="h-4 w-4" />

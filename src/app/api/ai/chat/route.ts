@@ -27,5 +27,5 @@ Always be helpful, concise, and professional. Use the DreamForge brand voice - w
     messages,
   });
 
-  return result.toDataStreamResponse();
+  return result.toTextStreamResponse();
 }

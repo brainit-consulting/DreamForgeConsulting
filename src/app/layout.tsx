@@ -35,7 +35,7 @@ export default function RootLayout({
         className={`${patrickHand.variable} ${dmSans.variable} antialiased`}
       >
         <ThemeProvider>
-          <TooltipProvider delayDuration={300}>
+          <TooltipProvider>
             {children}
           </TooltipProvider>
           <Toaster richColors position="bottom-right" />

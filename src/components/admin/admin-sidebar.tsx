@@ -86,7 +86,9 @@ export function AdminSidebar() {
           if (collapsed) {
             return (
               <Tooltip key={item.href}>
-                <TooltipTrigger asChild>{NavLink}</TooltipTrigger>
+                <TooltipTrigger render={<span />}>
+                  {NavLink}
+                </TooltipTrigger>
                 <TooltipContent side="right" sideOffset={8}>
                   {item.label}
                 </TooltipContent>
