@@ -21,8 +21,9 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check for session cookie (better-auth uses "better-auth.session_token")
+  // Check for session cookie (HTTPS uses __Secure- prefix)
   const sessionToken =
+    req.cookies.get("__Secure-better-auth.session_token")?.value ??
     req.cookies.get("better-auth.session_token")?.value;
 
   if (!sessionToken) {
@@ -35,7 +36,7 @@ export async function middleware(req: NextRequest) {
       `${req.nextUrl.origin}/api/auth/get-session`,
       {
         headers: {
-          cookie: `better-auth.session_token=${sessionToken}`,
+          cookie: req.headers.get("cookie") ?? "",
         },
       }
     );
