@@ -48,7 +48,7 @@ export async function POST(
       status: newStatus,
       progress: STAGE_PROGRESS[newStatus as ProjectStatus],
     },
-    include: { client: true },
+    include: { client: true, invoices: true, tickets: true },
   });
 
   // Log activity
