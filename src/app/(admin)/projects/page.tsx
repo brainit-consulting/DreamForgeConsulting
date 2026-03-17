@@ -14,7 +14,9 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { AddProjectDialog } from "@/components/admin/projects/add-project-dialog";
 import { ActionTooltip } from "@/components/shared/action-tooltip";
+import { useConfirm } from "@/components/shared/confirm-dialog";
 import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import type { ProjectStatus } from "@/types";
 
 const statusVariant: Record<ProjectStatus, "info" | "ember" | "warning" | "success" | "default"> = {
@@ -35,6 +37,7 @@ interface ProjectRow {
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<ProjectRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const confirm = useConfirm();
 
   const fetchProjects = useCallback(async () => {
     const res = await fetch("/api/projects");
@@ -55,8 +58,15 @@ export default function ProjectsPage() {
   }
 
   async function deleteProject(id: string) {
-    if (!confirm("Delete this project?")) return;
+    const ok = await confirm({
+      title: "Delete Project",
+      description: "This will permanently delete the project and all its invoices and tickets.",
+      confirmLabel: "Delete",
+      variant: "danger",
+    });
+    if (!ok) return;
     await fetch(`/api/projects/${id}`, { method: "DELETE" });
+    toast.success("Project deleted");
     fetchProjects();
   }
 

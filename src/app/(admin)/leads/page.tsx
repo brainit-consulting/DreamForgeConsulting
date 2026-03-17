@@ -12,7 +12,9 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { AddLeadDialog } from "@/components/admin/leads/add-lead-dialog";
 import { ActionTooltip } from "@/components/shared/action-tooltip";
+import { useConfirm } from "@/components/shared/confirm-dialog";
 import { Trash2, UserCheck } from "lucide-react";
+import { toast } from "sonner";
 import type { Lead, LeadStatus } from "@/types";
 
 const statusVariant: Record<LeadStatus, "info" | "default" | "ember" | "warning" | "success" | "destructive"> = {
@@ -23,6 +25,7 @@ const statusVariant: Record<LeadStatus, "info" | "default" | "ember" | "warning"
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
+  const confirm = useConfirm();
 
   const fetchLeads = useCallback(async () => {
     const res = await fetch("/api/leads");
@@ -43,20 +46,33 @@ export default function LeadsPage() {
   }
 
   async function deleteLead(id: string) {
-    if (!confirm("Delete this lead?")) return;
+    const ok = await confirm({
+      title: "Delete Lead",
+      description: "This lead will be permanently removed. This action cannot be undone.",
+      confirmLabel: "Delete",
+      variant: "danger",
+    });
+    if (!ok) return;
     await fetch(`/api/leads/${id}`, { method: "DELETE" });
+    toast.success("Lead deleted");
     fetchLeads();
   }
 
   async function promoteLead(id: string) {
-    if (!confirm("Promote this lead to a client? They'll receive a portal invite via email.")) return;
+    const ok = await confirm({
+      title: "Promote to Client",
+      description: "This will create a portal account and send login credentials via email.",
+      confirmLabel: "Promote & Send Invite",
+      variant: "promote",
+    });
+    if (!ok) return;
     const res = await fetch(`/api/leads/${id}/promote`, { method: "POST" });
     const data = await res.json();
     if (res.ok) {
-      alert(`${data.message}\nTemp password: ${data.tempPassword}`);
+      toast.success(data.message);
       fetchLeads();
     } else {
-      alert(data.error);
+      toast.error(data.error);
     }
   }
 

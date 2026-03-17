@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ActionTooltip } from "@/components/shared/action-tooltip";
+import { useConfirm } from "@/components/shared/confirm-dialog";
 import { CreateInvoiceDialog } from "@/components/admin/invoices/create-invoice-dialog";
 import {
   DollarSign, Send, CheckCircle, AlertTriangle, Trash2, Mail, CreditCard,
@@ -44,6 +45,8 @@ export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<InvoiceRow[]>([]);
   const [filter, setFilter] = useState<InvoiceStatus | "ALL">("ALL");
   const [loading, setLoading] = useState(true);
+
+  const confirmAction = useConfirm();
 
   const fetchInvoices = useCallback(async () => {
     const res = await fetch("/api/invoices");
@@ -83,8 +86,15 @@ export default function InvoicesPage() {
   }
 
   async function deleteInvoice(id: string) {
-    if (!confirm("Delete this invoice?")) return;
+    const ok = await confirmAction({
+      title: "Delete Invoice",
+      description: "This invoice will be permanently removed.",
+      confirmLabel: "Delete",
+      variant: "danger",
+    });
+    if (!ok) return;
     await fetch(`/api/invoices/${id}`, { method: "DELETE" });
+    toast.success("Invoice deleted");
     fetchInvoices();
   }
 

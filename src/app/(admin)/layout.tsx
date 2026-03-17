@@ -1,5 +1,6 @@
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { HelpProvider } from "@/components/shared/help-modal";
+import { ConfirmProvider } from "@/components/shared/confirm-dialog";
 import { AthenaChat } from "@/components/shared/athena-chat";
 import { TopBar } from "@/components/shared/top-bar";
 
@@ -10,16 +11,18 @@ export default function AdminLayout({
 }) {
   return (
     <HelpProvider>
-      <div className="flex h-screen overflow-hidden">
-        <AdminSidebar />
-        <div className="flex flex-1 flex-col overflow-hidden">
-          <TopBar />
-          <main className="flex-1 overflow-y-auto">
-            <div className="mx-auto max-w-7xl px-6 py-6">{children}</div>
-          </main>
+      <ConfirmProvider>
+        <div className="flex h-screen overflow-hidden">
+          <AdminSidebar />
+          <div className="flex flex-1 flex-col overflow-hidden">
+            <TopBar />
+            <main className="flex-1 overflow-y-auto">
+              <div className="mx-auto max-w-7xl px-6 py-6">{children}</div>
+            </main>
+          </div>
         </div>
-      </div>
-      <AthenaChat />
+        <AthenaChat />
+      </ConfirmProvider>
     </HelpProvider>
   );
 }

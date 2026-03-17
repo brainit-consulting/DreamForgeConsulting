@@ -10,7 +10,9 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { InviteClientDialog } from "@/components/admin/clients/invite-client-dialog";
 import { ActionTooltip } from "@/components/shared/action-tooltip";
+import { useConfirm } from "@/components/shared/confirm-dialog";
 import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface ClientRow {
   id: string;
@@ -24,6 +26,7 @@ interface ClientRow {
 export default function ClientsPage() {
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const confirm = useConfirm();
 
   const fetchClients = useCallback(async () => {
     const res = await fetch("/api/clients");
@@ -35,8 +38,15 @@ export default function ClientsPage() {
   useEffect(() => { fetchClients(); }, [fetchClients]);
 
   async function deleteClient(id: string) {
-    if (!confirm("Delete this client and all their projects/invoices?")) return;
+    const ok = await confirm({
+      title: "Delete Client",
+      description: "This will permanently delete the client and all their projects, invoices, and tickets.",
+      confirmLabel: "Delete",
+      variant: "danger",
+    });
+    if (!ok) return;
     await fetch(`/api/clients/${id}`, { method: "DELETE" });
+    toast.success("Client deleted");
     fetchClients();
   }
 
