@@ -1,14 +1,8 @@
-import { openai } from "@ai-sdk/openai";
-import { streamText } from "ai";
+import { streamWithFallback } from "@/lib/ai-provider";
 
 export const maxDuration = 30;
 
-export async function POST(req: Request) {
-  const { messages } = await req.json();
-
-  const result = streamText({
-    model: openai("gpt-4o-mini"),
-    system: `You are Athena, the AI assistant for DreamForge Consulting. You help both admin users and clients navigate the platform.
+const SYSTEM_PROMPT = `You are Athena, the AI assistant for DreamForge Consulting. You help both admin users and clients navigate the platform.
 
 For admin users, you can help with:
 - Understanding dashboard metrics and KPIs
@@ -23,8 +17,32 @@ For client portal users, you can help with:
 - How to submit and track support tickets
 - General questions about the consulting process
 
-Always be helpful, concise, and professional. Use the DreamForge brand voice - warm, knowledgeable, and craftsman-like.`,
-    messages,
+Always be helpful, concise, and professional. Use the DreamForge brand voice - warm, knowledgeable, and craftsman-like.`;
+
+// Convert UI messages (parts format) to model messages (content format)
+function normalizeMessages(
+  messages: Array<{ role: string; parts?: Array<{ type: string; text?: string }>; content?: string }>
+) {
+  return messages.map((msg) => {
+    if (msg.content) {
+      return { role: msg.role as "user" | "assistant", content: msg.content };
+    }
+    // Extract text from parts (AI SDK v6 UI format)
+    const text = msg.parts
+      ?.filter((p) => p.type === "text")
+      .map((p) => p.text)
+      .join("") ?? "";
+    return { role: msg.role as "user" | "assistant", content: text };
+  });
+}
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+  const normalized = normalizeMessages(messages);
+
+  const result = await streamWithFallback({
+    system: SYSTEM_PROMPT,
+    messages: normalized,
   });
 
   return result.toTextStreamResponse();
