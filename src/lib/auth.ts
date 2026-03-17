@@ -1,6 +1,8 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { db } from "./db";
+import { resend } from "./resend";
+import { passwordResetEmail } from "./email-templates";
 
 export const auth = betterAuth({
   database: prismaAdapter(db, {
@@ -8,6 +10,13 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    sendResetPassword: async ({ user, url }) => {
+      await resend.emails.send({
+        from: "DreamForge Consulting <noreply@dreamforgeworld.com>",
+        to: user.email,
+        ...passwordResetEmail({ name: user.name, resetUrl: url }),
+      });
+    },
   },
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days

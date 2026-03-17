@@ -105,6 +105,18 @@ export const helpContent: Record<string, HelpSection> = {
       "Edit client details (company, email, phone, address) directly from this page",
     ],
   },
+  tickets: {
+    title: "Support Tickets — Client Requests",
+    content:
+      "The Tickets page shows all support requests submitted by clients through their portal. Each ticket has a subject, description, priority level (Low/Medium/High/Urgent), and a status that you manage: Open → In Progress → Resolved → Closed. Click any row to expand and read the full ticket description. Use the priority and status dropdowns to update tickets directly from the table. The stats cards at the top give you a quick count of open, in-progress, resolved, and high-priority tickets. Use the filter buttons to focus on specific statuses. The Archive button quickly closes a ticket without deleting it.",
+    tips: [
+      "Click a ticket row to expand and read the full description",
+      "Change ticket status via the dropdown: Open → In Progress → Resolved → Closed",
+      "Adjust priority if a client's issue is more or less urgent than they indicated",
+      "Use the Archive button to quickly close resolved tickets",
+      "High/Urgent count includes both HIGH and URGENT priority tickets",
+    ],
+  },
   backups: {
     title: "Database Backups — Automated & Versioned",
     content:

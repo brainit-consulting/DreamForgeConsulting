@@ -1,3 +1,47 @@
+export function passwordResetEmail({
+  name,
+  resetUrl,
+}: {
+  name: string;
+  resetUrl: string;
+}) {
+  return {
+    subject: "Reset Your Password — DreamForge Consulting",
+    html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;background:#0A0A0F;font-family:system-ui,-apple-system,sans-serif;">
+  <div style="max-width:560px;margin:0 auto;padding:40px 24px;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <h1 style="color:#F59E0B;font-size:28px;margin:0;">DreamForge</h1>
+      <p style="color:#888;font-size:12px;letter-spacing:3px;margin:4px 0 0;">CONSULTING</p>
+    </div>
+    <div style="background:#16161E;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:32px;">
+      <h2 style="color:#E8E4DF;font-size:20px;margin:0 0 16px;">Password Reset</h2>
+      <p style="color:#AAA;font-size:14px;line-height:1.6;margin:0 0 24px;">
+        Hi${name ? ` ${name}` : ""}, we received a request to reset your password.
+        Click the button below to choose a new one.
+      </p>
+      <a href="${resetUrl}" style="display:inline-block;background:#F59E0B;color:#0A0A0F;font-weight:600;font-size:14px;padding:12px 32px;border-radius:8px;text-decoration:none;">
+        Reset Password
+      </a>
+      <p style="color:#666;font-size:12px;margin:24px 0 0;">
+        This link expires in 1 hour. If you didn't request this, you can safely ignore this email.
+      </p>
+    </div>
+    <p style="color:#555;font-size:11px;text-align:center;margin:24px 0 0;">
+      DreamForge Consulting &mdash; Crafting your digital future.
+    </p>
+  </div>
+</body>
+</html>`,
+  };
+}
+
 export function clientInviteEmail({
   clientName,
   company,

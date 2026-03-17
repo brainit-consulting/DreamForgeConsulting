@@ -8,6 +8,7 @@ import {
   UserPlus,
   FolderKanban,
   Receipt,
+  TicketCheck,
   Settings,
   ChevronLeft,
   LogOut,
@@ -30,6 +31,7 @@ const navItems = [
   { label: "Clients", href: "/clients", icon: Users },
   { label: "Projects", href: "/projects", icon: FolderKanban },
   { label: "Invoices", href: "/invoices", icon: Receipt },
+  { label: "Tickets", href: "/tickets", icon: TicketCheck },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 

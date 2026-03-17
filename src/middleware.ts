@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_ROUTES = ["/login", "/api/auth"];
+const PUBLIC_ROUTES = ["/login", "/forgot-password", "/reset-password", "/api/auth"];
 const STATIC_PREFIXES = ["/_next", "/favicon.ico", "/Athena.png", "/DreamForgeConsultingLogo.png"];
 
 export async function middleware(req: NextRequest) {

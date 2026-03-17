@@ -104,6 +104,11 @@ export default function LoginPage() {
             <p className="text-center text-xs text-muted-foreground">
               Access is by invitation only.
             </p>
+            <p className="text-center">
+              <a href="/forgot-password" className="text-xs text-primary hover:underline">
+                Forgot your password?
+              </a>
+            </p>
           </div>
         </div>
       </div>
