@@ -27,8 +27,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Client already has portal access" }, { status: 409 });
     }
 
+    if (!client.email) {
+      return NextResponse.json({ error: "Client has no email address — add one before sending an invite" }, { status: 400 });
+    }
+
     // Check if a user with this email already exists
-    const existingUser = await db.user.findUnique({ where: { email: client.email } });
+    const existingUser = await db.user.findUnique({ where: { email: client.email! } });
     if (existingUser) {
       return NextResponse.json(
         { error: "A user with this email already exists" },

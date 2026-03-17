@@ -96,7 +96,7 @@ export function EditLeadDialog({ lead, onUpdated }: { lead: Lead; onUpdated: () 
             </div>
             <div className="space-y-1">
               <Label htmlFor="edit-email">Email</Label>
-              <Input id="edit-email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+              <Input id="edit-email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="jane@company.com" />
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">

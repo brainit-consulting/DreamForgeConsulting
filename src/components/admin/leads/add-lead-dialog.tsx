@@ -67,7 +67,7 @@ export function AddLeadDialog({ onCreated }: { onCreated: () => void }) {
             </div>
             <div className="space-y-1">
               <Label htmlFor="lead-email">Email</Label>
-              <Input id="lead-email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+              <Input id="lead-email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="jane@company.com" />
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">

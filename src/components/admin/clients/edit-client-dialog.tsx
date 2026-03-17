@@ -19,7 +19,7 @@ import { ActionTooltip } from "@/components/shared/action-tooltip";
 interface ClientData {
   id: string;
   company: string;
-  email: string;
+  email?: string | null;
   phone?: string | null;
   website?: string | null;
   address?: string | null;
@@ -38,7 +38,7 @@ export function EditClientDialog({
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     company: client.company,
-    email: client.email,
+    email: client.email ?? "",
     phone: client.phone ?? "",
     website: client.website ?? "",
     address: client.address ?? "",
@@ -48,7 +48,7 @@ export function EditClientDialog({
     if (isOpen) {
       setForm({
         company: client.company,
-        email: client.email,
+        email: client.email ?? "",
         phone: client.phone ?? "",
         website: client.website ?? "",
         address: client.address ?? "",
@@ -124,7 +124,7 @@ export function EditClientDialog({
               type="email"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              required
+              placeholder="contact@company.com"
             />
           </div>
           <div className="space-y-1">

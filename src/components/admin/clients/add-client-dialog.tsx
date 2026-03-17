@@ -85,7 +85,6 @@ export function AddClientDialog({ onCreated }: { onCreated: () => void }) {
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="contact@company.com"
-                required
               />
             </div>
           </div>

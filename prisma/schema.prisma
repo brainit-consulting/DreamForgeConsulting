@@ -87,7 +87,7 @@ enum UserRole {
 model Lead {
   id        String     @id @default(cuid())
   name      String
-  email     String
+  email     String?
   company   String?
   phone     String?
   website   String?
@@ -115,7 +115,7 @@ model Client {
   id        String   @id @default(cuid())
   userId    String?  @unique
   company   String
-  email     String
+  email     String?
   phone     String?
   website   String?
   address   String?  @db.Text

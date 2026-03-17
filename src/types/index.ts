@@ -32,7 +32,7 @@ export type TicketPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
 export interface Lead {
   id: string;
   name: string;
-  email: string;
+  email?: string;
   company?: string;
   phone?: string;
   website?: string;

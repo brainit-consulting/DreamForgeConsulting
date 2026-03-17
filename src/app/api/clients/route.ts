@@ -5,7 +5,7 @@ import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
 
 const createClientSchema = z.object({
   company: z.string().min(1),
-  email: z.string().email(),
+  email: z.string().email().optional().or(z.literal("")),
   phone: z.string().optional(),
   website: z.string().optional(),
   address: z.string().optional(),

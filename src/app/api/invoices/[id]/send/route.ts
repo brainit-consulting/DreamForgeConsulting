@@ -17,6 +17,10 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: "Only draft invoices can be sent" }, { status: 400 });
   }
 
+  if (!invoice.client.email) {
+    return NextResponse.json({ error: "Client has no email address" }, { status: 400 });
+  }
+
   // Send email
   try {
     await resend.emails.send({

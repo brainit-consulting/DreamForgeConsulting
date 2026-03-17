@@ -18,12 +18,12 @@ export const helpContent: Record<string, HelpSection> = {
   leads: {
     title: "Leads — Sales Pipeline",
     content:
-      "Leads are potential clients you're tracking through your sales pipeline. Each lead has a status that progresses through: New → Contacted → Qualified → Proposal → Converted (or Lost). Use the 'Add Lead' button to create a new lead with their name, email, company, phone, source, estimated value, and notes. You can change a lead's status directly from the dropdown in the table. When a lead is ready to become a client, click the green checkmark icon to promote them — this creates a user account, a client record, and sends them a portal invite email via Resend from noreply@dreamforgeworld.com.",
+      "Leads are potential clients you're tracking through your sales pipeline. Each lead has a status that progresses through: New → Contacted → Qualified → Proposal → Converted (or Lost). Use the 'Add Lead' button to create a new lead — only the name is required, email and other fields can be added later. You can change a lead's status directly from the dropdown in the table. When a lead is ready to become a client, click the green checkmark icon to promote them — this creates a client record. You can then send a portal invite from the Clients page when you're ready to give them access.",
     tips: [
       "Use the search bar to filter leads by name, email, company, or source",
-      "Click the pencil icon to edit a lead's name, email, company, phone, source, value, or notes",
+      "Click the pencil icon to edit a lead's details (name, email, company, phone, website, address, source, value, notes)",
       "The status dropdown in each row lets you update pipeline stage instantly",
-      "Promoting a lead (green ✓ icon) creates their portal login and sends credentials via email",
+      "Promoting a lead (green ✓ icon) converts them to a client — portal invite is sent separately from Clients",
       "The pipeline summary at the top shows how many leads are in each stage",
       "Leads marked as Converted or Lost no longer show the promote button",
     ],
@@ -31,13 +31,14 @@ export const helpContent: Record<string, HelpSection> = {
   clients: {
     title: "Clients — Your Roster",
     content:
-      "Clients are converted leads who have active portal accounts. Each client has a company name, email, phone, and a count of their projects. Click a client's name to view their detail page showing all their projects (with progress bars and workflow status) and invoices (with amounts and payment status). Use the 'Invite Client' button to manually create a new client without going through the lead pipeline — this creates their account and sends a portal invite email with temporary login credentials.",
+      "Clients are businesses you work with. They can be added directly or promoted from leads. Each client has a company name, email, phone, website, and a count of their projects. The Portal column shows whether a client has portal access (green shield). Click a client's name to view their detail page with projects and invoices. Use 'Add Client' to create a new client record — portal access is granted separately by clicking the mail icon (Send Invite) when you're ready.",
     tips: [
       "Use the search bar to filter clients by company name, email, or phone",
       "Click a client's company name to see their full detail page with projects and invoices",
-      "The 'Invite Client' dialog creates the user account, client record, and sends the email in one step",
-      "The temporary password is shown after invite in case the email doesn't arrive",
-      "Project count column shows how many projects each client has",
+      "The shield icon in the Portal column means the client has portal login access",
+      "Click the mail icon to send a portal invite — this creates their login and emails credentials",
+      "Click the pencil icon to edit client details (company, email, phone, website, address)",
+      "Email is optional when adding a client, but required before sending a portal invite",
     ],
   },
   projects: {
@@ -105,11 +106,12 @@ export const helpContent: Record<string, HelpSection> = {
   clientDetail: {
     title: "Client Detail — Overview & History",
     content:
-      "The client detail page shows everything about a single client in one place. Click the 'Edit' button to update company name, email, phone, or address. At the top you'll see the client's details and how long they've been a client. Below that, the Projects section lists all projects assigned to this client with their current workflow stage, progress bar, and status. The Invoices section shows all invoices for this client with amounts, status badges (Draft, Sent, Paid, Overdue), and due dates. Use this page to get a quick snapshot of your relationship with any client.",
+      "The client detail page shows everything about a single client in one place. The portal status badge shows whether the client has portal access — click 'Send Invite' to grant access, or it shows 'Portal Active' if already invited. Click 'Edit' to update company name, email, phone, website, or address. Below that, the Projects section lists all projects with workflow stage, progress bar, and status. The Invoices section shows all invoices with amounts, status badges, and due dates.",
     tips: [
       "Click a project row to navigate directly to the project detail page",
       "Invoice status badges are color-coded: amber for Draft, blue for Sent, green for Paid, red for Overdue",
-      "Click the 'Edit' button to update company name, email, phone, or address",
+      "Click 'Send Invite' to create portal login and email credentials to the client",
+      "Click 'Edit' to update company name, email, phone, website, or address",
     ],
   },
   tickets: {

@@ -76,8 +76,8 @@ export default function LeadsPage() {
   async function promoteLead(id: string) {
     const ok = await confirm({
       title: "Promote to Client",
-      description: "This will create a portal account and send login credentials via email.",
-      confirmLabel: "Promote & Send Invite",
+      description: "This will convert the lead to a client record. You can send a portal invite later from the Clients page.",
+      confirmLabel: "Promote",
       variant: "promote",
     });
     if (!ok) return;
