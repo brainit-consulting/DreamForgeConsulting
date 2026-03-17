@@ -49,11 +49,16 @@ export default function ProjectsPage() {
   useEffect(() => { fetchProjects(); }, [fetchProjects]);
 
   async function updateProject(id: string, data: Partial<ProjectRow>) {
-    await fetch(`/api/projects/${id}`, {
+    const res = await fetch(`/api/projects/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
+    if (res.ok) {
+      toast.success(`Status updated to ${data.status ?? "saved"}`);
+    } else {
+      toast.error("Failed to update project");
+    }
     fetchProjects();
   }
 

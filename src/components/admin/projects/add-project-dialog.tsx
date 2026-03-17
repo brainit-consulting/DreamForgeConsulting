@@ -21,6 +21,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
+import { toast } from "sonner";
 
 interface ClientOption {
   id: string;
@@ -54,9 +55,13 @@ export function AddProjectDialog({ onCreated }: { onCreated: () => void }) {
         }),
       });
       if (res.ok) {
+        toast.success("Project created");
         setForm({ clientId: "", name: "", description: "", startDate: "", deadline: "", budget: "" });
         setOpen(false);
         onCreated();
+      } else {
+        const data = await res.json();
+        toast.error(data.error?.[0]?.message ?? "Failed to create project");
       }
     } finally {
       setLoading(false);

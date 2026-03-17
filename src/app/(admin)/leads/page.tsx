@@ -37,11 +37,16 @@ export default function LeadsPage() {
   useEffect(() => { fetchLeads(); }, [fetchLeads]);
 
   async function updateStatus(id: string, status: LeadStatus) {
-    await fetch(`/api/leads/${id}`, {
+    const res = await fetch(`/api/leads/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
     });
+    if (res.ok) {
+      toast.success(`Status updated to ${status}`);
+    } else {
+      toast.error("Failed to update status");
+    }
     fetchLeads();
   }
 

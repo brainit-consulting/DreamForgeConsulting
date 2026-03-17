@@ -29,6 +29,7 @@ import type { AthenaConfig } from "@/lib/athena-config";
 import type { BackupEntry } from "@/lib/backup";
 import { HelpButton } from "@/components/shared/help-modal";
 import { ActionTooltip } from "@/components/shared/action-tooltip";
+import { toast } from "sonner";
 
 interface BackupList {
   daily: BackupEntry[];
@@ -151,7 +152,10 @@ export default function SettingsPage() {
         const updated = await res.json();
         setConfig(updated);
         setSaved(true);
+        toast.success("Athena settings saved");
         setTimeout(() => setSaved(false), 3000);
+      } else {
+        toast.error("Failed to save settings");
       }
     } finally {
       setSaving(false);
@@ -164,7 +168,10 @@ export default function SettingsPage() {
       const defaults = await res.json();
       setConfig(defaults);
       setSaved(true);
+      toast.success("Settings reset to defaults");
       setTimeout(() => setSaved(false), 3000);
+    } else {
+      toast.error("Failed to reset settings");
     }
   }
 

@@ -14,6 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
+import { toast } from "sonner";
 
 export function AddLeadDialog({ onCreated }: { onCreated: () => void }) {
   const [open, setOpen] = useState(false);
@@ -35,9 +36,13 @@ export function AddLeadDialog({ onCreated }: { onCreated: () => void }) {
         }),
       });
       if (res.ok) {
+        toast.success("Lead created");
         setForm({ name: "", email: "", company: "", phone: "", source: "", notes: "", value: "" });
         setOpen(false);
         onCreated();
+      } else {
+        const data = await res.json();
+        toast.error(data.error?.[0]?.message ?? "Failed to create lead");
       }
     } finally {
       setLoading(false);

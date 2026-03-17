@@ -21,6 +21,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
+import { toast } from "sonner";
 
 interface ClientOption { id: string; company: string }
 interface ProjectOption { id: string; name: string; clientId: string }
@@ -61,9 +62,13 @@ export function CreateInvoiceDialog({ onCreated }: { onCreated: () => void }) {
         }),
       });
       if (res.ok) {
+        toast.success("Invoice created as draft");
         setForm({ clientId: "", projectId: "", amount: "", description: "", dueDate: "" });
         setOpen(false);
         onCreated();
+      } else {
+        const data = await res.json();
+        toast.error(data.error?.[0]?.message ?? "Failed to create invoice");
       }
     } finally {
       setLoading(false);

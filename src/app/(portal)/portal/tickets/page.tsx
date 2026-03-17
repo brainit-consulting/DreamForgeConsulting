@@ -11,6 +11,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { toast } from "sonner";
 import type { TicketPriority, TicketStatus } from "@/types";
 
 const priorityVariant: Record<TicketPriority, "default" | "info" | "warning" | "destructive"> = {
@@ -66,9 +67,12 @@ export default function PortalTicketsPage() {
       }),
     });
     if (res.ok) {
+      toast.success("Ticket submitted — we'll get back to you soon");
       setShowForm(false);
       setSubject(""); setDescription(""); setPriority("MEDIUM"); setProjectId("");
       fetchData();
+    } else {
+      toast.error("Failed to submit ticket");
     }
     setSubmitting(false);
   }

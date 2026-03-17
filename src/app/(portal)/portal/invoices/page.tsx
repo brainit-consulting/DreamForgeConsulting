@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { toast } from "sonner";
 import type { InvoiceStatus } from "@/types";
 
 const statusVariant: Record<InvoiceStatus, "default" | "info" | "success" | "destructive" | "warning"> = {
@@ -29,17 +30,21 @@ export default function PortalInvoicesPage() {
       .then((data) => setInvoices(data.invoices ?? []));
   }, []);
 
-  async function handlePay(invoiceId: string, amount: number, description: string) {
+  async function handlePay(invoiceId: string) {
     try {
       const res = await fetch("/api/stripe/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ invoiceId, amount, description }),
+        body: JSON.stringify({ invoiceId }),
       });
       const data = await res.json();
-      if (data.url) window.location.href = data.url;
-    } catch (error) {
-      console.error("Payment error:", error);
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        toast.error(data.error ?? "Failed to start payment");
+      }
+    } catch {
+      toast.error("Payment failed — please try again");
     }
   }
 
@@ -69,7 +74,7 @@ export default function PortalInvoicesPage() {
                 <span className="font-display text-xl">${invoice.amount.toLocaleString()}</span>
                 <StatusBadge label={invoice.status} variant={statusVariant[invoice.status]} dot />
                 {(invoice.status === "SENT" || invoice.status === "OVERDUE") && (
-                  <Button size="sm" onClick={() => handlePay(invoice.id, invoice.amount, invoice.description ?? "")}>
+                  <Button size="sm" onClick={() => handlePay(invoice.id)}>
                     Pay Now
                   </Button>
                 )}
