@@ -1,5 +1,6 @@
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { HelpProvider } from "@/components/shared/help-modal";
+import { AthenaChat } from "@/components/shared/athena-chat";
 
 export default function AdminLayout({
   children,
@@ -14,6 +15,7 @@ export default function AdminLayout({
           <div className="mx-auto max-w-7xl px-6 py-6">{children}</div>
         </main>
       </div>
+      <AthenaChat />
     </HelpProvider>
   );
 }

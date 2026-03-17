@@ -1,5 +1,6 @@
 import { PortalSidebar } from "@/components/portal/portal-sidebar";
 import { HelpProvider } from "@/components/shared/help-modal";
+import { AthenaChat } from "@/components/shared/athena-chat";
 
 export default function PortalLayout({
   children,
@@ -14,6 +15,7 @@ export default function PortalLayout({
           <div className="mx-auto max-w-5xl px-6 py-6">{children}</div>
         </main>
       </div>
+      <AthenaChat />
     </HelpProvider>
   );
 }
