@@ -2,6 +2,7 @@ import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { openai } from "@ai-sdk/openai";
 import { streamText } from "ai";
 import { getAthenaConfig } from "@/lib/athena-config";
+import { requireAuth } from "@/lib/auth-helpers";
 
 export const maxDuration = 30;
 
@@ -23,6 +24,7 @@ function normalizeMessages(
 }
 
 export async function POST(req: Request) {
+  await requireAuth();
   const { messages } = await req.json();
   const normalized = normalizeMessages(messages);
   const config = getAthenaConfig();

@@ -40,7 +40,7 @@ export const helpContent: Record<string, HelpSection> = {
   projects: {
     title: "Projects — SaaS Delivery Tracker",
     content:
-      "Projects represent the SaaS applications you're building for clients. Each project tracks through a 7-stage workflow: Discovery & Planning → Design & Wireframing → Development → Testing & QA → Deployment & Launch → Launched → Post-Launch Support. Use 'New Project' to create one (select a client, set name, description, dates, and budget). The status dropdown in each row lets you change the workflow stage directly. Progress percentage auto-calculates based on the current stage.",
+      "Projects represent the SaaS applications you're building for clients. Each project tracks through a 7-stage workflow: Discovery & Planning → Design & Wireframing → Development → Testing & QA → Deployment & Launch → Launched → Support. Use 'New Project' to create one (select a client, set name, description, dates, and budget). The status dropdown in each row lets you change the workflow stage directly. Progress percentage auto-calculates based on the current stage.",
     tips: [
       "Click a project name to open its detail page with the interactive workflow tracker",
       "On the detail page, click workflow stage circles to advance or revert the project",
@@ -81,6 +81,28 @@ export const helpContent: Record<string, HelpSection> = {
       "The Invoices tab lets you view all invoices and pay outstanding ones with a single click",
       "Use the Tickets tab to submit new support requests — select the project and priority level",
       "The Athena AI assistant (bottom-right) can answer questions about your projects and invoices",
+    ],
+  },
+  projectDetail: {
+    title: "Project Detail — Workflow & Stage Work",
+    content:
+      "The project detail page is your command center for managing a single project's lifecycle. The interactive Workflow Tracker at the top visualizes all 7 stages as connected nodes — click any adjacent stage to advance or revert the project (you can only move one stage at a time, no skipping). Below the tracker, the Stage Work Panel shows Tasks and Notes specific to the currently active stage. Tasks are a checklist you can add to, check off, edit inline, or delete. Notes are freeform text entries that autosave after a short pause — use them to capture decisions, meeting notes, or blockers. The Timeline section at the bottom shows every stage transition logged as an activity, so you always have a history of when the project moved through each phase.",
+    tips: [
+      "Click a workflow stage circle to transition — you can advance one step or revert one step",
+      "Tasks and Notes are scoped per stage — switching stages shows that stage's work items",
+      "Notes autosave after a short debounce; you can also click 'Save' manually",
+      "Progress auto-calculates: Discovery 8%, Design 22%, Development 45%, Testing 68%, Deployment 85%, Launched/Support 100%",
+      "The Timeline logs every stage transition with timestamps for full audit trail",
+    ],
+  },
+  clientDetail: {
+    title: "Client Detail — Overview & History",
+    content:
+      "The client detail page shows everything about a single client in one place. At the top you'll find the client's company name, email, phone, and address — click 'Edit' to update any of these fields inline. Below that, the Projects section lists all projects assigned to this client with their current workflow stage, progress bar, and status. Click any project name to jump to its detail page. The Invoices section shows all invoices for this client with amounts, status badges (Draft, Sent, Paid, Overdue), and due dates. Use this page to get a quick snapshot of your relationship with any client.",
+    tips: [
+      "Click a project row to navigate directly to the project detail page",
+      "Invoice status badges are color-coded: amber for Draft, blue for Sent, green for Paid, red for Overdue",
+      "Edit client details (company, email, phone, address) directly from this page",
     ],
   },
   backups: {

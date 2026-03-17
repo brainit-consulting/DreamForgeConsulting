@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { runBackup } from "@/lib/backup";
-import { headers } from "next/headers";
+import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
 
 export async function POST() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  try {
+    await requireAdmin();
+    const result = await runBackup();
+    return NextResponse.json(result, { status: result.success ? 200 : 500 });
+  } catch (error) {
+    return handleAuthError(error);
   }
-
-  const result = await runBackup();
-  return NextResponse.json(result, { status: result.success ? 200 : 500 });
 }

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
+import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
 
 const createNoteSchema = z.object({
   stage: z.string().min(1),
@@ -11,23 +12,29 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
-  const stage = req.nextUrl.searchParams.get("stage");
+  try {
+    await requireAdmin();
+    const { id } = await params;
+    const stage = req.nextUrl.searchParams.get("stage");
 
-  const notes = await db.stageNote.findMany({
-    where: { projectId: id, ...(stage ? { stage: stage as any } : {}) },
-    orderBy: { createdAt: "desc" },
-  });
+    const notes = await db.stageNote.findMany({
+      where: { projectId: id, ...(stage ? { stage: stage as any } : {}) },
+      orderBy: { createdAt: "desc" },
+    });
 
-  return NextResponse.json(notes);
+    return NextResponse.json(notes);
+  } catch (error) {
+    return handleAuthError(error);
+  }
 }
 
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = await params;
   try {
+    await requireAdmin();
+    const { id } = await params;
     const body = await req.json();
     const data = createNoteSchema.parse(body);
     const note = await db.stageNote.create({
@@ -42,6 +49,6 @@ export async function POST(
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
-    return NextResponse.json({ error: "Failed to create note" }, { status: 500 });
+    return handleAuthError(error);
   }
 }

@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { resend } from "@/lib/resend";
+import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
 
 export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+  await requireAdmin();
   const { id } = await params;
 
   const invoice = await db.invoice.findUnique({
@@ -56,4 +59,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   });
 
   return NextResponse.json(updated);
+  } catch (error) {
+    return handleAuthError(error);
+  }
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
+import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
 
 const createLeadSchema = z.object({
   name: z.string().min(1),
@@ -13,12 +14,18 @@ const createLeadSchema = z.object({
 });
 
 export async function GET() {
-  const leads = await db.lead.findMany({ orderBy: { createdAt: "desc" } });
-  return NextResponse.json(leads);
+  try {
+    await requireAdmin();
+    const leads = await db.lead.findMany({ orderBy: { createdAt: "desc" } });
+    return NextResponse.json(leads);
+  } catch (error) {
+    return handleAuthError(error);
+  }
 }
 
 export async function POST(req: Request) {
   try {
+    await requireAdmin();
     const body = await req.json();
     const data = createLeadSchema.parse(body);
     const lead = await db.lead.create({ data });
@@ -27,6 +34,6 @@ export async function POST(req: Request) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
-    return NextResponse.json({ error: "Failed to create lead" }, { status: 500 });
+    return handleAuthError(error);
   }
 }

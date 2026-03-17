@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
+import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
 
 const createInvoiceSchema = z.object({
   clientId: z.string().min(1),
@@ -11,15 +12,21 @@ const createInvoiceSchema = z.object({
 });
 
 export async function GET() {
-  const invoices = await db.invoice.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { client: true, project: true },
-  });
-  return NextResponse.json(invoices);
+  try {
+    await requireAdmin();
+    const invoices = await db.invoice.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { client: true, project: true },
+    });
+    return NextResponse.json(invoices);
+  } catch (error) {
+    return handleAuthError(error);
+  }
 }
 
 export async function POST(req: Request) {
   try {
+    await requireAdmin();
     const body = await req.json();
     const data = createInvoiceSchema.parse(body);
     const invoice = await db.invoice.create({
@@ -34,6 +41,6 @@ export async function POST(req: Request) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
-    return NextResponse.json({ error: "Failed to create invoice" }, { status: 500 });
+    return handleAuthError(error);
   }
 }

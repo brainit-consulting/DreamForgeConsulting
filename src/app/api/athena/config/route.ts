@@ -3,27 +3,35 @@ import {
   getAthenaConfig,
   updateAthenaConfig,
   resetAthenaConfig,
-  athenaConfigSchema,
 } from "@/lib/athena-config";
+import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
 
 export async function GET() {
-  return NextResponse.json(getAthenaConfig());
+  try {
+    await requireAdmin();
+    return NextResponse.json(getAthenaConfig());
+  } catch (error) {
+    return handleAuthError(error);
+  }
 }
 
 export async function PUT(req: Request) {
   try {
+    await requireAdmin();
     const body = await req.json();
     const config = updateAthenaConfig(body);
     return NextResponse.json(config);
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Invalid config" },
-      { status: 400 }
-    );
+    return handleAuthError(error);
   }
 }
 
 export async function DELETE() {
-  const config = resetAthenaConfig();
-  return NextResponse.json(config);
+  try {
+    await requireAdmin();
+    const config = resetAthenaConfig();
+    return NextResponse.json(config);
+  } catch (error) {
+    return handleAuthError(error);
+  }
 }

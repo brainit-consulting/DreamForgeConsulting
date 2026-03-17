@@ -5,8 +5,11 @@ import { resend } from "@/lib/resend";
 import { clientInviteEmail } from "@/lib/email-templates";
 import { headers } from "next/headers";
 import crypto from "crypto";
+import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
 
 export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+  await requireAdmin();
   const { id } = await params;
 
   // Get lead
@@ -98,4 +101,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     tempPassword,
     message: `${lead.name} promoted to client. Invite sent to ${lead.email}.`,
   });
+  } catch (error) {
+    return handleAuthError(error);
+  }
 }

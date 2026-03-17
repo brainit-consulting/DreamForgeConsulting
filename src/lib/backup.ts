@@ -88,7 +88,7 @@ export async function runBackup(): Promise<BackupResult> {
     const { url: dailyUrl } = await put(dailyPath, json, {
       access: "public",
       contentType: "application/json",
-      addRandomSuffix: false,
+      addRandomSuffix: true,
     });
 
     const promoted: { weekly?: string; monthly?: string } = {};
@@ -101,7 +101,7 @@ export async function runBackup(): Promise<BackupResult> {
       await put(weeklyPath, json, {
         access: "public",
         contentType: "application/json",
-        addRandomSuffix: false,
+        addRandomSuffix: true,
       });
       promoted.weekly = weeklyPath;
     }
@@ -113,7 +113,7 @@ export async function runBackup(): Promise<BackupResult> {
       await put(monthlyPath, json, {
         access: "public",
         contentType: "application/json",
-        addRandomSuffix: false,
+        addRandomSuffix: true,
       });
       promoted.monthly = monthlyPath;
     }

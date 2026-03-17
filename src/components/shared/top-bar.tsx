@@ -4,24 +4,27 @@ import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { HelpButton } from "@/components/shared/help-modal";
 
-const pathToHelpKey: Record<string, string> = {
-  "/dashboard": "dashboard",
-  "/leads": "leads",
-  "/clients": "clients",
-  "/projects": "projects",
-  "/invoices": "invoices",
-  "/settings": "settings",
-  "/portal": "portal",
-  "/portal/projects": "portal",
-  "/portal/invoices": "portal",
-  "/portal/tickets": "portal",
-};
+// Ordered most-specific first so detail pages match before list pages
+const pathToHelpKey: [string, string][] = [
+  ["/portal/projects", "portal"],
+  ["/portal/invoices", "portal"],
+  ["/portal/tickets", "portal"],
+  ["/portal", "portal"],
+  ["/settings", "settings"],
+  ["/invoices", "invoices"],
+  ["/projects/", "projectDetail"],
+  ["/projects", "projects"],
+  ["/clients/", "clientDetail"],
+  ["/clients", "clients"],
+  ["/leads", "leads"],
+  ["/dashboard", "dashboard"],
+];
 
 export function TopBar() {
   const pathname = usePathname();
   const helpKey =
-    Object.entries(pathToHelpKey).find(([path]) =>
-      pathname === path || pathname.startsWith(path + "/")
+    pathToHelpKey.find(([path]) =>
+      pathname === path || pathname.startsWith(path)
     )?.[1] ?? "dashboard";
 
   return (

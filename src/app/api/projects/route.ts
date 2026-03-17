@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
+import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
 
 const createProjectSchema = z.object({
   clientId: z.string().min(1),
@@ -12,15 +13,21 @@ const createProjectSchema = z.object({
 });
 
 export async function GET() {
-  const projects = await db.project.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { client: true },
-  });
-  return NextResponse.json(projects);
+  try {
+    await requireAdmin();
+    const projects = await db.project.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { client: true },
+    });
+    return NextResponse.json(projects);
+  } catch (error) {
+    return handleAuthError(error);
+  }
 }
 
 export async function POST(req: Request) {
   try {
+    await requireAdmin();
     const body = await req.json();
     const data = createProjectSchema.parse(body);
     const project = await db.project.create({
@@ -35,6 +42,6 @@ export async function POST(req: Request) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
-    return NextResponse.json({ error: "Failed to create project" }, { status: 500 });
+    return handleAuthError(error);
   }
 }

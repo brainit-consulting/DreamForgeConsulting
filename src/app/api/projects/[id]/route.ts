@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
+import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
 
 const updateProjectSchema = z.object({
   name: z.string().min(1).optional(),
@@ -13,18 +14,24 @@ const updateProjectSchema = z.object({
 });
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const project = await db.project.findUnique({
-    where: { id },
-    include: { client: true, invoices: true, tickets: true },
-  });
-  if (!project) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(project);
+  try {
+    await requireAdmin();
+    const { id } = await params;
+    const project = await db.project.findUnique({
+      where: { id },
+      include: { client: true, invoices: true, tickets: true },
+    });
+    if (!project) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json(project);
+  } catch (error) {
+    return handleAuthError(error);
+  }
 }
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
   try {
+    await requireAdmin();
+    const { id } = await params;
     const body = await req.json();
     const data = updateProjectSchema.parse(body);
     const project = await db.project.update({
@@ -40,12 +47,17 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
-    return NextResponse.json({ error: "Failed to update project" }, { status: 500 });
+    return handleAuthError(error);
   }
 }
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  await db.project.delete({ where: { id } });
-  return NextResponse.json({ success: true });
+  try {
+    await requireAdmin();
+    const { id } = await params;
+    await db.project.delete({ where: { id } });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return handleAuthError(error);
+  }
 }

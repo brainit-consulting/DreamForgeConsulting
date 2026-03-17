@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
 
 export async function GET() {
+  try {
+  await requireAdmin();
   const invoices = await db.invoice.findMany({
     where: { status: "PAID", paidAt: { not: null } },
     select: { amount: true, paidAt: true },
@@ -31,4 +34,7 @@ export async function GET() {
   }));
 
   return NextResponse.json(data);
+  } catch (error) {
+    return handleAuthError(error);
+  }
 }

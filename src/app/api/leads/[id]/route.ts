@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
+import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
 
 const updateLeadSchema = z.object({
   name: z.string().min(1).optional(),
@@ -14,15 +15,21 @@ const updateLeadSchema = z.object({
 });
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const lead = await db.lead.findUnique({ where: { id } });
-  if (!lead) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(lead);
+  try {
+    await requireAdmin();
+    const { id } = await params;
+    const lead = await db.lead.findUnique({ where: { id } });
+    if (!lead) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json(lead);
+  } catch (error) {
+    return handleAuthError(error);
+  }
 }
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
   try {
+    await requireAdmin();
+    const { id } = await params;
     const body = await req.json();
     const data = updateLeadSchema.parse(body);
     const lead = await db.lead.update({ where: { id }, data });
@@ -31,12 +38,17 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }
-    return NextResponse.json({ error: "Failed to update lead" }, { status: 500 });
+    return handleAuthError(error);
   }
 }
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  await db.lead.delete({ where: { id } });
-  return NextResponse.json({ success: true });
+  try {
+    await requireAdmin();
+    const { id } = await params;
+    await db.lead.delete({ where: { id } });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return handleAuthError(error);
+  }
 }

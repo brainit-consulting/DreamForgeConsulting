@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
 import {
   STAGE_PROGRESS,
   WORKFLOW_STAGES,
@@ -13,6 +14,8 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  try {
+  await requireAdmin();
   const { id } = await params;
   const { status: newStatus } = await req.json();
 
@@ -64,4 +67,7 @@ export async function POST(
   });
 
   return NextResponse.json(updated);
+  } catch (error) {
+    return handleAuthError(error);
+  }
 }

@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
 
 export async function GET() {
+  try {
+  await requireAdmin();
   const [leadCount, clientCount, projectCount, paidInvoices, allInvoices] =
     await Promise.all([
       db.lead.count(),
@@ -42,4 +45,7 @@ export async function GET() {
     newLeads: leadCount,
     activeClients: clientCount,
   });
+  } catch (error) {
+    return handleAuthError(error);
+  }
 }
