@@ -28,9 +28,11 @@ interface ClientData {
 export function EditClientDialog({
   client,
   onUpdated,
+  variant = "button",
 }: {
   client: ClientData;
   onUpdated?: () => void;
+  variant?: "button" | "icon";
 }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -84,12 +86,20 @@ export function EditClientDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpen}>
       <ActionTooltip label="Edit client details">
-        <DialogTrigger
-          render={<Button variant="outline" size="sm" />}
-        >
-          <Pencil className="mr-2 h-3.5 w-3.5" />
-          Edit
-        </DialogTrigger>
+        {variant === "icon" ? (
+          <DialogTrigger
+            render={<Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" />}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </DialogTrigger>
+        ) : (
+          <DialogTrigger
+            render={<Button variant="outline" size="sm" />}
+          >
+            <Pencil className="mr-2 h-3.5 w-3.5" />
+            Edit
+          </DialogTrigger>
+        )}
       </ActionTooltip>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

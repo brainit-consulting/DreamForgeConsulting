@@ -8,10 +8,11 @@ import {
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { InviteClientDialog } from "@/components/admin/clients/invite-client-dialog";
+import { AddClientDialog } from "@/components/admin/clients/add-client-dialog";
+import { EditClientDialog } from "@/components/admin/clients/edit-client-dialog";
 import { ActionTooltip } from "@/components/shared/action-tooltip";
 import { useConfirm } from "@/components/shared/confirm-dialog";
-import { Trash2, Search } from "lucide-react";
+import { Trash2, Pencil, Search, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
@@ -75,7 +76,7 @@ export default function ClientsPage() {
             {clients.length} active clients
           </p>
         </div>
-        <InviteClientDialog />
+        <AddClientDialog onCreated={fetchClients} />
       </div>
 
       <div className="relative">
@@ -104,7 +105,7 @@ export default function ClientsPage() {
               <TableHead>Phone</TableHead>
               <TableHead className="text-center">Projects</TableHead>
               <TableHead>Since</TableHead>
-              <TableHead className="w-12" />
+              <TableHead className="w-20" />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -133,14 +134,21 @@ export default function ClientsPage() {
                     {format(new Date(client.createdAt), "MMM yyyy")}
                   </TableCell>
                   <TableCell>
-                    <ActionTooltip label="Delete client">
-                    <Button
-                      variant="ghost" size="icon" className="h-7 w-7 text-destructive"
-                      onClick={() => deleteClient(client.id)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                    </ActionTooltip>
+                    <div className="flex gap-1">
+                      <EditClientDialog
+                        client={{ id: client.id, company: client.company, email: client.email, phone: client.phone }}
+                        onUpdated={fetchClients}
+                        variant="icon"
+                      />
+                      <ActionTooltip label="Delete client">
+                        <Button
+                          variant="ghost" size="icon" className="h-7 w-7 text-destructive"
+                          onClick={() => deleteClient(client.id)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </ActionTooltip>
+                    </div>
                   </TableCell>
                 </TableRow>
               );
