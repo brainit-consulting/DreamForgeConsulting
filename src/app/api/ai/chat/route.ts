@@ -1,25 +1,9 @@
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { openai } from "@ai-sdk/openai";
 import { streamText } from "ai";
+import { getAthenaConfig } from "@/lib/athena-config";
 
 export const maxDuration = 30;
-
-const SYSTEM_PROMPT = `You are Athena, DreamForge Consulting's AI assistant. Be warm, concise, and direct.
-
-Rules:
-- Reply in 2-3 sentences max. Never write long lists or paragraphs.
-- Use markdown: **bold** for emphasis, bullet points only when listing 3+ items.
-- You know: dashboard KPIs, leads→clients pipeline, project workflow (Discovery→Design→Development→Testing→Deployment→Support), invoicing via Stripe, and support tickets.
-- If unsure, say so briefly and suggest where to look in the app.`;
-
-// Models verified to support system prompts and work reliably
-const FREE_MODELS = [
-  "mistralai/mistral-small-3.1-24b-instruct:free",
-  "meta-llama/llama-3.2-3b-instruct:free",
-  "nousresearch/hermes-3-llama-3.1-405b:free",
-  "nvidia/nemotron-3-super-120b-a12b:free",
-  "qwen/qwen3-4b:free",
-];
 
 let modelIndex = 0;
 
@@ -41,33 +25,32 @@ function normalizeMessages(
 export async function POST(req: Request) {
   const { messages } = await req.json();
   const normalized = normalizeMessages(messages);
+  const config = getAthenaConfig();
 
   const openrouter = createOpenRouter({
     apiKey: process.env.OPENROUTER_API_KEY,
   });
 
   // Try each free model, then fall back to OpenAI
-  for (let i = 0; i < FREE_MODELS.length; i++) {
-    const id = FREE_MODELS[(modelIndex + i) % FREE_MODELS.length];
+  for (let i = 0; i < config.freeModels.length; i++) {
+    const id = config.freeModels[(modelIndex + i) % config.freeModels.length];
     try {
       console.log(`[Athena] Trying ${id}`);
       const result = streamText({
         model: openrouter(id),
-        system: SYSTEM_PROMPT,
+        system: config.systemPrompt,
         messages: normalized,
-        maxOutputTokens: 350,
+        maxOutputTokens: config.maxOutputTokens,
+        temperature: config.temperature,
       });
-      // Wait for the first text chunk to confirm model works
+
       const reader = result.textStream[Symbol.asyncIterator]();
       const first = await reader.next();
+      if (first.done) continue;
 
-      if (first.done) continue; // empty response, try next
-
-      // Model works! Advance round-robin and return a stream
-      modelIndex = (modelIndex + i + 1) % FREE_MODELS.length;
+      modelIndex = (modelIndex + i + 1) % config.freeModels.length;
       console.log(`[Athena] Streaming from ${id}`);
 
-      // Build a new ReadableStream that yields the first chunk + rest
       const stream = new ReadableStream({
         async start(controller) {
           controller.enqueue(new TextEncoder().encode(first.value));
@@ -91,13 +74,19 @@ export async function POST(req: Request) {
   }
 
   // All free models failed — OpenAI fallback
-  console.log("[Athena] All free models down → OpenAI GPT-4o-mini");
-  const result = streamText({
-    model: openai("gpt-4o-mini"),
-    system: SYSTEM_PROMPT,
-    messages: normalized,
-    maxOutputTokens: 200,
-  });
+  if (config.enableOpenAIFallback) {
+    console.log(`[Athena] Fallback → OpenAI ${config.openAIFallbackModel}`);
+    const result = streamText({
+      model: openai(config.openAIFallbackModel),
+      system: config.systemPrompt,
+      messages: normalized,
+      maxOutputTokens: config.maxOutputTokens,
+      temperature: config.temperature,
+    });
+    return result.toTextStreamResponse();
+  }
 
-  return result.toTextStreamResponse();
+  return new Response("All AI models are currently unavailable. Please try again shortly.", {
+    headers: { "Content-Type": "text/plain" },
+  });
 }
