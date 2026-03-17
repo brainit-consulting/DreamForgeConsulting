@@ -7,6 +7,7 @@ const updateClientSchema = z.object({
   company: z.string().min(1).optional(),
   email: z.string().email().optional(),
   phone: z.string().optional(),
+  website: z.string().optional(),
   address: z.string().optional(),
 });
 

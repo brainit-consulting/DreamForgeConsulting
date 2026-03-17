@@ -21,6 +21,7 @@ export const helpContent: Record<string, HelpSection> = {
       "Leads are potential clients you're tracking through your sales pipeline. Each lead has a status that progresses through: New → Contacted → Qualified → Proposal → Converted (or Lost). Use the 'Add Lead' button to create a new lead with their name, email, company, phone, source, estimated value, and notes. You can change a lead's status directly from the dropdown in the table. When a lead is ready to become a client, click the green checkmark icon to promote them — this creates a user account, a client record, and sends them a portal invite email via Resend from noreply@dreamforgeworld.com.",
     tips: [
       "Use the search bar to filter leads by name, email, company, or source",
+      "Click the pencil icon to edit a lead's name, email, company, phone, source, value, or notes",
       "The status dropdown in each row lets you update pipeline stage instantly",
       "Promoting a lead (green ✓ icon) creates their portal login and sends credentials via email",
       "The pipeline summary at the top shows how many leads are in each stage",
@@ -104,11 +105,11 @@ export const helpContent: Record<string, HelpSection> = {
   clientDetail: {
     title: "Client Detail — Overview & History",
     content:
-      "The client detail page shows everything about a single client in one place. At the top you'll see the client's company name, email, phone number, and how long they've been a client. Below that, the Projects section lists all projects assigned to this client with their current workflow stage, progress bar, and status. The Invoices section shows all invoices for this client with amounts, status badges (Draft, Sent, Paid, Overdue), and due dates. Use this page to get a quick snapshot of your relationship with any client.",
+      "The client detail page shows everything about a single client in one place. Click the 'Edit' button to update company name, email, phone, or address. At the top you'll see the client's details and how long they've been a client. Below that, the Projects section lists all projects assigned to this client with their current workflow stage, progress bar, and status. The Invoices section shows all invoices for this client with amounts, status badges (Draft, Sent, Paid, Overdue), and due dates. Use this page to get a quick snapshot of your relationship with any client.",
     tips: [
       "Click a project row to navigate directly to the project detail page",
       "Invoice status badges are color-coded: amber for Draft, blue for Sent, green for Paid, red for Overdue",
-      "The total projects count card gives a quick overview of client engagement",
+      "Click the 'Edit' button to update company name, email, phone, or address",
     ],
   },
   tickets: {

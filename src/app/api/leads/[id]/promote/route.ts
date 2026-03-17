@@ -65,6 +65,8 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
       company: lead.company ?? lead.name,
       email: lead.email,
       phone: lead.phone,
+      website: lead.website,
+      address: lead.address,
     },
   });
 

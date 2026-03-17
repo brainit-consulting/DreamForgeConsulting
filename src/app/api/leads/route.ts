@@ -8,6 +8,8 @@ const createLeadSchema = z.object({
   email: z.string().email(),
   company: z.string().optional(),
   phone: z.string().optional(),
+  website: z.string().optional(),
+  address: z.string().optional(),
   source: z.string().optional(),
   notes: z.string().optional(),
   value: z.number().optional(),

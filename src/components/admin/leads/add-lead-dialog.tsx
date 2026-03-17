@@ -20,7 +20,7 @@ export function AddLeadDialog({ onCreated }: { onCreated: () => void }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
-    name: "", email: "", company: "", phone: "", source: "", notes: "", value: "",
+    name: "", email: "", company: "", phone: "", website: "", address: "", source: "", notes: "", value: "",
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -37,7 +37,7 @@ export function AddLeadDialog({ onCreated }: { onCreated: () => void }) {
       });
       if (res.ok) {
         toast.success("Lead created");
-        setForm({ name: "", email: "", company: "", phone: "", source: "", notes: "", value: "" });
+        setForm({ name: "", email: "", company: "", phone: "", website: "", address: "", source: "", notes: "", value: "" });
         setOpen(false);
         onCreated();
       } else {
@@ -78,6 +78,16 @@ export function AddLeadDialog({ onCreated }: { onCreated: () => void }) {
             <div className="space-y-1">
               <Label htmlFor="lead-phone">Phone</Label>
               <Input id="lead-phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            </div>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1">
+              <Label htmlFor="lead-website">Website</Label>
+              <Input id="lead-website" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} placeholder="https://company.com" />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="lead-address">Address</Label>
+              <Input id="lead-address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">

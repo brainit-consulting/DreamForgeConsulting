@@ -90,6 +90,8 @@ model Lead {
   email     String
   company   String?
   phone     String?
+  website   String?
+  address   String?    @db.Text
   status    LeadStatus @default(NEW)
   source    String?
   notes     String?    @db.Text
@@ -115,6 +117,7 @@ model Client {
   company   String
   email     String
   phone     String?
+  website   String?
   address   String?  @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

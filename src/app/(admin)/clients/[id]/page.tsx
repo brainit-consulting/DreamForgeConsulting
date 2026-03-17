@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Progress } from "@/components/ui/progress";
+import { EditClientDialog } from "@/components/admin/clients/edit-client-dialog";
 import { db } from "@/lib/db";
 import type { ProjectStatus, InvoiceStatus } from "@/types";
 
@@ -29,9 +30,21 @@ export default async function ClientDetailPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-display">{client.company}</h1>
-        <p className="mt-1 text-muted-foreground">{client.email}</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-display">{client.company}</h1>
+          <p className="mt-1 text-muted-foreground">{client.email}</p>
+        </div>
+        <EditClientDialog
+          client={{
+            id: client.id,
+            company: client.company,
+            email: client.email,
+            phone: client.phone,
+            website: client.website,
+            address: client.address,
+          }}
+        />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">

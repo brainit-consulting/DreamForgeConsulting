@@ -8,6 +8,8 @@ const updateLeadSchema = z.object({
   email: z.string().email().optional(),
   company: z.string().optional(),
   phone: z.string().optional(),
+  website: z.string().optional(),
+  address: z.string().optional(),
   status: z.enum(["NEW", "CONTACTED", "QUALIFIED", "PROPOSAL", "CONVERTED", "LOST"]).optional(),
   source: z.string().optional(),
   notes: z.string().optional(),

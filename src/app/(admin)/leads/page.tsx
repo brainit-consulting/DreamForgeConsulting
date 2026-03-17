@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { AddLeadDialog } from "@/components/admin/leads/add-lead-dialog";
+import { EditLeadDialog } from "@/components/admin/leads/edit-lead-dialog";
 import { ActionTooltip } from "@/components/shared/action-tooltip";
 import { useConfirm } from "@/components/shared/confirm-dialog";
 import { Trash2, UserCheck, Search } from "lucide-react";
@@ -185,6 +186,7 @@ export default function LeadsPage() {
                 </TableCell>
                 <TableCell>
                   <div className="flex gap-1">
+                    <EditLeadDialog lead={lead} onUpdated={fetchLeads} />
                     {lead.status !== "CONVERTED" && lead.status !== "LOST" && (
                       <ActionTooltip label="Promote to Client">
                         <Button
