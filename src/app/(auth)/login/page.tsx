@@ -1,41 +1,37 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { signIn } from "@/lib/auth-client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Logo } from "@/components/shared/logo";
 import { Flame } from "lucide-react";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSignIn() {
     setError("");
     setLoading(true);
 
     try {
-      const result = await signIn.email({ email, password });
-      if (result.error) {
-        setError(result.error.message ?? "Invalid credentials");
-      } else {
-        window.location.href = "/dashboard";
+      const res = await fetch("/api/auth/sign-in/email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Origin: window.location.origin,
+        },
+        body: JSON.stringify({ email, password }),
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        setError(data?.message ?? "Invalid credentials");
+        return;
       }
+
+      window.location.href = "/dashboard";
     } catch (err) {
       console.error("[Login] Sign-in failed:", err);
       setError("Something went wrong. Please try again.");
@@ -51,58 +47,65 @@ export default function LoginPage() {
           <Logo />
         </div>
 
-        <Card className="border-border/50">
-          <CardHeader className="text-center">
-            <CardTitle className="font-display text-2xl">Welcome Back</CardTitle>
-            <CardDescription>
+        <div className="rounded-xl border border-border/50 bg-card p-6 shadow-lg">
+          <div className="mb-6 text-center">
+            <h1 className="font-display text-2xl">Welcome Back</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
               Sign in to your DreamForge account
-            </CardDescription>
-          </CardHeader>
-          <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
-              {error && (
-                <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-                  {error}
-                </div>
-              )}
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col gap-4">
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 disabled:opacity-50"
-              >
-                {loading && <Flame className="h-4 w-4 animate-pulse" />}
-                {loading ? "Signing in..." : "Sign In"}
-              </button>
-              <p className="text-center text-xs text-muted-foreground">
-                Access is by invitation only.
-              </p>
-            </CardFooter>
-          </form>
-        </Card>
+            </p>
+          </div>
+
+          {error && (
+            <div className="mb-4 rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {error}
+            </div>
+          )}
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label htmlFor="email" className="text-sm font-medium">
+                Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+                className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/50"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="password" className="text-sm font-medium">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+                className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/50"
+              />
+            </div>
+
+            <button
+              type="button"
+              disabled={loading || !email || !password}
+              onClick={handleSignIn}
+              className="flex w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90 disabled:opacity-50"
+            >
+              {loading && <Flame className="h-4 w-4 animate-pulse" />}
+              {loading ? "Signing in..." : "Sign In"}
+            </button>
+
+            <p className="text-center text-xs text-muted-foreground">
+              Access is by invitation only.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
