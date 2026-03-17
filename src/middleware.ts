@@ -1,0 +1,67 @@
+import { NextRequest, NextResponse } from "next/server";
+
+const PUBLIC_ROUTES = ["/login", "/api/auth"];
+const STATIC_PREFIXES = ["/_next", "/favicon.ico", "/Athena.png", "/DreamForgeConsultingLogo.png"];
+
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  // Allow static assets and public files
+  if (STATIC_PREFIXES.some((p) => pathname.startsWith(p))) {
+    return NextResponse.next();
+  }
+
+  // Allow public routes
+  if (PUBLIC_ROUTES.some((r) => pathname.startsWith(r))) {
+    return NextResponse.next();
+  }
+
+  // Allow API routes (auth checked at handler level where needed)
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.next();
+  }
+
+  // Check for session cookie (better-auth uses "better-auth.session_token")
+  const sessionToken =
+    req.cookies.get("better-auth.session_token")?.value;
+
+  if (!sessionToken) {
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
+
+  // Validate session and get user role via better-auth API
+  try {
+    const sessionRes = await fetch(
+      `${req.nextUrl.origin}/api/auth/get-session`,
+      {
+        headers: {
+          cookie: `better-auth.session_token=${sessionToken}`,
+        },
+      }
+    );
+
+    if (!sessionRes.ok) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+
+    const session = await sessionRes.json();
+    const role = session?.user?.role;
+
+    if (!role) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+
+    // CLIENT role can only access /portal/*
+    if (role === "CLIENT" && !pathname.startsWith("/portal")) {
+      return NextResponse.redirect(new URL("/portal", req.url));
+    }
+
+    return NextResponse.next();
+  } catch {
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
+}
+
+export const config = {
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+};

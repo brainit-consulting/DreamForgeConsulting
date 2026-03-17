@@ -9,14 +9,11 @@ vi.mock("next/navigation", () => ({
 // Mock auth client
 vi.mock("@/lib/auth-client", () => ({
   signIn: { email: vi.fn() },
-  signUp: { email: vi.fn() },
   signOut: vi.fn(),
   useSession: () => ({ data: null }),
 }));
 
-// Dynamically import after mocks
 const { default: LoginPage } = await import("@/app/(auth)/login/page");
-const { default: RegisterPage } = await import("@/app/(auth)/register/page");
 
 describe("Login Page", () => {
   it("renders login form with email and password fields", () => {
@@ -26,30 +23,13 @@ describe("Login Page", () => {
     expect(screen.getByRole("button", { name: /sign in/i })).toBeInTheDocument();
   });
 
-  it("has a link to register page", () => {
+  it("shows invite-only message instead of register link", () => {
     render(<LoginPage />);
-    expect(screen.getByText(/create one/i)).toBeInTheDocument();
+    expect(screen.getByText(/invitation only/i)).toBeInTheDocument();
   });
 
   it("renders the DreamForge logo", () => {
     render(<LoginPage />);
     expect(screen.getByText("Dream")).toBeInTheDocument();
-  });
-});
-
-describe("Register Page", () => {
-  it("renders register form with name, email, and password fields", () => {
-    render(<RegisterPage />);
-    expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /create account/i })
-    ).toBeInTheDocument();
-  });
-
-  it("has a link to login page", () => {
-    render(<RegisterPage />);
-    expect(screen.getByText(/sign in/i)).toBeInTheDocument();
   });
 });

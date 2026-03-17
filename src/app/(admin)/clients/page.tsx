@@ -1,4 +1,5 @@
 import { ClientsTable } from "@/components/admin/clients/clients-table";
+import { InviteClientDialog } from "@/components/admin/clients/invite-client-dialog";
 import { mockClients, mockProjects } from "@/lib/mock-data";
 
 export default function ClientsPage() {
@@ -12,11 +13,14 @@ export default function ClientsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-display">Clients</h1>
-        <p className="mt-1 text-muted-foreground">
-          Your active client roster and history.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-display">Clients</h1>
+          <p className="mt-1 text-muted-foreground">
+            Your active client roster and history.
+          </p>
+        </div>
+        <InviteClientDialog />
       </div>
 
       <ClientsTable clients={mockClients} projectCounts={projectCounts} />

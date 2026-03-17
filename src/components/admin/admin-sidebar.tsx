@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Image from "next/image";
 import {
   LayoutDashboard,
   Users,
@@ -11,7 +10,9 @@ import {
   Receipt,
   Settings,
   ChevronLeft,
+  LogOut,
 } from "lucide-react";
+import { useSession, signOut } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/shared/logo";
 import { Button } from "@/components/ui/button";
@@ -34,6 +35,7 @@ const navItems = [
 export function AdminSidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const { data: session } = useSession();
 
   return (
     <aside
@@ -99,12 +101,40 @@ export function AdminSidebar() {
         })}
       </nav>
 
-      {/* Footer */}
+      {/* Footer — user info + sign out */}
       <div className="border-t border-sidebar-border p-3">
-        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-          <Image src="/DreamForgeConsultingLogo.png" alt="" width={14} height={14} className="rounded-sm" />
-          {!collapsed && <span>v0.1.0</span>}
-        </div>
+        {!collapsed ? (
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 px-1">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/15 text-xs font-medium text-primary">
+                {session?.user?.name?.charAt(0) ?? "A"}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="truncate text-xs font-medium">{session?.user?.name ?? "Admin"}</p>
+                <p className="truncate text-[10px] text-muted-foreground">{session?.user?.email ?? ""}</p>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full text-muted-foreground"
+              onClick={() => signOut().then(() => window.location.href = "/login")}
+            >
+              <LogOut className="mr-2 h-3.5 w-3.5" />
+              Sign out
+            </Button>
+          </div>
+        ) : (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="w-full text-muted-foreground"
+            onClick={() => signOut().then(() => window.location.href = "/login")}
+            aria-label="Sign out"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     </aside>
   );
