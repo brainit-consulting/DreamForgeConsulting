@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,9 +9,98 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { Bot, RotateCcw, Save, Plus, X } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Bot,
+  RotateCcw,
+  Save,
+  Plus,
+  X,
+  Database,
+  Download,
+  RefreshCw,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  CalendarDays,
+} from "lucide-react";
 import Image from "next/image";
 import type { AthenaConfig } from "@/lib/athena-config";
+import type { BackupEntry } from "@/lib/backup";
+import { HelpButton } from "@/components/shared/help-modal";
+import { ActionTooltip } from "@/components/shared/action-tooltip";
+
+interface BackupList {
+  daily: BackupEntry[];
+  weekly: BackupEntry[];
+  monthly: BackupEntry[];
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+}
+
+function formatDate(d: Date | string): string {
+  return new Date(d).toLocaleString("en-ZA", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+}
+
+function tierBadge(tier: BackupEntry["tier"]) {
+  const map = {
+    daily: "bg-amber-500/20 text-amber-400 border-amber-500/30",
+    weekly: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+    monthly: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+  } as const;
+  return (
+    <span className={`rounded border px-2 py-0.5 text-xs font-medium ${map[tier]}`}>
+      {tier}
+    </span>
+  );
+}
+
+function BackupTable({ entries }: { entries: BackupEntry[] }) {
+  if (entries.length === 0) {
+    return (
+      <p className="py-8 text-center text-sm text-muted-foreground">
+        No backups yet. Run a backup to see entries here.
+      </p>
+    );
+  }
+  return (
+    <div className="divide-y divide-border">
+      {entries.map((entry) => (
+        <div
+          key={entry.pathname}
+          className="flex items-center justify-between gap-4 py-3"
+        >
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            {tierBadge(entry.tier)}
+            <span className="font-notes text-sm">{entry.label}</span>
+          </div>
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <span>{formatBytes(entry.size)}</span>
+            <span className="hidden sm:inline">{formatDate(entry.uploadedAt)}</span>
+          </div>
+          <ActionTooltip label="Download backup JSON">
+            <a
+              href={entry.url}
+              download={`${entry.label}.json`}
+              title={`Download ${entry.label}.json`}
+            >
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Download className="h-3.5 w-3.5" />
+              </Button>
+            </a>
+          </ActionTooltip>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function SettingsPage() {
   const [config, setConfig] = useState<AthenaConfig | null>(null);
@@ -19,11 +108,34 @@ export default function SettingsPage() {
   const [saved, setSaved] = useState(false);
   const [newModel, setNewModel] = useState("");
 
+  // Backup state
+  const [backups, setBackups] = useState<BackupList | null>(null);
+  const [backupsLoading, setBackupsLoading] = useState(false);
+  const [backupRunning, setBackupRunning] = useState(false);
+  const [backupResult, setBackupResult] = useState<{
+    success: boolean;
+    message: string;
+  } | null>(null);
+
   useEffect(() => {
     fetch("/api/athena/config")
       .then((r) => r.json())
       .then(setConfig);
   }, []);
+
+  const loadBackups = useCallback(async () => {
+    setBackupsLoading(true);
+    try {
+      const res = await fetch("/api/admin/backup/list");
+      if (res.ok) setBackups(await res.json());
+    } finally {
+      setBackupsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadBackups();
+  }, [loadBackups]);
 
   async function handleSave() {
     if (!config) return;
@@ -67,6 +179,36 @@ export default function SettingsPage() {
     if (!config || config.freeModels.length <= 1) return;
     setConfig({ ...config, freeModels: config.freeModels.filter((m) => m !== model) });
   }
+
+  async function handleBackupNow() {
+    setBackupRunning(true);
+    setBackupResult(null);
+    try {
+      const res = await fetch("/api/admin/backup", { method: "POST" });
+      const data = await res.json();
+      setBackupResult({
+        success: data.success,
+        message: data.success
+          ? `Backup complete — ${formatBytes(data.sizeBytes ?? 0)} in ${data.durationMs}ms${
+              data.promoted?.weekly ? " · promoted to weekly" : ""
+            }${data.promoted?.monthly ? " · promoted to monthly" : ""}${
+              data.deleted?.length ? ` · deleted ${data.deleted.length} old backup(s)` : ""
+            }`
+          : `Backup failed: ${data.error}`,
+      });
+      if (data.success) await loadBackups();
+    } finally {
+      setBackupRunning(false);
+    }
+  }
+
+  const allBackups = backups
+    ? [...backups.daily, ...backups.weekly, ...backups.monthly]
+    : [];
+  const totalSize = allBackups.reduce((s, b) => s + b.size, 0);
+  const lastBackup = allBackups.sort(
+    (a, b) => new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
+  )[0];
 
   if (!config) {
     return (
@@ -264,6 +406,158 @@ export default function SettingsPage() {
               Reset to Defaults
             </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      <Separator />
+
+      {/* Backups & Cron */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <Database className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="font-display text-2xl text-primary">
+                  Backups &amp; Cron
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Automated daily DB snapshots stored in Vercel Blob.
+                </p>
+              </div>
+            </div>
+            <HelpButton sectionKey="backups" />
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Stats row */}
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div className="rounded-lg border border-border bg-muted/30 p-3">
+              <p className="text-xs text-muted-foreground">Total Backups</p>
+              <p className="mt-1 text-2xl font-display text-primary">
+                {allBackups.length}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {backups?.daily.length ?? 0}d ·{" "}
+                {backups?.weekly.length ?? 0}w ·{" "}
+                {backups?.monthly.length ?? 0}m
+              </p>
+            </div>
+            <div className="rounded-lg border border-border bg-muted/30 p-3">
+              <p className="text-xs text-muted-foreground">Total Storage</p>
+              <p className="mt-1 text-2xl font-display text-primary">
+                {formatBytes(totalSize)}
+              </p>
+              <p className="text-xs text-muted-foreground">max ~85 MB</p>
+            </div>
+            <div className="rounded-lg border border-border bg-muted/30 p-3">
+              <p className="text-xs text-muted-foreground">Last Backup</p>
+              <p className="mt-1 text-sm font-medium text-foreground">
+                {lastBackup ? formatDate(lastBackup.uploadedAt) : "—"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {lastBackup ? lastBackup.label : "none yet"}
+              </p>
+            </div>
+            <div className="rounded-lg border border-border bg-muted/30 p-3">
+              <p className="text-xs text-muted-foreground">Next Scheduled</p>
+              <p className="mt-1 text-sm font-medium text-foreground">~2:00 AM UTC</p>
+              <p className="text-xs text-muted-foreground">daily · ±59 min</p>
+            </div>
+          </div>
+
+          {/* Cron info strip */}
+          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-muted/20 px-4 py-3 text-sm">
+            <CalendarDays className="h-4 w-4 text-muted-foreground" />
+            <span className="font-mono text-primary">0 2 * * *</span>
+            <span className="text-muted-foreground">Daily at ~2:00 AM UTC</span>
+            <span className="mx-1 text-muted-foreground">·</span>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">7 daily · 4 weekly · 6 monthly retained</span>
+          </div>
+
+          {/* Manual trigger */}
+          <div className="flex items-center gap-3">
+            <ActionTooltip label="Trigger an immediate database backup">
+              <Button
+                onClick={handleBackupNow}
+                disabled={backupRunning}
+                variant="outline"
+              >
+                <RefreshCw
+                  className={`mr-2 h-4 w-4 ${backupRunning ? "animate-spin" : ""}`}
+                />
+                {backupRunning ? "Backing up…" : "Backup Now"}
+              </Button>
+            </ActionTooltip>
+            <ActionTooltip label="Refresh backup list">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={loadBackups}
+                disabled={backupsLoading}
+              >
+                <RefreshCw
+                  className={`h-4 w-4 ${backupsLoading ? "animate-spin" : ""}`}
+                />
+              </Button>
+            </ActionTooltip>
+            {backupResult && (
+              <div
+                className={`flex items-center gap-2 text-sm ${
+                  backupResult.success ? "text-emerald-400" : "text-destructive"
+                }`}
+              >
+                {backupResult.success ? (
+                  <CheckCircle2 className="h-4 w-4" />
+                ) : (
+                  <XCircle className="h-4 w-4" />
+                )}
+                {backupResult.message}
+              </div>
+            )}
+          </div>
+
+          {/* Backup list tabs */}
+          <Tabs defaultValue="daily">
+            <TabsList>
+              <TabsTrigger value="daily">
+                Daily
+                {backups && (
+                  <span className="ml-1.5 rounded-full bg-amber-500/20 px-1.5 py-0.5 text-xs text-amber-400">
+                    {backups.daily.length}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="weekly">
+                Weekly
+                {backups && (
+                  <span className="ml-1.5 rounded-full bg-blue-500/20 px-1.5 py-0.5 text-xs text-blue-400">
+                    {backups.weekly.length}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="monthly">
+                Monthly
+                {backups && (
+                  <span className="ml-1.5 rounded-full bg-emerald-500/20 px-1.5 py-0.5 text-xs text-emerald-400">
+                    {backups.monthly.length}
+                  </span>
+                )}
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="daily" className="mt-4">
+              <BackupTable entries={backups?.daily ?? []} />
+            </TabsContent>
+            <TabsContent value="weekly" className="mt-4">
+              <BackupTable entries={backups?.weekly ?? []} />
+            </TabsContent>
+            <TabsContent value="monthly" className="mt-4">
+              <BackupTable entries={backups?.monthly ?? []} />
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>
