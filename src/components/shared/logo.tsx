@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 interface LogoProps {
@@ -8,12 +9,15 @@ interface LogoProps {
 
 export function Logo({ collapsed = false, className }: LogoProps) {
   return (
-    <div className={cn("flex items-center gap-2.5", className)}>
+    <Link
+      href="https://dreamforgeconsulting.vercel.app"
+      className={cn("flex items-center gap-2.5", className)}
+    >
       <Image
         src="/DreamForgeConsultingLogo.png"
         alt="DreamForge Consulting"
-        width={36}
-        height={36}
+        width={80}
+        height={80}
         className="rounded-lg forge-glow"
       />
       {!collapsed && (
@@ -26,6 +30,6 @@ export function Logo({ collapsed = false, className }: LogoProps) {
           </span>
         </div>
       )}
-    </div>
+    </Link>
   );
 }
