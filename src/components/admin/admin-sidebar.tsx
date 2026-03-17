@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import {
   LayoutDashboard,
   Users,
@@ -10,7 +11,6 @@ import {
   Receipt,
   Settings,
   ChevronLeft,
-  Flame,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/shared/logo";
@@ -106,7 +106,7 @@ export function AdminSidebar() {
           <ThemeToggle />
           {!collapsed && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Flame className="h-3 w-3 text-primary" />
+              <Image src="/DreamForgeConsultingLogo.png" alt="" width={14} height={14} className="rounded-sm" />
               <span>v0.1.0</span>
             </div>
           )}

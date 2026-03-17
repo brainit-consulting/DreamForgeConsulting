@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { TextStreamChatTransport } from "ai";
 import { Rnd } from "react-rnd";
-import { Bot, X, Send, Sparkles } from "lucide-react";
+import Image from "next/image";
+import { X, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -29,14 +30,14 @@ export function AthenaChat() {
 
   if (!isOpen) {
     return (
-      <Button
+      <button
+        type="button"
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-lg forge-glow"
-        size="icon"
+        className="fixed bottom-6 right-6 z-50 h-14 w-14 overflow-hidden rounded-full shadow-lg forge-glow ring-2 ring-primary/30 transition-transform hover:scale-110"
         aria-label="Open Athena AI assistant"
       >
-        <Sparkles className="h-6 w-6" />
-      </Button>
+        <Image src="/Athena.png" alt="Athena" width={56} height={56} className="object-cover" />
+      </button>
     );
   }
 
@@ -58,9 +59,7 @@ export function AthenaChat() {
         {/* Header */}
         <div className="athena-drag-handle flex h-12 cursor-move items-center justify-between border-b border-border bg-muted/50 px-4">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/15">
-              <Bot className="h-4 w-4 text-primary" />
-            </div>
+            <Image src="/Athena.png" alt="Athena" width={28} height={28} className="rounded-full" />
             <div>
               <span className="font-display text-sm">Athena</span>
               <span className="ml-1.5 text-[10px] text-muted-foreground">
@@ -83,9 +82,7 @@ export function AthenaChat() {
         <ScrollArea className="h-[calc(100%-6.5rem)] px-4 py-3">
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                <Sparkles className="h-6 w-6 text-primary" />
-              </div>
+              <Image src="/Athena.png" alt="Athena" width={48} height={48} className="mb-3 rounded-full ring-2 ring-primary/20" />
               <p className="font-display text-lg">Hey there!</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 I&apos;m Athena, your DreamForge assistant.
