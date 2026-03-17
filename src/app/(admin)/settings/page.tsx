@@ -100,7 +100,7 @@ export default function SettingsPage() {
               className="rounded-full"
             />
             <div>
-              <CardTitle className="font-display text-xl">
+              <CardTitle className="font-display text-2xl text-primary">
                 Athena Preferences
               </CardTitle>
               <p className="text-sm text-muted-foreground">
@@ -112,10 +112,10 @@ export default function SettingsPage() {
         <CardContent className="space-y-6">
           {/* System Prompt */}
           <div className="space-y-2">
-            <Label htmlFor="systemPrompt" className="text-sm font-medium">
+            <Label htmlFor="systemPrompt" className="text-base font-medium text-primary">
               System Prompt
             </Label>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Defines Athena&apos;s personality, knowledge, and response style.
             </p>
             <Textarea
@@ -134,8 +134,8 @@ export default function SettingsPage() {
           {/* Response Limits */}
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="maxTokens">Max Output Tokens</Label>
-              <p className="text-xs text-muted-foreground">
+              <Label htmlFor="maxTokens" className="text-base text-primary">Max Output Tokens</Label>
+              <p className="text-sm text-muted-foreground">
                 Caps response length. 350 ≈ 2-3 sentences.
               </p>
               <Input
@@ -153,8 +153,8 @@ export default function SettingsPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="temperature">Temperature</Label>
-              <p className="text-xs text-muted-foreground">
+              <Label htmlFor="temperature" className="text-base text-primary">Temperature</Label>
+              <p className="text-sm text-muted-foreground">
                 0 = focused/deterministic, 2 = creative/random. Default: 0.7
               </p>
               <Input
@@ -178,8 +178,8 @@ export default function SettingsPage() {
 
           {/* Free Models */}
           <div className="space-y-3">
-            <Label>Free Models (OpenRouter)</Label>
-            <p className="text-xs text-muted-foreground">
+            <Label className="text-base text-primary">Free Models (OpenRouter)</Label>
+            <p className="text-sm text-muted-foreground">
               Athena cycles through these in round-robin. Models are tried in
               order; failed ones are skipped.
             </p>
@@ -222,8 +222,8 @@ export default function SettingsPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <Label>OpenAI Fallback</Label>
-                <p className="text-xs text-muted-foreground">
+                <Label className="text-base text-primary">OpenAI Fallback</Label>
+                <p className="text-sm text-muted-foreground">
                   Use OpenAI when all free models are unavailable.
                 </p>
               </div>
@@ -236,7 +236,7 @@ export default function SettingsPage() {
             </div>
             {config.enableOpenAIFallback && (
               <div className="space-y-2">
-                <Label htmlFor="fallbackModel">Fallback Model</Label>
+                <Label htmlFor="fallbackModel" className="text-base text-primary">Fallback Model</Label>
                 <Input
                   id="fallbackModel"
                   value={config.openAIFallbackModel}
