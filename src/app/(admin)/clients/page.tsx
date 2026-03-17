@@ -12,12 +12,13 @@ import { AddClientDialog } from "@/components/admin/clients/add-client-dialog";
 import { EditClientDialog } from "@/components/admin/clients/edit-client-dialog";
 import { ActionTooltip } from "@/components/shared/action-tooltip";
 import { useConfirm } from "@/components/shared/confirm-dialog";
-import { Trash2, Pencil, Search, Plus } from "lucide-react";
+import { Trash2, Search, Mail, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 interface ClientRow {
   id: string;
+  userId?: string | null;
   company: string;
   email: string;
   phone?: string;
@@ -45,6 +46,28 @@ export default function ClientsPage() {
   }, []);
 
   useEffect(() => { fetchClients(); }, [fetchClients]);
+
+  async function inviteClient(id: string) {
+    const ok = await confirm({
+      title: "Send Portal Invite",
+      description: "This will create a portal login and email credentials to the client.",
+      confirmLabel: "Send Invite",
+      variant: "promote",
+    });
+    if (!ok) return;
+    const res = await fetch("/api/admin/invite-client", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ clientId: id }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      toast.success(data.message);
+      fetchClients();
+    } else {
+      toast.error(data.error);
+    }
+  }
 
   async function deleteClient(id: string) {
     const ok = await confirm({
@@ -103,6 +126,7 @@ export default function ClientsPage() {
               <TableHead>Client</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Phone</TableHead>
+              <TableHead className="text-center">Portal</TableHead>
               <TableHead className="text-center">Projects</TableHead>
               <TableHead>Since</TableHead>
               <TableHead className="w-20" />
@@ -110,10 +134,10 @@ export default function ClientsPage() {
           </TableHeader>
           <TableBody>
             {loading && (
-              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
             )}
             {!loading && filtered.length === 0 && (
-              <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">{search ? "No clients match your search." : "No clients yet. Invite one or promote a lead!"}</TableCell></TableRow>
+              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">{search ? "No clients match your search." : "No clients yet. Add your first one!"}</TableCell></TableRow>
             )}
             {filtered.map((client) => {
               const initials = client.company.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
@@ -129,6 +153,15 @@ export default function ClientsPage() {
                   </TableCell>
                   <TableCell className="text-muted-foreground">{client.email}</TableCell>
                   <TableCell className="text-muted-foreground">{client.phone ?? "—"}</TableCell>
+                  <TableCell className="text-center">
+                    {client.userId ? (
+                      <ActionTooltip label="Has portal access">
+                        <ShieldCheck className="mx-auto h-4 w-4 text-emerald-500" />
+                      </ActionTooltip>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
                   <TableCell className="text-center">{client._count.projects}</TableCell>
                   <TableCell className="text-muted-foreground">
                     {format(new Date(client.createdAt), "MMM yyyy")}
@@ -140,6 +173,16 @@ export default function ClientsPage() {
                         onUpdated={fetchClients}
                         variant="icon"
                       />
+                      {!client.userId && (
+                        <ActionTooltip label="Send portal invite">
+                          <Button
+                            variant="ghost" size="icon" className="h-7 w-7 text-blue-500"
+                            onClick={() => inviteClient(client.id)}
+                          >
+                            <Mail className="h-3.5 w-3.5" />
+                          </Button>
+                        </ActionTooltip>
+                      )}
                       <ActionTooltip label="Delete client">
                         <Button
                           variant="ghost" size="icon" className="h-7 w-7 text-destructive"
