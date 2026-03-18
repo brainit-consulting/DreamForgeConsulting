@@ -11,6 +11,7 @@ const pathToHelpKey: [string, string][] = [
   ["/portal/tickets", "portal"],
   ["/portal", "portal"],
   ["/settings", "settings"],
+  ["/outreach", "outreach"],
   ["/tickets", "tickets"],
   ["/invoices", "invoices"],
   ["/projects/", "projectDetail"],

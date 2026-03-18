@@ -99,6 +99,8 @@ model Lead {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
+  outreachEmails OutreachEmail[]
+
   @@map("leads")
 }
 
@@ -262,4 +264,29 @@ model Activity {
 
   @@index([entityType, entityId])
   @@map("activities")
+}
+
+// =============================================
+// OUTREACH
+// =============================================
+
+model OutreachEmail {
+  id        String         @id @default(cuid())
+  leadId    String
+  subject   String
+  body      String         @db.Text
+  status    OutreachStatus @default(DRAFT)
+  sentAt    DateTime?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@map("outreach_emails")
+}
+
+enum OutreachStatus {
+  DRAFT
+  SENT
+  FAILED
 }

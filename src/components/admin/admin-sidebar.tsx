@@ -9,6 +9,7 @@ import {
   FolderKanban,
   Receipt,
   TicketCheck,
+  Mail,
   Settings,
   ChevronLeft,
   LogOut,
@@ -32,6 +33,7 @@ const navItems = [
   { label: "Projects", href: "/projects", icon: FolderKanban },
   { label: "Invoices", href: "/invoices", icon: Receipt },
   { label: "Tickets", href: "/tickets", icon: TicketCheck },
+  { label: "Outreach", href: "/outreach", icon: Mail },
   { label: "Settings", href: "/settings", icon: Settings },
 ];
 

@@ -126,6 +126,18 @@ export const helpContent: Record<string, HelpSection> = {
       "High/Urgent count includes both HIGH and URGENT priority tickets",
     ],
   },
+  outreach: {
+    title: "Outreach — Lead Email Campaigns",
+    content:
+      "The Outreach page lets you compose short emails and send them to selected leads. Click 'New Outreach' to compose a message — write a subject and body, then pick leads from a searchable list (only leads with email addresses appear). This creates one draft per selected lead. Each draft appears in the table where you can review it, then manually send it with a confirmation dialog. Sent emails use the DreamForge branded template and are delivered via Resend.",
+    tips: [
+      "Only leads with email addresses appear in the lead picker",
+      "Each draft is sent individually — you confirm before every send",
+      "Failed emails can be retried with the send button",
+      "Use the filter buttons to quickly find drafts, sent, or failed emails",
+      "The message body is plain text — it's automatically wrapped in the branded email template",
+    ],
+  },
   backups: {
     title: "Database Backups — Automated & Versioned",
     content:

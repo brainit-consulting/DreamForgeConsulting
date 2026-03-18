@@ -29,6 +29,8 @@ export type InvoiceStatus =
 export type TicketStatus = "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
 export type TicketPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
 
+export type OutreachStatus = "DRAFT" | "SENT" | "FAILED";
+
 export interface Lead {
   id: string;
   name: string;

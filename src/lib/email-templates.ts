@@ -42,6 +42,53 @@ export function passwordResetEmail({
   };
 }
 
+export function outreachEmail({
+  leadName,
+  company,
+  body,
+}: {
+  leadName: string;
+  company: string;
+  body: string;
+}): string {
+  const greeting = company
+    ? `Hi ${leadName} at ${company}`
+    : `Hi ${leadName}`;
+  const paragraphs = body
+    .split("\n")
+    .filter((l) => l.trim())
+    .map((p) => `<p style="color:#CCC;font-size:14px;line-height:1.6;margin:0 0 12px;">${p}</p>`)
+    .join("");
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin:0;padding:0;background:#0A0A0F;font-family:system-ui,-apple-system,sans-serif;">
+  <div style="max-width:560px;margin:0 auto;padding:40px 24px;">
+    <div style="text-align:center;margin-bottom:32px;">
+      <h1 style="color:#F59E0B;font-size:28px;margin:0;">DreamForge</h1>
+      <p style="color:#888;font-size:12px;letter-spacing:3px;margin:4px 0 0;">CONSULTING</p>
+    </div>
+    <div style="background:#16161E;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:32px;">
+      <h2 style="color:#E8E4DF;font-size:18px;margin:0 0 16px;">${greeting},</h2>
+      ${paragraphs}
+      <div style="margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);">
+        <p style="color:#888;font-size:13px;margin:0;">Best regards,</p>
+        <p style="color:#E8E4DF;font-size:14px;font-weight:600;margin:4px 0 0;">DreamForge Consulting</p>
+      </div>
+    </div>
+    <p style="color:#555;font-size:11px;text-align:center;margin:24px 0 0;">
+      DreamForge Consulting &mdash; Crafting your digital future.
+    </p>
+  </div>
+</body>
+</html>`;
+}
+
 export function clientInviteEmail({
   clientName,
   company,

@@ -32,6 +32,7 @@ async function exportDatabase(): Promise<Record<string, unknown[]>> {
     invoices,
     tickets,
     activities,
+    outreachEmails,
   ] = await Promise.all([
     db.user.findMany(),
     db.lead.findMany(),
@@ -42,6 +43,7 @@ async function exportDatabase(): Promise<Record<string, unknown[]>> {
     db.invoice.findMany(),
     db.ticket.findMany(),
     db.activity.findMany(),
+    db.outreachEmail.findMany(),
   ]);
 
   return {
@@ -54,6 +56,7 @@ async function exportDatabase(): Promise<Record<string, unknown[]>> {
     invoices,
     tickets,
     activities,
+    outreachEmails,
     exportedAt: [new Date().toISOString()],
   };
 }
@@ -192,6 +195,7 @@ export async function restoreDatabase(
 
     await db.$transaction(async (tx) => {
       // Delete children first (reverse FK order), skip admin user
+      await tx.outreachEmail.deleteMany();
       await tx.activity.deleteMany();
       await tx.ticket.deleteMany();
       await tx.invoice.deleteMany();
@@ -256,6 +260,12 @@ export async function restoreDatabase(
         await tx.activity.createMany({ data: any(data.activities) });
       }
       counts.activities = data.activities.length;
+
+      const outreachEmails = data.outreachEmails ?? [];
+      if (outreachEmails.length > 0) {
+        await tx.outreachEmail.createMany({ data: any(outreachEmails) });
+      }
+      counts.outreachEmails = outreachEmails.length;
     });
 
     return { success: true, counts, durationMs: Date.now() - start };
