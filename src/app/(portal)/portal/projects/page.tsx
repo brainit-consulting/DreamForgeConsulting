@@ -5,9 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { WorkflowTracker } from "@/components/shared/workflow-tracker";
 import { useConfirm } from "@/components/shared/confirm-dialog";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Headphones, Clock } from "lucide-react";
 import { toast } from "sonner";
 import type { ProjectStatus } from "@/types";
+
+interface SupportPlanInfo {
+  planType: string;
+  includedHours: number;
+  hoursUsed: number;
+  active: boolean;
+}
 
 interface Project {
   id: string;
@@ -16,6 +23,7 @@ interface Project {
   status: ProjectStatus;
   progress: number;
   budget?: number;
+  supportPlan?: SupportPlanInfo | null;
 }
 
 export default function PortalProjectsPage() {
@@ -88,6 +96,26 @@ export default function PortalProjectsPage() {
                 <p className="text-sm font-medium text-amber-400">
                   This project is ready for your approval. Review the scope and design, then click &quot;Review &amp; Approve&quot; to begin development.
                 </p>
+              </div>
+            )}
+            {project.supportPlan?.active && ["LAUNCHED", "SUPPORT"].includes(project.status) && (
+              <div className="flex items-center gap-4 rounded-lg border border-border bg-muted/20 px-4 py-3">
+                <Headphones className="h-5 w-5 text-primary shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium">
+                    {project.supportPlan.planType === "ANNUAL" ? "Annual" : "Monthly"} Support Plan
+                  </p>
+                  <p className="text-xs text-muted-foreground">Active support and maintenance</p>
+                </div>
+                <div className="text-right">
+                  <div className="flex items-center gap-1 text-sm">
+                    <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span className={project.supportPlan.hoursUsed > project.supportPlan.includedHours ? "text-amber-400" : ""}>
+                      {project.supportPlan.hoursUsed}h
+                    </span>
+                    <span className="text-muted-foreground">/ {project.supportPlan.includedHours}h this month</span>
+                  </div>
+                </div>
               </div>
             )}
           </CardContent>

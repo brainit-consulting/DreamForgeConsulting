@@ -8,6 +8,8 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { WorkflowTracker } from "@/components/shared/workflow-tracker";
 import { StageWorkPanel } from "@/components/admin/projects/stage-work-panel";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -58,6 +60,10 @@ export default function ProjectDetailPage() {
     overageRate: number; hoursUsed: number; active: boolean; monthsInvoiced: number;
   } | null>(null);
   const [supportLoading, setSupportLoading] = useState(false);
+  const [logHoursOpen, setLogHoursOpen] = useState(false);
+  const [logHours, setLogHours] = useState("");
+  const [logDesc, setLogDesc] = useState("");
+  const [logSaving, setLogSaving] = useState(false);
 
   // Proposal generation state
   const [proposalOpen, setProposalOpen] = useState(false);
@@ -504,6 +510,7 @@ export default function ProjectDetailPage() {
                       });
                       if (res.ok) { setSupportPlan(await res.json()); toast.success("Plan type updated"); }
                     }}
+                    title="Plan type"
                     className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
                   >
                     <option value="MONTHLY">Monthly</option>
@@ -543,10 +550,70 @@ export default function ProjectDetailPage() {
                   {supportPlan.monthsInvoiced >= 10 && supportPlan.monthsInvoiced < 12 && " — free months!"}
                 </p>
               )}
+
+              <div className="flex items-center gap-2">
+                <Button size="sm" variant="outline" onClick={() => setLogHoursOpen(true)}>
+                  <Clock className="mr-2 h-3.5 w-3.5" />
+                  Log Hours
+                </Button>
+              </div>
             </CardContent>
           )}
         </Card>
       )}
+
+      {/* Log Hours Dialog */}
+      <Dialog open={logHoursOpen} onOpenChange={(open) => { setLogHoursOpen(open); if (!open) { setLogHours(""); setLogDesc(""); } }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl text-primary">Log Support Hours</DialogTitle>
+          </DialogHeader>
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const hours = parseFloat(logHours);
+              if (!hours || hours <= 0 || !logDesc.trim()) return;
+              setLogSaving(true);
+              try {
+                await fetch(`/api/projects/${id}/stage-tasks`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ stage: "SUPPORT", title: `${hours}h — ${logDesc.trim()}` }),
+                });
+                const newHours = (supportPlan?.hoursUsed ?? 0) + hours;
+                const res = await fetch(`/api/projects/${id}/support-plan`, {
+                  method: "PUT",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ hoursUsed: newHours }),
+                });
+                if (res.ok) {
+                  setSupportPlan(await res.json());
+                  toast.success(`${hours}h logged`);
+                  setLogHoursOpen(false);
+                  setLogHours(""); setLogDesc("");
+                }
+              } finally { setLogSaving(false); }
+            }}
+            className="space-y-4 py-2"
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1">
+                <Label htmlFor="log-hours">Hours</Label>
+                <Input id="log-hours" type="number" step="0.25" min="0.25" value={logHours} onChange={(e) => setLogHours(e.target.value)} placeholder="2.5" className="font-notes text-base" required />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="log-desc">Description</Label>
+                <Input id="log-desc" value={logDesc} onChange={(e) => setLogDesc(e.target.value)} placeholder="Fixed login redirect issue" className="font-notes text-base" required />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="submit" disabled={logSaving} className="w-full">
+                {logSaving ? "Logging..." : "Log Hours"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Metrics */}
       <div className="grid gap-4 sm:grid-cols-4">

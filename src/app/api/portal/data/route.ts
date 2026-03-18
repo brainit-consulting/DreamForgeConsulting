@@ -10,6 +10,7 @@ export async function GET() {
       db.project.findMany({
         where: { clientId: client.id },
         orderBy: { createdAt: "desc" },
+        include: { supportPlan: true },
       }),
       db.invoice.findMany({
         where: { clientId: client.id },
