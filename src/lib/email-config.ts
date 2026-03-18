@@ -77,6 +77,13 @@ export async function resetEmailConfig(): Promise<EmailConfig> {
   return currentConfig;
 }
 
+/** Get the app's public URL, always returning production URL (never localhost) */
+export function getAppUrl(): string {
+  const url = process.env.NEXT_PUBLIC_APP_URL ?? "https://dreamforgeconsulting.vercel.app";
+  if (url.includes("localhost")) return "https://dreamforgeconsulting.vercel.app";
+  return url;
+}
+
 /** Get absolute logo URL for use in emails */
 export async function getAbsoluteLogoUrl(): Promise<string> {
   await loadFromDb();

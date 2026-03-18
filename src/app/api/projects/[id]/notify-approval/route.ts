@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { approvalRequestEmail } from "@/lib/email-templates";
 import { sendEmail } from "@/lib/email-send";
 import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
-import { getFromAddress } from "@/lib/email-config";
+import { getFromAddress, getAppUrl } from "@/lib/email-config";
 
 export async function POST(
   _req: Request,
@@ -26,7 +26,7 @@ export async function POST(
       return NextResponse.json({ error: "Client has no email address" }, { status: 400 });
     }
 
-    const portalUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://dreamforgeconsulting.vercel.app"}/portal/projects`;
+    const portalUrl = `${getAppUrl()}/portal/projects`;
 
     const emailContent = await approvalRequestEmail({
       projectName: project.name,

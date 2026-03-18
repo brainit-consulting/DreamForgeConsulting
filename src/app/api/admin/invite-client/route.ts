@@ -6,7 +6,7 @@ import { clientInviteEmail } from "@/lib/email-templates";
 import { headers } from "next/headers";
 import crypto from "crypto";
 import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
-import { getFromAddress } from "@/lib/email-config";
+import { getFromAddress, getAppUrl } from "@/lib/email-config";
 
 export async function POST(req: Request) {
   try {
@@ -76,7 +76,7 @@ export async function POST(req: Request) {
       });
 
       // Send invite email
-      const portalUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://dreamforgeconsulting.vercel.app"}/login`;
+      const portalUrl = `${getAppUrl()}/login`;
       const emailContent = await clientInviteEmail({
         clientName: client.company,
         company: client.company,

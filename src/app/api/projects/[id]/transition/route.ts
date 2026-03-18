@@ -3,7 +3,7 @@ import { db } from "@/lib/db";
 import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
 import { sendEmail } from "@/lib/email-send";
 import { approvalRequestEmail } from "@/lib/email-templates";
-import { getFromAddress, getEmailConfig } from "@/lib/email-config";
+import { getFromAddress, getEmailConfig, getAppUrl } from "@/lib/email-config";
 import {
   STAGE_PROGRESS,
   WORKFLOW_STAGES,
@@ -73,7 +73,7 @@ export async function POST(
   const emailCfg = await getEmailConfig();
   if (newStatus === "APPROVAL" && updated.client?.email && emailCfg.autoApprovalEmail) {
     try {
-      const portalUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://dreamforgeconsulting.vercel.app"}/portal/projects`;
+      const portalUrl = `${getAppUrl()}/portal/projects`;
       const emailContent = await approvalRequestEmail({
         projectName: updated.name,
         clientName: updated.client.company,

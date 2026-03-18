@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { approvalRequestEmail } from "@/lib/email-templates";
 import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
-import { getEmailConfig } from "@/lib/email-config";
+import { getEmailConfig, getAppUrl } from "@/lib/email-config";
 
 export async function GET(
   _req: Request,
@@ -22,7 +22,7 @@ export async function GET(
     }
 
     const config = await getEmailConfig();
-    const portalUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://dreamforgeconsulting.vercel.app"}/portal/projects`;
+    const portalUrl = `${getAppUrl()}/portal/projects`;
 
     const emailContent = await approvalRequestEmail({
       projectName: project.name,

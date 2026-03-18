@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { sendEmail } from "@/lib/email-send";
 import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
-import { getFromAddress, getEmailConfig, getAbsoluteLogoUrl } from "@/lib/email-config";
+import { getFromAddress, getEmailConfig, getAbsoluteLogoUrl, getAppUrl } from "@/lib/email-config";
 
 export async function POST(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -49,7 +49,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
         <p style="color:#F59E0B;font-size:28px;font-weight:bold;margin:0;">$${invoice.amount.toLocaleString()}</p>
         ${invoice.dueDate ? `<p style="color:#888;font-size:13px;margin:8px 0 0;">Due: ${invoice.dueDate.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</p>` : ""}
       </div>
-      <a href="${process.env.NEXT_PUBLIC_APP_URL ?? "https://dreamforgeconsulting.vercel.app"}/login" style="display:inline-block;background:#F59E0B;color:#0A0A0F;font-weight:600;font-size:14px;padding:12px 32px;border-radius:8px;text-decoration:none;">
+      <a href="${getAppUrl()}/login" style="display:inline-block;background:#F59E0B;color:#0A0A0F;font-weight:600;font-size:14px;padding:12px 32px;border-radius:8px;text-decoration:none;">
         View & Pay Invoice
       </a>
     </div>
