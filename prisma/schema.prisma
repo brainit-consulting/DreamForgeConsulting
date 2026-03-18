@@ -118,6 +118,7 @@ model Client {
   id        String   @id @default(cuid())
   userId    String?  @unique
   company   String
+  name      String?
   email     String?
   phone     String?
   website   String?

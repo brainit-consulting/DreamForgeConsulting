@@ -25,6 +25,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     const client = await db.client.create({
       data: {
         company: lead.company ?? lead.name,
+        name: lead.name,
         email: lead.email,
         phone: lead.phone,
         website: lead.website,

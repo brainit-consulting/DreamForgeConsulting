@@ -13,7 +13,7 @@ const statusVariant: Record<ProjectStatus, "info" | "ember" | "warning" | "succe
 };
 
 interface PortalData {
-  client: { company: string };
+  client: { company: string; name?: string | null };
   projects: Array<{ id: string; name: string; description?: string; status: ProjectStatus; progress: number }>;
   invoices: Array<{ id: string; status: string }>;
   tickets: Array<{ id: string; status: string }>;
@@ -52,7 +52,7 @@ export default function PortalDashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-display">Welcome back, {data.client.company}</h1>
+        <h1 className="text-3xl font-display">Welcome back, {data.client.name?.split(" ")[0] ?? data.client.company}</h1>
         <p className="mt-1 text-muted-foreground">
           Here&apos;s an overview of your projects and account.
         </p>
