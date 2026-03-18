@@ -123,22 +123,26 @@ function HelpModalPanel() {
 export function HelpButton({
   sectionKey,
   className,
+  icon,
+  label,
 }: {
   sectionKey: string;
   className?: string;
+  icon?: React.ReactNode;
+  label?: string;
 }) {
   const { openHelp } = useHelp();
 
   return (
-    <ActionTooltip label="Help & tips">
+    <ActionTooltip label={label ?? "Help & tips"}>
       <Button
         variant="ghost"
         size="icon"
         onClick={() => openHelp(sectionKey)}
         className={cn("h-8 w-8 text-muted-foreground hover:text-primary", className)}
-        aria-label={`Help for ${sectionKey}`}
+        aria-label={label ?? `Help for ${sectionKey}`}
       >
-        <HelpCircle className="h-4 w-4" />
+        {icon ?? <HelpCircle className="h-4 w-4" />}
       </Button>
     </ActionTooltip>
   );

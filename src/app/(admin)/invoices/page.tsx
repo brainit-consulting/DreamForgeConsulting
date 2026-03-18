@@ -12,7 +12,7 @@ import { ActionTooltip } from "@/components/shared/action-tooltip";
 import { useConfirm } from "@/components/shared/confirm-dialog";
 import { CreateInvoiceDialog } from "@/components/admin/invoices/create-invoice-dialog";
 import {
-  DollarSign, Send, CheckCircle, AlertTriangle, Trash2, Mail, CreditCard,
+  DollarSign, Send, CheckCircle, AlertTriangle, Trash2, Mail, CreditCard, Undo2,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { InvoiceStatus } from "@/types";
@@ -83,6 +83,24 @@ export default function InvoicesPage() {
     });
     toast.success("Invoice marked as paid");
     fetchInvoices();
+  }
+
+  async function refundInvoice(id: string) {
+    const ok = await confirmAction({
+      title: "Issue Refund",
+      description: "This will issue a full refund via Stripe. The client's card will be credited within 2-10 business days. This cannot be undone.",
+      confirmLabel: "Issue Refund",
+      variant: "danger",
+    });
+    if (!ok) return;
+    const res = await fetch(`/api/invoices/${id}/refund`, { method: "POST" });
+    const data = await res.json();
+    if (res.ok) {
+      toast.success(data.message);
+      fetchInvoices();
+    } else {
+      toast.error(data.error ?? "Refund failed");
+    }
   }
 
   async function deleteInvoice(id: string) {
@@ -185,6 +203,13 @@ export default function InvoicesPage() {
                       <ActionTooltip label="Mark as paid">
                         <Button variant="ghost" size="icon" className="h-7 w-7 text-emerald-500" onClick={() => markPaid(inv.id)}>
                           <CreditCard className="h-3.5 w-3.5" />
+                        </Button>
+                      </ActionTooltip>
+                    )}
+                    {inv.status === "PAID" && (
+                      <ActionTooltip label="Issue refund">
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-amber-500" onClick={() => refundInvoice(inv.id)}>
+                          <Undo2 className="h-3.5 w-3.5" />
                         </Button>
                       </ActionTooltip>
                     )}

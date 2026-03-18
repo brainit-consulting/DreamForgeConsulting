@@ -182,6 +182,28 @@ export const helpContent: Record<string, HelpSection> = {
       "The message body is plain text — automatically wrapped in the branded template with your logo, sign-off, and footer",
     ],
   },
+  adminGuide: {
+    title: "Admin Guide — Internal Operations",
+    content:
+      "This is your internal reference for how to handle key business operations in DreamForge Consulting. Not visible to clients.",
+    tips: [
+      "HOW TO ONBOARD A NEW CLIENT: Add Lead (name only required) → work through pipeline (New→Contacted→Qualified→Proposal) → Promote to Client → go to Clients page → click mail icon to Send Portal Invite when ready.",
+      "HOW TO START A PROJECT: Go to Projects → New Project → select client, set name/description/budget/dates → project starts at Discovery. Add tasks + notes at each stage as you work.",
+      "HOW TO GENERATE A PROPOSAL: At Proposal stage → click 'Copy Prompt' → paste into Claude/ChatGPT → copy result → paste into Stage Work Notes (or use 'Generate via Athena' + Save as Note). Edit in the Proposal Document card. Click green 'Submit for Approval' when ready.",
+      "HOW TO SEND FOR CLIENT APPROVAL: After submitting proposal → project moves to Client Approval → if auto-send is ON (Settings > Email Preferences), client gets email automatically. If OFF → click 'Preview' to review the email → click 'Send Notification' manually.",
+      "HOW TO HANDLE CLIENT APPROVAL: Client clicks 'Review & Approve' in their portal → project moves to Development automatically. Or you can advance manually via the workflow tracker.",
+      "HOW TO INVOICE A CLIENT: Go to Invoices → New Invoice → select client + project + amount + due date → creates as DRAFT. Click send icon (mail) to email it. Payment structure: 40% start, 30% mid-development, 30% completion.",
+      "HOW TO HANDLE A PAYMENT: Client clicks 'Pay Now' in portal → Stripe Checkout → payment completes → invoice auto-marked PAID via webhook. You don't need to do anything.",
+      "HOW TO ISSUE A REFUND: Agree on refund with client → go to dashboard.stripe.com → Payments → find the payment → click 'Refund' (full or partial). Our system automatically marks the invoice as REFUNDED via webhook + logs activity. Client sees REFUNDED status in portal. Money returns to their card in 2-10 business days.",
+      "HOW TO HANDLE A DISPUTE: If a client disputes a charge via their bank, Stripe notifies us automatically. A warning activity is logged with the dispute reason. Go to Stripe Dashboard → Disputes to respond with evidence.",
+      "HOW TO SET UP SUPPORT PLAN: When project reaches Launched/Support → click 'Enable Support Plan' on project detail → configure plan type (Monthly/Annual), rates, hours. DRAFT invoices auto-generate on the 1st of each month.",
+      "HOW TO LOG SUPPORT HOURS: On project detail at Support stage → click 'Log Hours' → enter hours + description. Creates a task entry + updates hoursUsed. Overage is calculated automatically on the next invoice.",
+      "HOW TO SEND OUTREACH EMAILS: Go to Outreach → New Outreach → write subject + body → optionally select leads (or save as template). Each draft is sent individually with confirmation. Use Preview (eye icon) to see the branded email before sending.",
+      "HOW TO BACK UP / RESTORE: Settings > Backups → 'Backup Now' for manual backup. Click cloud icon on any backup to restore (safety backup created first, admin account preserved). Retention is configurable.",
+      "HOW TO RESET A PASSWORD: Client uses 'Forgot your password?' on login page → gets reset email → sets new password. Admin cannot see or reset client passwords directly.",
+      "BILLING DEFAULTS: Monthly support: configurable in Settings > Support Plan Defaults. Email branding: Settings > Email Preferences. All settings persist to DB across deploys.",
+    ],
+  },
   backups: {
     title: "Database Backups — Automated & Versioned",
     content:
