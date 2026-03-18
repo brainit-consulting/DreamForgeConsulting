@@ -18,7 +18,7 @@ function emailHeader(): string {
 function emailFooter(): string {
   const config = getEmailConfig();
   return `<p style="color:#555;font-size:11px;text-align:center;margin:24px 0 0;">
-      ${config.companyName} &mdash; Crafting your digital future.
+      ${config.companyName}${config.tagline ? ` &mdash; ${config.tagline}` : ""}
     </p>`;
 }
 
@@ -95,8 +95,11 @@ export function outreachEmail({
       <h2 style="color:#E8E4DF;font-size:18px;margin:0 0 16px;">${greeting},</h2>
       ${paragraphs}
       <div style="margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);">
-        <p style="color:#888;font-size:13px;margin:0;">Best regards,</p>
-        <p style="color:#E8E4DF;font-size:14px;font-weight:600;margin:4px 0 0;">${config.companyName}</p>
+        ${config.signOff.split("\n").map((line, i) =>
+          i === 0
+            ? `<p style="color:#888;font-size:13px;margin:0;">${line}</p>`
+            : `<p style="color:#E8E4DF;font-size:14px;font-weight:600;margin:4px 0 0;">${line}</p>`
+        ).join("")}
       </div>
     </div>
     ${emailFooter()}

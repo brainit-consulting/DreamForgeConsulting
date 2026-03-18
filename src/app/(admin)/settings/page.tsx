@@ -25,6 +25,7 @@ import {
   CalendarDays,
   UploadCloud,
   Mail,
+  ChevronDown,
 } from "lucide-react";
 import Image from "next/image";
 import type { AthenaConfig } from "@/lib/athena-config";
@@ -120,6 +121,11 @@ function BackupTable({ entries, onRestore }: { entries: BackupEntry[]; onRestore
 }
 
 export default function SettingsPage() {
+  // Section collapse state
+  const [athenaOpen, setAthenaOpen] = useState(false);
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [backupsOpen, setBackupsOpen] = useState(false);
+
   const [config, setConfig] = useState<AthenaConfig | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -333,26 +339,29 @@ export default function SettingsPage() {
 
       {/* Athena Preferences */}
       <Card>
-        <CardHeader>
-          <div className="flex items-center gap-3">
-            <Image
-              src="/Athena.png"
-              alt="Athena"
-              width={40}
-              height={40}
-              className="rounded-full"
-            />
-            <div>
-              <CardTitle className="font-display text-2xl text-primary">
-                Athena Preferences
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Configure the AI assistant&apos;s behavior, personality, and limits.
-              </p>
+        <CardHeader className="cursor-pointer select-none" onClick={() => setAthenaOpen(!athenaOpen)}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Image
+                src="/Athena.png"
+                alt="Athena"
+                width={40}
+                height={40}
+                className="rounded-full"
+              />
+              <div>
+                <CardTitle className="font-display text-2xl text-primary">
+                  Athena Preferences
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Configure the AI assistant&apos;s behavior, personality, and limits.
+                </p>
+              </div>
             </div>
+            <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${athenaOpen ? "rotate-180" : ""}`} />
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
+        {athenaOpen && <CardContent className="space-y-6">
           {/* System Prompt */}
           <div className="space-y-2">
             <Label htmlFor="systemPrompt" className="text-base font-medium text-primary">
@@ -507,14 +516,14 @@ export default function SettingsPage() {
               Reset to Defaults
             </Button>
           </div>
-        </CardContent>
+        </CardContent>}
       </Card>
 
       <Separator />
 
       {/* Email Preferences */}
       <Card>
-        <CardHeader>
+        <CardHeader className="cursor-pointer select-none" onClick={() => setEmailOpen(!emailOpen)}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
@@ -529,10 +538,13 @@ export default function SettingsPage() {
                 </p>
               </div>
             </div>
-            <HelpButton sectionKey="emailPreferences" />
+            <div className="flex items-center gap-2">
+              <HelpButton sectionKey="emailPreferences" />
+              <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${emailOpen ? "rotate-180" : ""}`} />
+            </div>
           </div>
         </CardHeader>
-        {emailConfig && (
+        {emailOpen && emailConfig && (
           <CardContent className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email-company" className="text-base text-primary">Company Name</Label>
@@ -578,6 +590,40 @@ export default function SettingsPage() {
 
             <Separator />
 
+            <div className="space-y-2">
+              <Label htmlFor="email-signoff" className="text-base text-primary">Sign-Off</Label>
+              <p className="text-sm text-muted-foreground">
+                Closing line at the bottom of outreach emails. Use separate lines for greeting and name.
+              </p>
+              <Textarea
+                id="email-signoff"
+                value={emailConfig.signOff}
+                onChange={(e) =>
+                  setEmailConfig({ ...emailConfig, signOff: e.target.value })
+                }
+                rows={3}
+                className="font-mono text-sm"
+                placeholder={"Best regards,\nDreamForge Consulting"}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email-tagline" className="text-base text-primary">Tagline</Label>
+              <p className="text-sm text-muted-foreground">
+                Short phrase shown in the email footer after the company name.
+              </p>
+              <Input
+                id="email-tagline"
+                value={emailConfig.tagline}
+                onChange={(e) =>
+                  setEmailConfig({ ...emailConfig, tagline: e.target.value })
+                }
+                placeholder="Crafting your digital future."
+              />
+            </div>
+
+            <Separator />
+
             <div className="flex items-center gap-3">
               <Button onClick={handleEmailSave} disabled={emailSaving}>
                 <Save className="mr-2 h-4 w-4" />
@@ -596,7 +642,7 @@ export default function SettingsPage() {
 
       {/* Backups & Cron */}
       <Card>
-        <CardHeader>
+        <CardHeader className="cursor-pointer select-none" onClick={() => setBackupsOpen(!backupsOpen)}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
@@ -611,10 +657,13 @@ export default function SettingsPage() {
                 </p>
               </div>
             </div>
-            <HelpButton sectionKey="backups" />
+            <div className="flex items-center gap-2">
+              <HelpButton sectionKey="backups" />
+              <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${backupsOpen ? "rotate-180" : ""}`} />
+            </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
+        {backupsOpen && <CardContent className="space-y-6">
           {/* Stats row */}
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div className="rounded-lg border border-border bg-muted/30 p-3">
@@ -741,7 +790,7 @@ export default function SettingsPage() {
               <BackupTable entries={backups?.monthly ?? []} onRestore={handleRestore} />
             </TabsContent>
           </Tabs>
-        </CardContent>
+        </CardContent>}
       </Card>
     </div>
   );

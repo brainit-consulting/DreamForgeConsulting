@@ -3,6 +3,8 @@ import { z } from "zod";
 export const emailConfigSchema = z.object({
   companyName: z.string().min(1),
   logoUrl: z.string(),
+  signOff: z.string().min(1),
+  tagline: z.string(),
 });
 
 export type EmailConfig = z.infer<typeof emailConfigSchema>;
@@ -10,6 +12,8 @@ export type EmailConfig = z.infer<typeof emailConfigSchema>;
 export const DEFAULT_EMAIL_CONFIG: EmailConfig = {
   companyName: "DreamForge Consulting",
   logoUrl: "/DreamForgeConsultingLogo.png",
+  signOff: "Best regards,\nDreamForge Consulting",
+  tagline: "Crafting your digital future.",
 };
 
 let currentConfig: EmailConfig = { ...DEFAULT_EMAIL_CONFIG };

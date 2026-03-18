@@ -72,6 +72,11 @@ function getISOWeekNumber(date: Date): number {
 // Main backup function — call from cron or manual trigger
 export async function runBackup(): Promise<BackupResult> {
   const start = Date.now();
+
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return { success: false, error: "BLOB_READ_WRITE_TOKEN not configured", durationMs: 0 };
+  }
+
   const deleted: string[] = [];
 
   try {
@@ -284,6 +289,9 @@ export async function listBackups(): Promise<{
   weekly: BackupEntry[];
   monthly: BackupEntry[];
 }> {
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return { daily: [], weekly: [], monthly: [] };
+  }
   const all = await list({ prefix: "backups/" });
 
   function mapEntry(tier: BackupEntry["tier"]) {

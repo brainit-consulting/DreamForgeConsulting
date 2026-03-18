@@ -17,7 +17,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { ActionTooltip } from "@/components/shared/action-tooltip";
 import { useConfirm } from "@/components/shared/confirm-dialog";
 import {
-  Mail, Send, Trash2, FileEdit, Search, Plus, CheckCircle, XCircle, Clock,
+  Mail, Send, Trash2, FileEdit, Search, Plus, CheckCircle, XCircle, Clock, Eye, Copy,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { OutreachStatus, Lead } from "@/types";
@@ -186,6 +186,39 @@ export default function OutreachPage() {
         )
       )
     : leadsWithEmail;
+
+  // Preview state
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewHtml, setPreviewHtml] = useState("");
+  const [previewMeta, setPreviewMeta] = useState({ subject: "", from: "", to: "" });
+
+  async function openPreview(id: string) {
+    const res = await fetch(`/api/outreach/${id}/preview`);
+    if (res.ok) {
+      const data = await res.json();
+      setPreviewMeta({ subject: data.subject, from: data.from, to: data.to });
+      setPreviewHtml(data.html);
+      setPreviewOpen(true);
+    } else {
+      toast.error("Failed to load preview");
+    }
+  }
+
+  async function cloneEmail(id: string) {
+    const original = emails.find((e) => e.id === id);
+    if (!original) return;
+    const res = await fetch("/api/outreach", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ subject: original.subject, body: original.body }),
+    });
+    if (res.ok) {
+      toast.success("Draft cloned — edit it from the table");
+      fetchEmails();
+    } else {
+      toast.error("Failed to clone");
+    }
+  }
 
   async function sendEmail(id: string, leadName: string, leadEmail: string) {
     const ok = await confirmAction({
@@ -408,6 +441,22 @@ export default function OutreachPage() {
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1">
+                      <ActionTooltip label="Preview email">
+                        <Button
+                          variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground"
+                          onClick={() => openPreview(email.id)}
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                        </Button>
+                      </ActionTooltip>
+                      <ActionTooltip label="Clone as new draft">
+                        <Button
+                          variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground"
+                          onClick={() => cloneEmail(email.id)}
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                        </Button>
+                      </ActionTooltip>
                       {email.status === "DRAFT" && !email.lead && (
                         <ActionTooltip label="Assign leads">
                           <Button
@@ -513,6 +562,32 @@ export default function OutreachPage() {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Email Preview Dialog */}
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl text-primary">
+              Email Preview
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="grid gap-1 text-sm">
+              <p><span className="text-muted-foreground">From:</span> {previewMeta.from}</p>
+              <p><span className="text-muted-foreground">To:</span> {previewMeta.to}</p>
+              <p><span className="text-muted-foreground">Subject:</span> {previewMeta.subject}</p>
+            </div>
+            <div className="rounded-lg border border-border overflow-hidden">
+              <iframe
+                srcDoc={previewHtml}
+                title="Email preview"
+                className="w-full h-[450px] bg-[#0A0A0F]"
+                sandbox=""
+              />
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
