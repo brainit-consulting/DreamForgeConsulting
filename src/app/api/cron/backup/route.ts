@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { runBackup } from "@/lib/backup";
 import { db } from "@/lib/db";
 import { getSupportConfig } from "@/lib/support-config";
+import { pruneActivities } from "@/lib/activity-cleanup";
 
 // Vercel cron automatically sends Authorization: Bearer <CRON_SECRET>
 // This endpoint must be a GET for Vercel cron compatibility
@@ -99,8 +100,16 @@ export async function GET(req: Request) {
     console.error("[Cron] Overdue invoice check failed:", err);
   }
 
+  // Prune old activities — keep 500 most recent per entity
+  let activitiesPruned = 0;
+  try {
+    activitiesPruned = await pruneActivities();
+  } catch (err) {
+    console.error("[Cron] Activity cleanup failed:", err);
+  }
+
   return NextResponse.json(
-    { ...backupResult, supportInvoicesCreated: invoicesCreated, overdueMarked },
+    { ...backupResult, supportInvoicesCreated: invoicesCreated, overdueMarked, activitiesPruned },
     { status: backupResult.success ? 200 : 500 }
   );
 }
