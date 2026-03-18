@@ -91,7 +91,7 @@ export default function ProjectDetailPage() {
 
   // Fetch proposal notes when at APPROVAL stage
   useEffect(() => {
-    if (project?.status === "APPROVAL") {
+    if (project && ["APPROVAL", "DEVELOPMENT", "TESTING", "DEPLOYMENT", "LAUNCHED", "SUPPORT"].includes(project.status)) {
       fetch(`/api/projects/${id}/stage-notes?stage=PROPOSAL`)
         .then(r => r.json())
         .then(setProposalNotes)
@@ -336,12 +336,14 @@ export default function ProjectDetailPage() {
       </Card>
 
       {/* Show Proposal notes when at APPROVAL stage for easy editing */}
-      {project.status === "APPROVAL" && proposalNotes.length > 0 && (
+      {["APPROVAL", "DEVELOPMENT", "TESTING", "DEPLOYMENT", "LAUNCHED", "SUPPORT"].includes(project.status) && proposalNotes.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="font-display text-xl text-primary">Proposal Document</CardTitle>
             <p className="text-sm text-muted-foreground">
-              Review or edit the proposal before notifying the client. Changes save on blur.
+              {project.status === "APPROVAL"
+                ? "Review or edit the proposal before notifying the client. Changes save on blur."
+                : "The approved proposal for this project."}
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -349,11 +351,12 @@ export default function ProjectDetailPage() {
               <div key={note.id} className="rounded-lg border border-border bg-muted/20 p-4">
                 <textarea
                   defaultValue={note.content}
-                  title="Edit proposal note"
+                  title="Proposal note"
                   placeholder="Proposal content..."
-                  className="w-full min-h-[200px] bg-transparent font-notes text-sm text-foreground outline-none resize-y"
+                  readOnly={project.status !== "APPROVAL"}
+                  className={`w-full min-h-[200px] bg-transparent font-notes text-sm text-foreground outline-none resize-y ${project.status !== "APPROVAL" ? "cursor-default" : ""}`}
                   onBlur={async (e) => {
-                    if (e.target.value !== note.content) {
+                    if (project.status === "APPROVAL" && e.target.value !== note.content) {
                       await fetch(`/api/projects/${id}/stage-notes/${note.id}`, {
                         method: "PUT",
                         headers: { "Content-Type": "application/json" },
