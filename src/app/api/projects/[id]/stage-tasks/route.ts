@@ -3,8 +3,11 @@ import { db } from "@/lib/db";
 import { z } from "zod";
 import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
 
+const VALID_STAGES = ["DISCOVERY", "DESIGN", "PROPOSAL", "APPROVAL", "DEVELOPMENT", "TESTING", "DEPLOYMENT", "LAUNCHED", "SUPPORT"] as const;
+type ValidStage = typeof VALID_STAGES[number];
+
 const createTaskSchema = z.object({
-  stage: z.string().min(1),
+  stage: z.enum(VALID_STAGES),
   title: z.string().min(1),
 });
 
@@ -16,9 +19,12 @@ export async function GET(
     await requireAdmin();
     const { id } = await params;
     const stage = req.nextUrl.searchParams.get("stage");
+    if (stage && !VALID_STAGES.includes(stage as ValidStage)) {
+      return NextResponse.json({ error: "Invalid stage" }, { status: 400 });
+    }
 
     const tasks = await db.stageTask.findMany({
-      where: { projectId: id, ...(stage ? { stage: stage as any } : {}) },
+      where: { projectId: id, ...(stage ? { stage: stage as ValidStage } : {}) },
       orderBy: { sortOrder: "asc" },
     });
 

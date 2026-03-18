@@ -25,6 +25,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!invoice.client?.email) {
+      return NextResponse.json(
+        { error: "Client has no email address" },
+        { status: 400 }
+      );
+    }
+
     const stripe = getStripe();
     const description =
       invoice.description || `Invoice for ${invoice.project?.name ?? "services"}`;

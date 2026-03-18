@@ -84,8 +84,23 @@ export async function GET(req: Request) {
     }
   }
 
+  // Mark overdue invoices — runs daily
+  let overdueMarked = 0;
+  try {
+    const overdue = await db.invoice.updateMany({
+      where: {
+        status: "SENT",
+        dueDate: { lt: now },
+      },
+      data: { status: "OVERDUE" },
+    });
+    overdueMarked = overdue.count;
+  } catch (err) {
+    console.error("[Cron] Overdue invoice check failed:", err);
+  }
+
   return NextResponse.json(
-    { ...backupResult, supportInvoicesCreated: invoicesCreated },
+    { ...backupResult, supportInvoicesCreated: invoicesCreated, overdueMarked },
     { status: backupResult.success ? 200 : 500 }
   );
 }

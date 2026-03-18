@@ -6,7 +6,7 @@ import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
 const updateProjectSchema = z.object({
   name: z.string().min(1).optional(),
   description: z.string().optional(),
-  status: z.enum(["DISCOVERY", "DESIGN", "DEVELOPMENT", "TESTING", "DEPLOYMENT", "LAUNCHED", "SUPPORT"]).optional(),
+  status: z.enum(["DISCOVERY", "DESIGN", "PROPOSAL", "APPROVAL", "DEVELOPMENT", "TESTING", "DEPLOYMENT", "LAUNCHED", "SUPPORT"]).optional(),
   startDate: z.string().optional(),
   deadline: z.string().optional(),
   budget: z.number().optional(),
