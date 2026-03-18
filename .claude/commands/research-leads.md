@@ -168,7 +168,7 @@ Field mapping:
 - `value`: Estimate based on business size and project type (conservative — real quotes come later):
   - Shopify store setup/customization (boutique retail, <2k products): $800-1.5k — includes theme work, product import, AI agent add-on, automations
   - Website/digital presence: $1.5-3k
-  - IT support retainer: $250-1k/month
+  - IT support retainer: $400-1.2k/month
   - Process automation: $2.5-6k
   - Custom SaaS: $4-12k
   - Training/consulting: $1-2.5k
