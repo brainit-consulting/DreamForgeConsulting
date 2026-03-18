@@ -114,12 +114,12 @@ function PriceGuidanceContent({ items }: { items: string[] }) {
 function AdminGuideTips({ tips }: { tips: string[] }) {
   const chapterNames = [
     "Client Onboarding",
+    "Outreach & Communication",
     "Projects & Proposals",
     "Invoicing & Payments",
     "Support & Maintenance",
-    "Outreach & Communication",
-    "Price Guidance",
     "System Administration",
+    "Price Guidance",
   ];
   const chapters: Record<string, string[]> = Object.fromEntries(chapterNames.map((n) => [n, []]));
 
@@ -162,7 +162,6 @@ function AdminGuideTips({ tips }: { tips: string[] }) {
             )}
           >
             <span className="truncate">{name}</span>
-            <span className="ml-auto text-xs text-foreground/30">{chapters[name].length}</span>
           </button>
         ))}
       </nav>
