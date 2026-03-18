@@ -1,6 +1,10 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { LogOut } from "lucide-react";
+import { signOut } from "@/lib/auth-client";
+import { Button } from "@/components/ui/button";
+import { ActionTooltip } from "@/components/shared/action-tooltip";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { HelpButton } from "@/components/shared/help-modal";
 
@@ -31,6 +35,16 @@ export function TopBar() {
 
   return (
     <div className="flex h-12 items-center justify-end gap-1 border-b border-border px-6">
+      <ActionTooltip label="Sign out">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-muted-foreground"
+          onClick={() => signOut().then(() => window.location.href = "/login")}
+        >
+          <LogOut className="h-4 w-4" />
+        </Button>
+      </ActionTooltip>
       <ThemeToggle />
       <HelpButton sectionKey={helpKey} />
     </div>

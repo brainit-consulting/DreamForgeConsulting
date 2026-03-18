@@ -7,13 +7,9 @@ import {
   FolderKanban,
   Receipt,
   TicketCheck,
-  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { signOut } from "@/lib/auth-client";
 import { Logo } from "@/components/shared/logo";
-import { Button } from "@/components/ui/button";
-import { ActionTooltip } from "@/components/shared/action-tooltip";
 
 const portalNav = [
   { label: "Dashboard", href: "/portal", icon: LayoutDashboard },
@@ -67,17 +63,7 @@ export function PortalSidebar() {
 
       {/* Footer */}
       <div className="border-t border-sidebar-border p-3">
-        <ActionTooltip label="Sign out of client portal">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="w-full text-muted-foreground"
-            onClick={() => signOut().then(() => window.location.href = "/login")}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign out
-          </Button>
-        </ActionTooltip>
+        <p className="text-center text-[10px] text-muted-foreground">Client Portal</p>
       </div>
     </aside>
   );
