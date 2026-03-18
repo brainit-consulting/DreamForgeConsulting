@@ -98,7 +98,7 @@ export const helpContent: Record<string, HelpSection> = {
       "Invoices tab lets you view all invoices and pay outstanding ones via Stripe with a single click",
       "After paying via Stripe, the invoice automatically updates to PAID — no manual steps needed",
       "Tickets tab lets you submit new support requests — select the project and priority level",
-      "Change your password anytime from the 'Change Password' card on the Dashboard — enter your current (or temp) password and choose a new one",
+      "Change your password anytime from Settings in the sidebar — enter your current (or temp) password and choose a new one",
       "If you forget your password, use the 'Forgot your password?' link on the login page to get a reset email",
       "The Athena AI assistant (bottom-right) can answer questions about your projects and invoices",
     ],

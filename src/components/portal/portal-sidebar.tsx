@@ -7,6 +7,7 @@ import {
   FolderKanban,
   Receipt,
   TicketCheck,
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/shared/logo";
@@ -16,6 +17,7 @@ const portalNav = [
   { label: "Projects", href: "/portal/projects", icon: FolderKanban },
   { label: "Invoices", href: "/portal/invoices", icon: Receipt },
   { label: "Tickets", href: "/portal/tickets", icon: TicketCheck },
+  { label: "Settings", href: "/portal/settings", icon: Settings },
 ];
 
 export function PortalSidebar() {
