@@ -73,16 +73,17 @@ export async function outreachEmail({
   company: string;
   body: string;
 }): Promise<string> {
-  const greeting = company
-    ? `Hi ${leadName} at ${company}`
-    : `Hi ${leadName}`;
+  const config = await getEmailConfig();
+
+  const parts: string[] = ["Hi"];
+  if (config.greetingUseName && leadName) parts.push(leadName);
+  if (config.greetingUseCompany && company) parts.push(`at ${company}`);
+  const greeting = parts.length > 1 ? parts.join(" ") : "Hi there";
   const paragraphs = body
     .split("\n")
     .filter((l) => l.trim())
     .map((p) => `<p style="color:#CCC;font-size:14px;line-height:1.6;margin:0 0 12px;">${p}</p>`)
     .join("");
-
-  const config = await getEmailConfig();
   const header = await emailHeader();
   const footer = await emailFooter();
 

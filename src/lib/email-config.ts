@@ -9,6 +9,8 @@ export const emailConfigSchema = z.object({
   logoSize: z.number().min(30).max(300),
   signOff: z.string().min(1),
   tagline: z.string(),
+  greetingUseName: z.boolean(),
+  greetingUseCompany: z.boolean(),
   autoApprovalEmail: z.boolean(),
 });
 
@@ -20,6 +22,8 @@ export const DEFAULT_EMAIL_CONFIG: EmailConfig = {
   logoSize: 120,
   signOff: "Best regards,\nDreamForge Consulting",
   tagline: "Crafting your digital future.",
+  greetingUseName: true,
+  greetingUseCompany: true,
   autoApprovalEmail: true,
 };
 

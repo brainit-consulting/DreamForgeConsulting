@@ -644,6 +644,36 @@ export default function SettingsPage() {
 
             <div className="flex items-center justify-between rounded-lg border border-border p-3">
               <div>
+                <p className="text-sm font-medium text-primary">Use lead name in greeting</p>
+                <p className="text-xs text-muted-foreground">
+                  Include the lead&apos;s name in outreach email greeting (e.g., &quot;Hi Sarah&quot;).
+                </p>
+              </div>
+              <Switch
+                checked={emailConfig.greetingUseName}
+                onCheckedChange={(checked) =>
+                  setEmailConfig({ ...emailConfig, greetingUseName: checked })
+                }
+              />
+            </div>
+
+            <div className="flex items-center justify-between rounded-lg border border-border p-3">
+              <div>
+                <p className="text-sm font-medium text-primary">Use company name in greeting</p>
+                <p className="text-xs text-muted-foreground">
+                  Include the company name (e.g., &quot;Hi Sarah at TechFlow Inc&quot;).
+                </p>
+              </div>
+              <Switch
+                checked={emailConfig.greetingUseCompany}
+                onCheckedChange={(checked) =>
+                  setEmailConfig({ ...emailConfig, greetingUseCompany: checked })
+                }
+              />
+            </div>
+
+            <div className="flex items-center justify-between rounded-lg border border-border p-3">
+              <div>
                 <p className="text-sm font-medium text-primary">Auto-send approval request email</p>
                 <p className="text-xs text-muted-foreground">
                   When a project reaches Client Approval, automatically email the client to review and approve.
