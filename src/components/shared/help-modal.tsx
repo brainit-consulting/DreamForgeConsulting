@@ -59,18 +59,69 @@ function GuideSection({ title, children }: { title: string; children: ReactNode 
   );
 }
 
-/** Admin guide with collapsible chapters and styled tips */
+/** Price Guidance table renderer */
+function PriceGuidanceContent({ items }: { items: string[] }) {
+  const rows = items
+    .filter((t) => t.startsWith("PRICE GUIDANCE — "))
+    .map((t) => {
+      const after = t.replace("PRICE GUIDANCE — ", "");
+      const colonIdx = after.indexOf(":");
+      if (colonIdx === -1) return { service: after, rate: "", note: "" };
+      const service = after.slice(0, colonIdx).trim();
+      const rest = after.slice(colonIdx + 1).trim();
+      const parenIdx = rest.indexOf("(");
+      if (parenIdx === -1) return { service, rate: rest, note: "" };
+      return {
+        service,
+        rate: rest.slice(0, parenIdx).trim(),
+        note: rest.slice(parenIdx + 1).replace(/\)$/, "").trim(),
+      };
+    });
+  const marketNote = items.find((t) => t.includes("below-market rates"));
+
+  return (
+    <div>
+      <div className="overflow-x-auto rounded-lg border border-border/30">
+        <table className="w-full text-sm border-collapse">
+          <thead>
+            <tr className="bg-muted/30">
+              <th className="text-left py-2.5 px-4 font-display text-primary text-sm">Service</th>
+              <th className="text-left py-2.5 px-4 font-display text-primary text-sm">Our Rate</th>
+              <th className="text-left py-2.5 px-4 font-display text-primary text-sm">Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, i) => (
+              <tr key={i} className="border-t border-border/20 hover:bg-muted/10 transition-colors">
+                <td className="py-2.5 px-4 font-sans text-foreground/90 whitespace-nowrap">{row.service}</td>
+                <td className="py-2.5 px-4 font-mono text-emerald-400 whitespace-nowrap">{row.rate}</td>
+                <td className="py-2.5 px-4 font-sans text-foreground/60 text-xs">{row.note}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {marketNote && (
+        <p className="mt-3 text-xs text-foreground/40 font-sans italic">
+          {marketNote.replace("PRICE GUIDANCE — ", "")}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** Admin guide — two-column layout with sidebar nav + content pane */
 function AdminGuideTips({ tips }: { tips: string[] }) {
-  // Group tips by category based on the "HOW TO" prefix
-  const chapters: Record<string, string[]> = {
-    "Client Onboarding": [],
-    "Projects & Proposals": [],
-    "Invoicing & Payments": [],
-    "Support & Maintenance": [],
-    "Outreach & Communication": [],
-    "Price Guidance": [],
-    "System Administration": [],
-  };
+  const chapterNames = [
+    "Client Onboarding",
+    "Projects & Proposals",
+    "Invoicing & Payments",
+    "Support & Maintenance",
+    "Outreach & Communication",
+    "Price Guidance",
+    "System Administration",
+  ];
+  const chapters: Record<string, string[]> = Object.fromEntries(chapterNames.map((n) => [n, []]));
 
   for (const tip of tips) {
     if (tip.includes("PRICE GUIDANCE")) {
@@ -90,75 +141,50 @@ function AdminGuideTips({ tips }: { tips: string[] }) {
     }
   }
 
+  const [active, setActive] = useState(chapterNames[0]);
+  const activeItems = chapters[active] ?? [];
+  const nonEmpty = chapterNames.filter((n) => chapters[n].length > 0);
+
   return (
-    <div className="space-y-3">
-      {Object.entries(chapters).map(([chapter, items]) => {
-        if (items.length === 0) return null;
+    <div className="flex gap-0 rounded-lg border border-border/40 overflow-hidden min-h-[340px]">
+      {/* Sidebar nav */}
+      <nav className="w-52 shrink-0 border-r border-border/30 bg-muted/20">
+        {nonEmpty.map((name) => (
+          <button
+            key={name}
+            type="button"
+            onClick={() => setActive(name)}
+            className={cn(
+              "flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-sans transition-colors border-b border-border/10",
+              active === name
+                ? "bg-primary/10 text-primary font-medium border-l-2 border-l-primary"
+                : "text-foreground/60 hover:bg-muted/40 hover:text-foreground/80 border-l-2 border-l-transparent"
+            )}
+          >
+            <span className="truncate">{name}</span>
+            <span className="ml-auto text-xs text-foreground/30">{chapters[name].length}</span>
+          </button>
+        ))}
+      </nav>
 
-        if (chapter === "Price Guidance") {
-          // Parse "PRICE GUIDANCE — Label: $range (details)" into table rows
-          const rows = items
-            .filter((t) => t.startsWith("PRICE GUIDANCE — "))
-            .map((t) => {
-              const after = t.replace("PRICE GUIDANCE — ", "");
-              const colonIdx = after.indexOf(":");
-              if (colonIdx === -1) return { service: after, rate: "", note: "" };
-              const service = after.slice(0, colonIdx).trim();
-              const rest = after.slice(colonIdx + 1).trim();
-              // Split on first parenthesis for note
-              const parenIdx = rest.indexOf("(");
-              if (parenIdx === -1) return { service, rate: rest, note: "" };
-              return {
-                service,
-                rate: rest.slice(0, parenIdx).trim(),
-                note: rest.slice(parenIdx + 1).replace(/\)$/, "").trim(),
-              };
-            });
+      {/* Content pane */}
+      <div className="flex-1 overflow-y-auto p-5">
+        <h3 className="font-display text-lg text-primary mb-4">{active}</h3>
 
-          // Find the market comparison note (last entry)
-          const marketNote = items.find((t) => t.includes("below-market rates"));
-
-          return (
-            <GuideSection key={chapter} title={chapter}>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm border-collapse">
-                  <thead>
-                    <tr className="border-b border-border/50">
-                      <th className="text-left py-2 pr-4 font-display text-primary text-sm">Service</th>
-                      <th className="text-left py-2 pr-4 font-display text-primary text-sm">Our Rate</th>
-                      <th className="text-left py-2 font-display text-primary text-sm">Details</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rows.map((row, i) => (
-                      <tr key={i} className="border-b border-border/20">
-                        <td className="py-2 pr-4 font-sans text-foreground/90 whitespace-nowrap">{row.service}</td>
-                        <td className="py-2 pr-4 font-mono text-emerald-400 whitespace-nowrap">{row.rate}</td>
-                        <td className="py-2 font-sans text-foreground/60">{row.note}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              {marketNote && (
-                <p className="mt-3 text-xs text-foreground/50 font-sans italic">
-                  {marketNote.replace("PRICE GUIDANCE — ", "")}
+        {active === "Price Guidance" ? (
+          <PriceGuidanceContent items={activeItems} />
+        ) : (
+          <div className="space-y-4">
+            {activeItems.map((tip, i) => (
+              <div key={i} className="rounded-lg bg-muted/10 border border-border/20 px-4 py-3">
+                <p className="text-sm leading-relaxed text-foreground/80 font-sans">
+                  {highlightKeywords(tip)}
                 </p>
-              )}
-            </GuideSection>
-          );
-        }
-
-        return (
-          <GuideSection key={chapter} title={chapter}>
-            {items.map((tip, i) => (
-              <p key={i} className="text-sm leading-relaxed text-foreground/80 font-sans">
-                {highlightKeywords(tip)}
-              </p>
+              </div>
             ))}
-          </GuideSection>
-        );
-      })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
