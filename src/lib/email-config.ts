@@ -77,10 +77,12 @@ export async function resetEmailConfig(): Promise<EmailConfig> {
   return currentConfig;
 }
 
+const PROD_URL = "https://dreamforgeconsulting.vercel.app";
+
 /** Get the app's public URL, always returning production URL (never localhost) */
 export function getAppUrl(): string {
-  const url = process.env.NEXT_PUBLIC_APP_URL ?? "https://dreamforgeconsulting.vercel.app";
-  if (url.includes("localhost")) return "https://dreamforgeconsulting.vercel.app";
+  const url = (process.env.NEXT_PUBLIC_APP_URL ?? PROD_URL).trim();
+  if (url.includes("localhost")) return PROD_URL;
   return url;
 }
 
@@ -88,9 +90,9 @@ export function getAppUrl(): string {
 export async function getAbsoluteLogoUrl(): Promise<string> {
   await loadFromDb();
   // Always use production URL for email assets — localhost is unreachable from email clients
-  const base = process.env.NEXT_PUBLIC_APP_URL?.includes("localhost")
-    ? "https://dreamforgeconsulting.vercel.app"
-    : (process.env.NEXT_PUBLIC_APP_URL ?? "https://dreamforgeconsulting.vercel.app");
+  const base = (process.env.NEXT_PUBLIC_APP_URL ?? PROD_URL).trim().includes("localhost")
+    ? PROD_URL
+    : (process.env.NEXT_PUBLIC_APP_URL ?? PROD_URL).trim();
   const logo = currentConfig.logoUrl;
   if (logo.startsWith("http")) return logo;
   return `${base}${logo.startsWith("/") ? "" : "/"}${logo}`;
