@@ -642,6 +642,23 @@ export default function SettingsPage() {
 
             <Separator />
 
+            <div className="flex items-center justify-between rounded-lg border border-border p-3">
+              <div>
+                <p className="text-sm font-medium text-primary">Auto-send approval request email</p>
+                <p className="text-xs text-muted-foreground">
+                  When a project reaches Client Approval, automatically email the client to review and approve.
+                </p>
+              </div>
+              <Switch
+                checked={emailConfig.autoApprovalEmail}
+                onCheckedChange={(checked) =>
+                  setEmailConfig({ ...emailConfig, autoApprovalEmail: checked })
+                }
+              />
+            </div>
+
+            <Separator />
+
             <div className="flex items-center gap-3">
               <Button onClick={handleEmailSave} disabled={emailSaving}>
                 <Save className="mr-2 h-4 w-4" />
