@@ -19,6 +19,7 @@ const statusVariant: Record<InvoiceStatus, "default" | "info" | "success" | "des
   PAID: "success",
   OVERDUE: "destructive",
   CANCELLED: "warning",
+  REFUNDED: "warning",
 };
 
 interface InvoicesTableProps {

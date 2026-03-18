@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import type { InvoiceStatus } from "@/types";
 
 const statusVariant: Record<InvoiceStatus, "default" | "info" | "success" | "destructive" | "warning"> = {
-  DRAFT: "default", SENT: "info", PAID: "success", OVERDUE: "destructive", CANCELLED: "warning",
+  DRAFT: "default", SENT: "info", PAID: "success", OVERDUE: "destructive", CANCELLED: "warning", REFUNDED: "warning",
 };
 
 interface Invoice {

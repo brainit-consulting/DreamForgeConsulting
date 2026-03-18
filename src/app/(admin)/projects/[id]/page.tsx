@@ -25,7 +25,7 @@ const statusVariant: Record<ProjectStatus, "info" | "ember" | "warning" | "succe
   DEVELOPMENT: "ember", TESTING: "warning", DEPLOYMENT: "warning", LAUNCHED: "success", SUPPORT: "default",
 };
 const invoiceStatusVariant: Record<InvoiceStatus, "default" | "info" | "success" | "destructive" | "warning"> = {
-  DRAFT: "default", SENT: "info", PAID: "success", OVERDUE: "destructive", CANCELLED: "warning",
+  DRAFT: "default", SENT: "info", PAID: "success", OVERDUE: "destructive", CANCELLED: "warning", REFUNDED: "warning",
 };
 const priorityVariant: Record<TicketPriority, "default" | "info" | "warning" | "destructive"> = {
   LOW: "default", MEDIUM: "info", HIGH: "warning", URGENT: "destructive",

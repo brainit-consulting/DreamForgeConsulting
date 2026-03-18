@@ -18,9 +18,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
     }
 
-    if (invoice.status !== "SENT") {
+    if (invoice.status === "PAID") {
       return NextResponse.json(
-        { error: "Only sent invoices can be paid" },
+        { error: "This invoice has already been paid" },
+        { status: 400 }
+      );
+    }
+
+    if (invoice.status !== "SENT" && invoice.status !== "OVERDUE") {
+      return NextResponse.json(
+        { error: "Only sent or overdue invoices can be paid" },
         { status: 400 }
       );
     }
@@ -32,7 +39,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Check for existing unpaid Stripe session to prevent double-charge
     const stripe = getStripe();
+    const existingSessions = await stripe.checkout.sessions.list({
+      limit: 5,
+    });
+    const activeSession = existingSessions.data.find(
+      (s) =>
+        s.metadata?.invoiceId === invoiceId &&
+        s.status === "open" &&
+        s.payment_status === "unpaid"
+    );
+    if (activeSession?.url) {
+      // Redirect to existing session instead of creating a new one
+      return NextResponse.json({ url: activeSession.url });
+    }
+
     const description =
       invoice.description || `Invoice for ${invoice.project?.name ?? "services"}`;
 

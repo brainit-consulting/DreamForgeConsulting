@@ -14,7 +14,7 @@ const projectStatusVariant: Record<ProjectStatus, "info" | "ember" | "warning" |
 };
 
 const invoiceStatusVariant: Record<InvoiceStatus, "default" | "info" | "success" | "destructive" | "warning"> = {
-  DRAFT: "default", SENT: "info", PAID: "success", OVERDUE: "destructive", CANCELLED: "warning",
+  DRAFT: "default", SENT: "info", PAID: "success", OVERDUE: "destructive", CANCELLED: "warning", REFUNDED: "warning",
 };
 
 export default async function ClientDetailPage({

@@ -221,6 +221,7 @@ enum InvoiceStatus {
   PAID
   OVERDUE
   CANCELLED
+  REFUNDED
 }
 
 model Ticket {
