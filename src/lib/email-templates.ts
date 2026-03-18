@@ -9,7 +9,7 @@ async function emailHeader(): Promise<string> {
 
   return `
     <div style="text-align:center;margin-bottom:32px;">
-      <img src="${logoUrl}" alt="${config.companyName}" style="max-height:60px;max-width:200px;margin:0 auto 12px;" />
+      <img src="${logoUrl}" alt="${config.companyName}" style="max-height:${config.logoSize}px;max-width:${config.logoSize * 2}px;margin:0 auto 12px;" />
       <h1 style="color:#F59E0B;font-size:28px;margin:0;">${mainName}</h1>
       ${subtitle ? `<p style="color:#888;font-size:12px;letter-spacing:3px;margin:4px 0 0;">${subtitle}</p>` : ""}
     </div>`;

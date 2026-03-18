@@ -36,7 +36,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
 <body style="margin:0;padding:0;background:#0A0A0F;font-family:system-ui,sans-serif;">
   <div style="max-width:560px;margin:0 auto;padding:40px 24px;">
     <div style="text-align:center;margin-bottom:32px;">
-      <img src="${logoUrl}" alt="${emailCfg.companyName}" style="max-height:60px;max-width:200px;margin:0 auto 12px;" />
+      <img src="${logoUrl}" alt="${emailCfg.companyName}" style="max-height:${emailCfg.logoSize}px;max-width:${emailCfg.logoSize * 2}px;margin:0 auto 12px;" />
       <h1 style="color:#F59E0B;font-size:24px;margin:0 0 8px;">${emailCfg.companyName}</h1>
       <p style="color:#888;font-size:12px;letter-spacing:2px;margin:0 0 32px;">INVOICE</p>
     </div>

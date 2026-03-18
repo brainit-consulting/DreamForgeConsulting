@@ -575,13 +575,31 @@ export default function SettingsPage() {
                 }
                 placeholder="/DreamForgeConsultingLogo.png"
               />
+              <div className="mt-3 flex items-center gap-4">
+                <Label htmlFor="email-logo-size" className="shrink-0 text-sm text-muted-foreground">
+                  Size: {emailConfig.logoSize}px
+                </Label>
+                <input
+                  id="email-logo-size"
+                  type="range"
+                  min={30}
+                  max={300}
+                  value={emailConfig.logoSize}
+                  onChange={(e) =>
+                    setEmailConfig({ ...emailConfig, logoSize: parseInt(e.target.value) })
+                  }
+                  className="flex-1 accent-primary"
+                  title={`Logo size: ${emailConfig.logoSize}px`}
+                />
+              </div>
               {emailConfig.logoUrl && (
                 <div className="mt-3 rounded-lg border border-border bg-muted/30 p-4">
                   <p className="mb-2 text-xs text-muted-foreground">Preview:</p>
                   <img
-                    src={emailConfig.logoUrl.startsWith("http") ? emailConfig.logoUrl : emailConfig.logoUrl}
+                    src={emailConfig.logoUrl}
                     alt="Email logo preview"
-                    className="h-12 max-w-[200px] object-contain"
+                    style={{ maxHeight: emailConfig.logoSize, maxWidth: emailConfig.logoSize * 2 }}
+                    className="object-contain"
                     onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                   />
                 </div>
