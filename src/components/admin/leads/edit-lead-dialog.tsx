@@ -84,7 +84,7 @@ export function EditLeadDialog({ lead, onUpdated }: { lead: Lead; onUpdated: () 
           <Pencil className="h-3.5 w-3.5" />
         </DialogTrigger>
       </ActionTooltip>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-display text-xl text-primary">Edit Lead</DialogTitle>
         </DialogHeader>
@@ -109,15 +109,13 @@ export function EditLeadDialog({ lead, onUpdated }: { lead: Lead; onUpdated: () 
               <Input id="edit-phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
             </div>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="space-y-1">
-              <Label htmlFor="edit-website">Website</Label>
-              <Input id="edit-website" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} placeholder="https://company.com" />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="edit-address">Address</Label>
-              <Input id="edit-address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
-            </div>
+          <div className="space-y-1">
+            <Label htmlFor="edit-website">Website</Label>
+            <Input id="edit-website" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} placeholder="https://company.com" />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="edit-address">Address</Label>
+            <Input id="edit-address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="123 Main St, City, FL 33901" />
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1">

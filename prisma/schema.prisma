@@ -272,7 +272,7 @@ model Activity {
 
 model OutreachEmail {
   id        String         @id @default(cuid())
-  leadId    String
+  leadId    String?
   subject   String
   body      String         @db.Text
   status    OutreachStatus @default(DRAFT)
@@ -280,7 +280,7 @@ model OutreachEmail {
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
 
-  lead Lead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  lead Lead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
 
   @@map("outreach_emails")
 }

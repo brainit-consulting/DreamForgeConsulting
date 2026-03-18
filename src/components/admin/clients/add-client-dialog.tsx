@@ -56,7 +56,7 @@ export function AddClientDialog({ onCreated }: { onCreated: () => void }) {
         <Plus className="mr-2 h-4 w-4" />
         Add Client
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-display text-xl text-primary">
             Add Client
@@ -114,6 +114,7 @@ export function AddClientDialog({ onCreated }: { onCreated: () => void }) {
               id="client-address"
               value={form.address}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
+              placeholder="123 Main St, City, FL 33901"
             />
           </div>
           <DialogFooter>

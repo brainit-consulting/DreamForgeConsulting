@@ -40,7 +40,7 @@ interface OutreachRow {
   status: OutreachStatus;
   sentAt?: string;
   createdAt: string;
-  lead: Lead;
+  lead: Lead | null;
 }
 
 export default function OutreachPage() {
@@ -104,7 +104,6 @@ export default function OutreachPage() {
 
   async function handleCreateDrafts(e: React.FormEvent) {
     e.preventDefault();
-    if (selectedLeadIds.size === 0) return;
     setCreating(true);
     try {
       const res = await fetch("/api/outreach", {
@@ -113,21 +112,80 @@ export default function OutreachPage() {
         body: JSON.stringify({
           subject,
           body,
-          leadIds: Array.from(selectedLeadIds),
+          ...(selectedLeadIds.size > 0 && { leadIds: Array.from(selectedLeadIds) }),
         }),
       });
       if (res.ok) {
         const data = await res.json();
-        toast.success(`${data.count} draft(s) created`);
+        toast.success(
+          selectedLeadIds.size > 0
+            ? `${data.count} draft(s) created`
+            : "Draft saved — assign leads when ready"
+        );
         setComposeOpen(false);
         fetchEmails();
       } else {
-        toast.error("Failed to create drafts");
+        toast.error("Failed to create draft");
       }
     } finally {
       setCreating(false);
     }
   }
+
+  // Assign leads dialog state
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [assignDraftId, setAssignDraftId] = useState("");
+  const [assignLeadIds, setAssignLeadIds] = useState<Set<string>>(new Set());
+  const [assignSearch, setAssignSearch] = useState("");
+  const [assigning, setAssigning] = useState(false);
+
+  async function openAssign(draftId: string) {
+    setAssignDraftId(draftId);
+    setAssignLeadIds(new Set());
+    setAssignSearch("");
+    const res = await fetch("/api/leads");
+    if (res.ok) setLeads(await res.json());
+    setAssignOpen(true);
+  }
+
+  function toggleAssignLead(id: string) {
+    setAssignLeadIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  async function handleAssign(e: React.FormEvent) {
+    e.preventDefault();
+    if (assignLeadIds.size === 0) return;
+    setAssigning(true);
+    try {
+      const res = await fetch(`/api/outreach/${assignDraftId}/assign`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ leadIds: Array.from(assignLeadIds) }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        toast.success(`${data.count} draft(s) created for leads`);
+        setAssignOpen(false);
+        fetchEmails();
+      } else {
+        toast.error("Failed to assign leads");
+      }
+    } finally {
+      setAssigning(false);
+    }
+  }
+
+  const assignFilteredLeads = assignSearch
+    ? leadsWithEmail.filter((l) =>
+        [l.name, l.company, l.email].some((f) =>
+          f?.toLowerCase().includes(assignSearch.toLowerCase())
+        )
+      )
+    : leadsWithEmail;
 
   async function sendEmail(id: string, leadName: string, leadEmail: string) {
     const ok = await confirmAction({
@@ -259,12 +317,14 @@ export default function OutreachPage() {
               <DialogFooter>
                 <Button
                   type="submit"
-                  disabled={creating || !subject || !body || selectedLeadIds.size === 0}
+                  disabled={creating || !subject || !body}
                   className="w-full"
                 >
                   {creating
                     ? "Creating..."
-                    : `Create ${selectedLeadIds.size} Draft${selectedLeadIds.size !== 1 ? "s" : ""}`}
+                    : selectedLeadIds.size > 0
+                      ? `Create ${selectedLeadIds.size} Draft${selectedLeadIds.size !== 1 ? "s" : ""}`
+                      : "Save Draft"}
                 </Button>
               </DialogFooter>
             </form>
@@ -328,12 +388,16 @@ export default function OutreachPage() {
                 <TableRow key={email.id}>
                   <TableCell className="font-medium text-sm">{email.subject}</TableCell>
                   <TableCell>
-                    <div>
-                      <p className="text-sm">{email.lead.name}</p>
-                      <p className="text-xs text-muted-foreground">{email.lead.company ?? ""}</p>
-                    </div>
+                    {email.lead ? (
+                      <div>
+                        <p className="text-sm">{email.lead.name}</p>
+                        <p className="text-xs text-muted-foreground">{email.lead.company ?? ""}</p>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-muted-foreground italic">Template — no recipient</span>
+                    )}
                   </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">{email.lead.email ?? "—"}</TableCell>
+                  <TableCell className="text-muted-foreground text-sm">{email.lead?.email ?? "—"}</TableCell>
                   <TableCell>
                     <StatusBadge label={email.status} variant={statusVariant[email.status]} dot />
                   </TableCell>
@@ -344,21 +408,31 @@ export default function OutreachPage() {
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-1">
-                      {email.status === "DRAFT" && (
+                      {email.status === "DRAFT" && !email.lead && (
+                        <ActionTooltip label="Assign leads">
+                          <Button
+                            variant="ghost" size="icon" className="h-7 w-7 text-blue-500"
+                            onClick={() => openAssign(email.id)}
+                          >
+                            <Mail className="h-3.5 w-3.5" />
+                          </Button>
+                        </ActionTooltip>
+                      )}
+                      {email.status === "DRAFT" && email.lead && (
                         <ActionTooltip label="Send email">
                           <Button
                             variant="ghost" size="icon" className="h-7 w-7 text-emerald-500"
-                            onClick={() => sendEmail(email.id, email.lead.name, email.lead.email ?? "")}
+                            onClick={() => sendEmail(email.id, email.lead!.name, email.lead!.email ?? "")}
                           >
                             <Send className="h-3.5 w-3.5" />
                           </Button>
                         </ActionTooltip>
                       )}
-                      {email.status === "FAILED" && (
+                      {email.status === "FAILED" && email.lead && (
                         <ActionTooltip label="Retry send">
                           <Button
                             variant="ghost" size="icon" className="h-7 w-7 text-amber-500"
-                            onClick={() => sendEmail(email.id, email.lead.name, email.lead.email ?? "")}
+                            onClick={() => sendEmail(email.id, email.lead!.name, email.lead!.email ?? "")}
                           >
                             <Send className="h-3.5 w-3.5" />
                           </Button>
@@ -382,6 +456,65 @@ export default function OutreachPage() {
           </Table>
         </div>
       )}
+
+      {/* Assign Leads Dialog */}
+      <Dialog open={assignOpen} onOpenChange={setAssignOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl text-primary">
+              Assign Leads
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAssign} className="space-y-4 py-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search leads with email..."
+                value={assignSearch}
+                onChange={(e) => setAssignSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <div className="max-h-56 overflow-y-auto rounded-lg border border-border">
+              {assignFilteredLeads.length === 0 && (
+                <p className="py-4 text-center text-sm text-muted-foreground">
+                  No leads with email addresses found.
+                </p>
+              )}
+              {assignFilteredLeads.map((lead) => (
+                <label
+                  key={lead.id}
+                  className="flex cursor-pointer items-center gap-3 border-b border-border px-3 py-2.5 last:border-0 hover:bg-muted/30"
+                >
+                  <input
+                    type="checkbox"
+                    checked={assignLeadIds.has(lead.id)}
+                    onChange={() => toggleAssignLead(lead.id)}
+                    className="h-4 w-4 shrink-0 rounded border-border accent-primary"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{lead.name}</p>
+                    <p className="truncate text-xs text-muted-foreground">
+                      {lead.company ? `${lead.company} · ` : ""}{lead.email}
+                    </p>
+                  </div>
+                </label>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button
+                type="submit"
+                disabled={assigning || assignLeadIds.size === 0}
+                className="w-full"
+              >
+                {assigning
+                  ? "Assigning..."
+                  : `Assign to ${assignLeadIds.size} Lead${assignLeadIds.size !== 1 ? "s" : ""}`}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

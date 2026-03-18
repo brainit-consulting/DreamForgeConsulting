@@ -6,7 +6,7 @@ import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
 const createOutreachSchema = z.object({
   subject: z.string().min(1),
   body: z.string().min(1),
-  leadIds: z.array(z.string().min(1)).min(1),
+  leadIds: z.array(z.string().min(1)).optional(),
 });
 
 export async function GET() {
@@ -25,11 +25,22 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     await requireAdmin();
-    const body = await req.json();
-    const data = createOutreachSchema.parse(body);
+    const reqBody = await req.json();
+    const data = createOutreachSchema.parse(reqBody);
 
+    const leadIds = data.leadIds ?? [];
+
+    if (leadIds.length === 0) {
+      // Save as a template draft with no recipient
+      const draft = await db.outreachEmail.create({
+        data: { subject: data.subject, body: data.body },
+      });
+      return NextResponse.json({ count: 1, id: draft.id }, { status: 201 });
+    }
+
+    // Create one draft per selected lead
     const created = await db.outreachEmail.createMany({
-      data: data.leadIds.map((leadId) => ({
+      data: leadIds.map((leadId) => ({
         leadId,
         subject: data.subject,
         body: data.body,

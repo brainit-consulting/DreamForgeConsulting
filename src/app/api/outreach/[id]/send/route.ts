@@ -25,6 +25,10 @@ export async function POST(
       return NextResponse.json({ error: "Already sent" }, { status: 400 });
     }
 
+    if (!email.lead) {
+      return NextResponse.json({ error: "No recipient assigned — assign a lead first" }, { status: 400 });
+    }
+
     if (!email.lead.email) {
       return NextResponse.json({ error: "Lead has no email address" }, { status: 400 });
     }

@@ -55,7 +55,7 @@ export function AddLeadDialog({ onCreated }: { onCreated: () => void }) {
         <Plus className="mr-2 h-4 w-4" />
         Add Lead
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-display text-xl text-primary">Add Lead</DialogTitle>
         </DialogHeader>
@@ -80,15 +80,13 @@ export function AddLeadDialog({ onCreated }: { onCreated: () => void }) {
               <Input id="lead-phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
             </div>
           </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="space-y-1">
-              <Label htmlFor="lead-website">Website</Label>
-              <Input id="lead-website" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} placeholder="https://company.com" />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="lead-address">Address</Label>
-              <Input id="lead-address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
-            </div>
+          <div className="space-y-1">
+            <Label htmlFor="lead-website">Website</Label>
+            <Input id="lead-website" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} placeholder="https://company.com" />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="lead-address">Address</Label>
+            <Input id="lead-address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="123 Main St, City, FL 33901" />
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1">

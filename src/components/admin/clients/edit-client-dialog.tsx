@@ -101,7 +101,7 @@ export function EditClientDialog({
           </DialogTrigger>
         )}
       </ActionTooltip>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-display text-xl text-primary">
             Edit Client
@@ -150,6 +150,7 @@ export function EditClientDialog({
               id="edit-address"
               value={form.address}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
+              placeholder="123 Main St, City, FL 33901"
             />
           </div>
           <DialogFooter>
