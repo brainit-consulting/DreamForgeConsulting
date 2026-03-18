@@ -98,14 +98,31 @@ export const helpContent: Record<string, HelpSection> = {
   projectDetail: {
     title: "Project Detail — Workflow & Stage Work",
     content:
-      "The project detail page is your command center for managing a project's lifecycle through all 9 stages. The interactive Workflow Tracker at the top shows: Discovery & Planning → Design & Wireframing → Proposal → Client Approval → Development → Testing & QA → Deployment & Launch → Launched → Support. Click any adjacent stage to advance or revert (one step at a time, no skipping). Below the tracker, the Stage Work Panel shows Tasks and Notes for the current stage. The Timeline logs every transition for a full audit trail.",
+      "The project detail page is your command center for managing a project's lifecycle through all 9 stages. The interactive Workflow Tracker at the top lets you advance or revert one stage at a time. Below the tracker, the Stage Work Panel shows Tasks and Notes for the current stage. The Proposal Document card appears from the Proposal stage onward. The Timeline logs every transition for a full audit trail.",
     tips: [
-      "Click a workflow stage circle to transition — advance one step or revert to any earlier step",
+      "Click a workflow stage circle to advance one step or revert to any earlier step",
       "Tasks and Notes are scoped per stage — switching stages shows that stage's work items",
       "Notes autosave after a short debounce; you can also click 'Save' manually",
-      "When a project is at Client Approval, an amber 'Awaiting Client Approval' banner appears",
-      "The admin can still manually advance past Client Approval if needed",
+      "The Proposal Document shows from Proposal stage onward — editable at Proposal + Approval, read-only after",
       "The Timeline logs every stage transition and client approval with timestamps",
+      "Click the ? icon on the Project Workflow card for a detailed guide on each stage",
+    ],
+  },
+  projectWorkflow: {
+    title: "Project Workflow — Complete Guide",
+    content:
+      "Your project moves through 9 stages. Each stage has its own Tasks checklist and Notes. Click workflow circles to advance (one step forward) or revert (any earlier step). Here's how each stage works:",
+    tips: [
+      "STAGE 1 — Discovery & Planning: Add tasks for requirements gathering, stakeholder interviews, and technical audits. Add notes documenting findings, pain points, and decisions. Complete tasks as you go.",
+      "STAGE 2 — Design & Wireframing: Add tasks for wireframes, mockups, and architecture. Add notes for design decisions and client feedback. All Discovery + Design data feeds into the proposal.",
+      "STAGE 3 — Proposal: Click 'Copy Prompt' to generate an AI prompt from Discovery + Design data → paste into Claude/ChatGPT → paste the result into Stage Work > Notes. Or click 'Generate via Athena' to do it in-app (click 'Save as Note'). The Proposal Document card appears showing your proposal — edit it freely. Click the green 'Submit for Approval' button when ready.",
+      "STAGE 4 — Client Approval: Proposal Document is still editable for last-minute tweaks. Preview the approval email, then click 'Send Notification' to email the client (or enable auto-send in Settings > Email Preferences). Client clicks 'Review & Approve' in their portal to advance to Development. Admin can also advance manually.",
+      "STAGE 5 — Development: Build the project. Proposal Document becomes read-only for reference. Add development tasks and notes.",
+      "STAGE 6 — Testing & QA: Quality assurance and bug fixing. Track test cases as tasks.",
+      "STAGE 7 — Deployment & Launch: Deploy to production. Track deployment tasks and launch checklist.",
+      "STAGE 8 — Launched: Project is live. Progress shows 100%.",
+      "STAGE 9 — Post-Launch Support: Ongoing maintenance and support. Proposal Document remains visible as reference.",
+      "Progress auto-calculates: Discovery 5%, Design 15%, Proposal 22%, Approval 30%, Development 50%, Testing 70%, Deployment 85%, Launched/Support 100%",
     ],
   },
   clientDetail: {

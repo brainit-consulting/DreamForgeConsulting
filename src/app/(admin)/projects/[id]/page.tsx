@@ -12,6 +12,8 @@ import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { ActionTooltip } from "@/components/shared/action-tooltip";
+import { useConfirm } from "@/components/shared/confirm-dialog";
+import { HelpButton } from "@/components/shared/help-modal";
 import { toast } from "sonner";
 import { ArrowRight, Clock, FileText, Copy, Bot, Save, Eye, Mail } from "lucide-react";
 import type { ProjectStatus, InvoiceStatus, TicketPriority, Activity } from "@/types";
@@ -48,6 +50,7 @@ export default function ProjectDetailPage() {
   const [loading, setLoading] = useState(true);
 
   const [error, setError] = useState(false);
+  const confirmAction = useConfirm();
 
   // Proposal generation state
   const [proposalOpen, setProposalOpen] = useState(false);
@@ -323,8 +326,13 @@ export default function ProjectDetailPage() {
       {/* Interactive Workflow */}
       <Card>
         <CardHeader>
-          <CardTitle className="font-display text-xl">Project Workflow</CardTitle>
-          <p className="text-sm text-muted-foreground">Click the next stage to advance, or a previous stage to revert.</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="font-display text-xl">Project Workflow</CardTitle>
+              <p className="mt-1 text-sm text-muted-foreground">Click the next stage to advance, or a previous stage to revert.</p>
+            </div>
+            <HelpButton sectionKey="projectWorkflow" />
+          </div>
         </CardHeader>
         <CardContent>
           <WorkflowTracker
@@ -339,14 +347,48 @@ export default function ProjectDetailPage() {
       {["PROPOSAL", "APPROVAL", "DEVELOPMENT", "TESTING", "DEPLOYMENT", "LAUNCHED", "SUPPORT"].includes(project.status) && proposalNotes.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="font-display text-xl text-primary">Proposal Document</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              {project.status === "PROPOSAL"
-                ? "Edit your proposal draft. Changes save on blur. Submit for approval when ready."
-                : project.status === "APPROVAL"
-                  ? "Review or edit the proposal before notifying the client. Changes save on blur."
-                  : "The approved proposal for this project."}
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="font-display text-xl text-primary">Proposal Document</CardTitle>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {project.status === "PROPOSAL"
+                    ? "Edit your proposal draft. Changes save on blur. Submit for approval when ready."
+                    : project.status === "APPROVAL"
+                      ? "Review or edit the proposal before notifying the client. Changes save on blur."
+                      : "The approved proposal for this project."}
+                </p>
+              </div>
+              {project.status === "PROPOSAL" && (
+                <Button
+                  className="shrink-0 bg-emerald-600 hover:bg-emerald-700 text-white"
+                  onClick={async () => {
+                    const ok = await confirmAction({
+                      title: "Submit for Approval",
+                      description: "Submit this proposal for client approval? The proposal will become read-only and the project will move to the Client Approval stage.",
+                      confirmLabel: "Submit for Approval",
+                      variant: "promote",
+                    });
+                    if (!ok) return;
+                    const res = await fetch(`/api/projects/${id}/transition`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ status: "APPROVAL" }),
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                      setProject(data);
+                      fetchActivities();
+                      toast.success("Proposal submitted — awaiting client approval");
+                    } else {
+                      toast.error(data.error ?? "Failed to submit");
+                    }
+                  }}
+                >
+                  <ArrowRight className="mr-2 h-4 w-4" />
+                  Submit for Approval
+                </Button>
+              )}
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             {proposalNotes.map((note) => (
@@ -374,35 +416,12 @@ export default function ProjectDetailPage() {
         </Card>
       )}
 
-      {project.status === "PROPOSAL" && proposalNotes.length > 0 && (
-        <div className="flex justify-end">
-          <ActionTooltip label="Advance to Client Approval stage">
-            <Button
-              onClick={async () => {
-                const res = await fetch(`/api/projects/${id}/transition`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ status: "APPROVAL" }),
-                });
-                const data = await res.json();
-                if (res.ok) {
-                  setProject(data);
-                  fetchActivities();
-                  toast.success("Proposal submitted — awaiting client approval");
-                } else {
-                  toast.error(data.error ?? "Failed to submit");
-                }
-              }}
-            >
-              <ArrowRight className="mr-2 h-4 w-4" />
-              Submit for Approval
-            </Button>
-          </ActionTooltip>
-        </div>
-      )}
-
       {/* Stage Work — Tasks + Notes */}
-      <StageWorkPanel projectId={project.id} currentStage={project.status} />
+      <StageWorkPanel
+        projectId={project.id}
+        currentStage={project.status}
+        hideNotes={["PROPOSAL", "APPROVAL"].includes(project.status) && proposalNotes.length > 0}
+      />
 
       {/* Approval Email Preview Modal */}
       <Dialog open={approvalPreviewOpen} onOpenChange={setApprovalPreviewOpen}>

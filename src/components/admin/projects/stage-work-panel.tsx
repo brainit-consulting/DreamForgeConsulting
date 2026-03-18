@@ -41,6 +41,7 @@ interface StageNote {
 interface StageWorkPanelProps {
   projectId: string;
   currentStage: ProjectStatus;
+  hideNotes?: boolean;
 }
 
 function useDebounce(callback: () => void, delay: number) {
@@ -53,7 +54,7 @@ function useDebounce(callback: () => void, delay: number) {
   }, [delay]);
 }
 
-export function StageWorkPanel({ projectId, currentStage }: StageWorkPanelProps) {
+export function StageWorkPanel({ projectId, currentStage, hideNotes }: StageWorkPanelProps) {
   const [tasks, setTasks] = useState<StageTask[]>([]);
   const [notes, setNotes] = useState<StageNote[]>([]);
   const [newTask, setNewTask] = useState("");
@@ -288,9 +289,10 @@ export function StageWorkPanel({ projectId, currentStage }: StageWorkPanelProps)
           </form>
         </div>
 
-        <Separator />
+        {!hideNotes && <Separator />}
 
         {/* ── Notes ── */}
+        {!hideNotes && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
             <StickyNote className="h-4 w-4 text-primary" />
@@ -387,6 +389,7 @@ export function StageWorkPanel({ projectId, currentStage }: StageWorkPanelProps)
             )}
           </div>
         </div>
+        )}
       </CardContent>
     </Card>
   );
