@@ -16,6 +16,7 @@ Use this as context when identifying which businesses are good prospects. DreamF
 - **Process optimization**: streamlining operations, integrating disconnected tools, building dashboards for visibility and decision-making
 - **IT support & infrastructure**: managed IT, cloud migration, system maintenance, security hardening, backup solutions
 - **Website & digital presence**: website redesign, SEO, online branding — often a foot-in-the-door service that leads to bigger projects
+- **Shopify & e-commerce**: custom Shopify store setup/migration for boutique retail (1-3 owner, <2k products), theme customization, product import, AI shopping agent, checkout automations, app integrations
 - **Training & consulting**: tech training, digital transformation strategy, workflow audits, adoption coaching
 
 ## Phase 1: Market Research
@@ -158,6 +159,7 @@ Field mapping:
 - `source`: "Smart lead discovery"
 - `notes`: Include opportunity score, owner info, services offered, why they're a fit, website quality, suggested DreamForge service
 - `value`: Estimate based on business size and project type (conservative — real quotes come later):
+  - Shopify store setup/customization (boutique retail, <2k products): $800-1.5k — includes theme work, product import, AI agent add-on, automations
   - Website/digital presence: $1.5-3k
   - IT support retainer: $250-1k/month
   - Process automation: $2.5-6k
