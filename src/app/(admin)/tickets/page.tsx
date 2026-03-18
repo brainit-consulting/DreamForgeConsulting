@@ -9,12 +9,13 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { ActionTooltip } from "@/components/shared/action-tooltip";
 import { useConfirm } from "@/components/shared/confirm-dialog";
 import {
-  TicketCheck, AlertTriangle, Clock, CheckCircle, Trash2, Archive,
+  TicketCheck, AlertTriangle, Clock, CheckCircle, Trash2, Archive, Search,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { TicketStatus, TicketPriority } from "@/types";
@@ -50,6 +51,7 @@ export default function TicketsPage() {
   const [tickets, setTickets] = useState<TicketRow[]>([]);
   const [filter, setFilter] = useState<TicketStatus | "ALL">("ALL");
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
   const confirmAction = useConfirm();
 
@@ -64,7 +66,14 @@ export default function TicketsPage() {
 
   useEffect(() => { fetchTickets(); }, [fetchTickets]);
 
-  const filtered = filter === "ALL" ? tickets : tickets.filter((t) => t.status === filter);
+  const searched = search
+    ? tickets.filter((t) =>
+        [t.subject, t.description, t.client?.company, t.client?.email, t.project?.name].some((f) =>
+          f?.toLowerCase().includes(search.toLowerCase())
+        )
+      )
+    : tickets;
+  const filtered = filter === "ALL" ? searched : searched.filter((t) => t.status === filter);
 
   const openCount = tickets.filter((t) => t.status === "OPEN").length;
   const inProgressCount = tickets.filter((t) => t.status === "IN_PROGRESS").length;
@@ -122,6 +131,16 @@ export default function TicketsPage() {
             <CardContent><p className="font-display text-2xl">{stat.value}</p></CardContent>
           </Card>
         ))}
+      </div>
+
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Search tickets by subject, client, project..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-9"
+        />
       </div>
 
       <div className="flex items-center gap-2">
