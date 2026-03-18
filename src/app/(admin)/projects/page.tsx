@@ -21,8 +21,8 @@ import { toast } from "sonner";
 import type { ProjectStatus } from "@/types";
 
 const statusVariant: Record<ProjectStatus, "info" | "ember" | "warning" | "success" | "default"> = {
-  DISCOVERY: "info", DESIGN: "ember", DEVELOPMENT: "ember",
-  TESTING: "warning", DEPLOYMENT: "warning", LAUNCHED: "success", SUPPORT: "default",
+  DISCOVERY: "info", DESIGN: "ember", PROPOSAL: "warning", APPROVAL: "warning",
+  DEVELOPMENT: "ember", TESTING: "warning", DEPLOYMENT: "warning", LAUNCHED: "success", SUPPORT: "default",
 };
 
 interface ProjectRow {
@@ -159,7 +159,7 @@ export default function ProjectsPage() {
                       <StatusBadge label={project.status} variant={statusVariant[project.status]} dot />
                     </SelectTrigger>
                     <SelectContent>
-                      {(["DISCOVERY", "DESIGN", "DEVELOPMENT", "TESTING", "DEPLOYMENT", "LAUNCHED", "SUPPORT"] as ProjectStatus[]).map((s) => (
+                      {(["DISCOVERY", "DESIGN", "PROPOSAL", "APPROVAL", "DEVELOPMENT", "TESTING", "DEPLOYMENT", "LAUNCHED", "SUPPORT"] as ProjectStatus[]).map((s) => (
                         <SelectItem key={s} value={s}>{s}</SelectItem>
                       ))}
                     </SelectContent>

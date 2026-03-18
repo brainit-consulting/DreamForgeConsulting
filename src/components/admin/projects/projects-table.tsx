@@ -18,6 +18,8 @@ import type { Project, ProjectStatus } from "@/types";
 const statusVariant: Record<ProjectStatus, "info" | "ember" | "warning" | "success" | "default"> = {
   DISCOVERY: "info",
   DESIGN: "ember",
+  PROPOSAL: "warning",
+  APPROVAL: "warning",
   DEVELOPMENT: "ember",
   TESTING: "warning",
   DEPLOYMENT: "warning",

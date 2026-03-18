@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 import {
   Search,
   Palette,
+  FileText,
+  CheckCircle,
   Code,
   TestTubeDiagonal,
   Rocket,
@@ -20,6 +22,8 @@ import {
 const stageIcons: Record<ProjectStatus, React.ElementType> = {
   DISCOVERY: Search,
   DESIGN: Palette,
+  PROPOSAL: FileText,
+  APPROVAL: CheckCircle,
   DEVELOPMENT: Code,
   TESTING: TestTubeDiagonal,
   DEPLOYMENT: Rocket,

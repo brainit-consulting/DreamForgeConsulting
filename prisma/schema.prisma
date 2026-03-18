@@ -186,6 +186,8 @@ model StageNote {
 enum ProjectStatus {
   DISCOVERY
   DESIGN
+  PROPOSAL
+  APPROVAL
   DEVELOPMENT
   TESTING
   DEPLOYMENT

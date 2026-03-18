@@ -13,6 +13,8 @@ export type LeadStatus =
 export type ProjectStatus =
   | "DISCOVERY"
   | "DESIGN"
+  | "PROPOSAL"
+  | "APPROVAL"
   | "DEVELOPMENT"
   | "TESTING"
   | "DEPLOYMENT"
@@ -112,6 +114,8 @@ export interface Activity {
 export const WORKFLOW_STAGES: { key: ProjectStatus; label: string }[] = [
   { key: "DISCOVERY", label: "Discovery & Planning" },
   { key: "DESIGN", label: "Design & Wireframing" },
+  { key: "PROPOSAL", label: "Proposal" },
+  { key: "APPROVAL", label: "Client Approval" },
   { key: "DEVELOPMENT", label: "Development" },
   { key: "TESTING", label: "Testing & QA" },
   { key: "DEPLOYMENT", label: "Deployment & Launch" },
@@ -121,10 +125,12 @@ export const WORKFLOW_STAGES: { key: ProjectStatus; label: string }[] = [
 
 // Auto-calculated progress per stage
 export const STAGE_PROGRESS: Record<ProjectStatus, number> = {
-  DISCOVERY: 8,
-  DESIGN: 22,
-  DEVELOPMENT: 45,
-  TESTING: 68,
+  DISCOVERY: 5,
+  DESIGN: 15,
+  PROPOSAL: 22,
+  APPROVAL: 30,
+  DEVELOPMENT: 50,
+  TESTING: 70,
   DEPLOYMENT: 85,
   LAUNCHED: 100,
   SUPPORT: 100,

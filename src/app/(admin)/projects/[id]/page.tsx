@@ -12,8 +12,8 @@ import { ArrowRight, Clock } from "lucide-react";
 import type { ProjectStatus, InvoiceStatus, TicketPriority, Activity } from "@/types";
 
 const statusVariant: Record<ProjectStatus, "info" | "ember" | "warning" | "success" | "default"> = {
-  DISCOVERY: "info", DESIGN: "ember", DEVELOPMENT: "ember",
-  TESTING: "warning", DEPLOYMENT: "warning", LAUNCHED: "success", SUPPORT: "default",
+  DISCOVERY: "info", DESIGN: "ember", PROPOSAL: "warning", APPROVAL: "warning",
+  DEVELOPMENT: "ember", TESTING: "warning", DEPLOYMENT: "warning", LAUNCHED: "success", SUPPORT: "default",
 };
 const invoiceStatusVariant: Record<InvoiceStatus, "default" | "info" | "success" | "destructive" | "warning"> = {
   DRAFT: "default", SENT: "info", PAID: "success", OVERDUE: "destructive", CANCELLED: "warning",
@@ -116,6 +116,16 @@ export default function ProjectDetailPage() {
         </div>
         <StatusBadge label={project.status} variant={statusVariant[project.status]} dot />
       </div>
+
+      {project.status === "APPROVAL" && (
+        <div className="flex items-center gap-3 rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3">
+          <Clock className="h-5 w-5 text-amber-400 shrink-0" />
+          <div>
+            <p className="text-sm font-medium text-amber-400">Awaiting Client Approval</p>
+            <p className="text-xs text-amber-400/70">The client has been notified and can approve from their portal. You can also advance manually.</p>
+          </div>
+        </div>
+      )}
 
       {/* Interactive Workflow */}
       <Card>

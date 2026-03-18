@@ -8,13 +8,13 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import type { ProjectStatus } from "@/types";
 
 const statusVariant: Record<ProjectStatus, "info" | "ember" | "warning" | "success" | "default"> = {
-  DISCOVERY: "info", DESIGN: "ember", DEVELOPMENT: "ember",
-  TESTING: "warning", DEPLOYMENT: "warning", LAUNCHED: "success", SUPPORT: "default",
+  DISCOVERY: "info", DESIGN: "ember", PROPOSAL: "warning", APPROVAL: "warning",
+  DEVELOPMENT: "ember", TESTING: "warning", DEPLOYMENT: "warning", LAUNCHED: "success", SUPPORT: "default",
 };
 
 const statusLabel: Record<ProjectStatus, string> = {
-  DISCOVERY: "Discovery", DESIGN: "Design", DEVELOPMENT: "Development",
-  TESTING: "Testing", DEPLOYMENT: "Deploying", LAUNCHED: "Launched", SUPPORT: "Support",
+  DISCOVERY: "Discovery", DESIGN: "Design", PROPOSAL: "Proposal", APPROVAL: "Approval",
+  DEVELOPMENT: "Development", TESTING: "Testing", DEPLOYMENT: "Deploying", LAUNCHED: "Launched", SUPPORT: "Support",
 };
 
 interface ProjectRow {

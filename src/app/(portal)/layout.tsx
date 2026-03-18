@@ -1,5 +1,6 @@
 import { PortalSidebar } from "@/components/portal/portal-sidebar";
 import { HelpProvider } from "@/components/shared/help-modal";
+import { ConfirmProvider } from "@/components/shared/confirm-dialog";
 import { AthenaChat } from "@/components/shared/athena-chat";
 import { TopBar } from "@/components/shared/top-bar";
 
@@ -10,6 +11,7 @@ export default function PortalLayout({
 }) {
   return (
     <HelpProvider>
+    <ConfirmProvider>
       <div className="flex h-screen overflow-hidden">
         <PortalSidebar />
         <div className="flex flex-1 flex-col overflow-hidden">
@@ -20,6 +22,7 @@ export default function PortalLayout({
         </div>
       </div>
       <AthenaChat />
+    </ConfirmProvider>
     </HelpProvider>
   );
 }

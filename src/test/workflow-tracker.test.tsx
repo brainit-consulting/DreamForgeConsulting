@@ -10,12 +10,14 @@ vi.mock("next/navigation", () => ({
 }));
 
 describe("WorkflowTracker", () => {
-  it("renders all 7 workflow stages", () => {
+  it("renders all 9 workflow stages", () => {
     render(
-      <WorkflowTracker currentStatus="DEVELOPMENT" progress={45} />
+      <WorkflowTracker currentStatus="DEVELOPMENT" progress={50} />
     );
     expect(screen.getByText("Discovery & Planning")).toBeInTheDocument();
     expect(screen.getByText("Design & Wireframing")).toBeInTheDocument();
+    expect(screen.getByText("Proposal")).toBeInTheDocument();
+    expect(screen.getByText("Client Approval")).toBeInTheDocument();
     expect(screen.getByText("Development")).toBeInTheDocument();
     expect(screen.getByText("Testing & QA")).toBeInTheDocument();
     expect(screen.getByText("Deployment & Launch")).toBeInTheDocument();
@@ -43,8 +45,8 @@ describe("WorkflowTracker", () => {
       <WorkflowTracker currentStatus="TESTING" progress={78} />
     );
     const emeraldNodes = container.querySelectorAll(".border-emerald-500");
-    // DISCOVERY, DESIGN, DEVELOPMENT = 3 completed stages
-    expect(emeraldNodes.length).toBe(3);
+    // DISCOVERY, DESIGN, PROPOSAL, APPROVAL, DEVELOPMENT = 5 completed stages
+    expect(emeraldNodes.length).toBe(5);
   });
 });
 

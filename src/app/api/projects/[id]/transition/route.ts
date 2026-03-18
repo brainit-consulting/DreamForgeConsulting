@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
+import { resend } from "@/lib/resend";
+import { approvalRequestEmail } from "@/lib/email-templates";
+import { getFromAddress } from "@/lib/email-config";
 import {
   STAGE_PROGRESS,
   WORKFLOW_STAGES,
@@ -65,6 +68,26 @@ export async function POST(
       entityId: id,
     },
   });
+
+  // Send approval request email when moving to APPROVAL
+  if (newStatus === "APPROVAL" && updated.client?.email) {
+    try {
+      const portalUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://dreamforgeconsulting.vercel.app"}/portal/projects`;
+      const emailContent = await approvalRequestEmail({
+        projectName: updated.name,
+        clientName: updated.client.company,
+        portalUrl,
+      });
+      await resend.emails.send({
+        from: getFromAddress(),
+        to: updated.client.email,
+        subject: emailContent.subject,
+        html: emailContent.html,
+      });
+    } catch (emailError) {
+      console.error("[Transition] Approval email failed:", emailError);
+    }
+  }
 
   return NextResponse.json(updated);
   } catch (error) {

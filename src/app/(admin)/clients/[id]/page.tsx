@@ -9,8 +9,8 @@ import { db } from "@/lib/db";
 import type { ProjectStatus, InvoiceStatus } from "@/types";
 
 const projectStatusVariant: Record<ProjectStatus, "info" | "ember" | "warning" | "success" | "default"> = {
-  DISCOVERY: "info", DESIGN: "ember", DEVELOPMENT: "ember",
-  TESTING: "warning", DEPLOYMENT: "warning", LAUNCHED: "success", SUPPORT: "default",
+  DISCOVERY: "info", DESIGN: "ember", PROPOSAL: "warning", APPROVAL: "warning",
+  DEVELOPMENT: "ember", TESTING: "warning", DEPLOYMENT: "warning", LAUNCHED: "success", SUPPORT: "default",
 };
 
 const invoiceStatusVariant: Record<InvoiceStatus, "default" | "info" | "success" | "destructive" | "warning"> = {

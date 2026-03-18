@@ -44,14 +44,14 @@ export const helpContent: Record<string, HelpSection> = {
   projects: {
     title: "Projects — SaaS Delivery Tracker",
     content:
-      "Projects represent the SaaS applications you're building for clients. Each project tracks through a 7-stage workflow: Discovery & Planning → Design & Wireframing → Development → Testing & QA → Deployment & Launch → Launched → Support. Use 'New Project' to create one (select a client, set name, description, dates, and budget). The status dropdown in each row lets you change the workflow stage directly. Progress percentage auto-calculates based on the current stage.",
+      "Projects represent the SaaS applications you're building for clients. Each project tracks through a 9-stage workflow: Discovery & Planning → Design & Wireframing → Proposal → Client Approval → Development → Testing & QA → Deployment & Launch → Launched → Support. Use 'New Project' to create one (select a client, set name, description, dates, and budget). The status dropdown in each row lets you change the workflow stage directly. Progress percentage auto-calculates based on the current stage.",
     tips: [
       "Use the search bar to filter projects by name or client company",
       "Click a project name to open its detail page with the interactive workflow tracker",
       "On the detail page, click workflow stage circles to advance or revert the project",
       "Each stage has its own Tasks checklist and Notes — use them to track work details",
       "Stage transitions are logged in the Timeline section on the project detail page",
-      "Progress auto-calculates: Discovery 8%, Design 22%, Development 45%, Testing 68%, Deployment 85%, Launched/Support 100%",
+      "Progress auto-calculates across all 9 stages from Discovery (5%) to Launched/Support (100%)",
     ],
   },
   invoices: {
@@ -83,7 +83,7 @@ export const helpContent: Record<string, HelpSection> = {
     content:
       "Welcome to your DreamForge Consulting client portal. Here you can track the real-time status of all your projects with visual workflow indicators, view and pay outstanding invoices directly via Stripe, and submit support tickets for any questions or issues. The dashboard shows a summary of your active projects, pending invoices, and open tickets. Payments are processed securely through Stripe and your invoice status updates automatically.",
     tips: [
-      "The Projects tab shows your projects with full workflow visualization",
+      "The Projects tab shows your projects with full workflow visualization — when a project is awaiting your approval, you'll see a 'Review & Approve' button",
       "The Invoices tab lets you view all invoices and pay outstanding ones with a single click",
       "After paying via Stripe, the invoice automatically updates to PAID — no manual steps needed",
       "Use the Tickets tab to submit new support requests — select the project and priority level",
@@ -99,7 +99,7 @@ export const helpContent: Record<string, HelpSection> = {
       "Click a workflow stage circle to transition — you can advance one step or revert one step",
       "Tasks and Notes are scoped per stage — switching stages shows that stage's work items",
       "Notes autosave after a short debounce; you can also click 'Save' manually",
-      "Progress auto-calculates: Discovery 8%, Design 22%, Development 45%, Testing 68%, Deployment 85%, Launched/Support 100%",
+      "Progress auto-calculates across all 9 stages from Discovery (5%) to Launched/Support (100%)",
       "The Timeline logs every stage transition with timestamps for full audit trail",
     ],
   },
