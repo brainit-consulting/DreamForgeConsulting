@@ -9,7 +9,7 @@ Smart lead discovery for DreamForge Consulting. Researches market opportunities,
 
 ## DreamForge Service Offering
 
-Use this as context when identifying which businesses are good prospects. DreamForge offers:
+These are DreamForge's **known** service lines — use them as context when scoring leads. However, **do not limit research to these categories**. Phase 1 should actively discover new sectors and opportunities based on current market demand, even if they don't fit neatly into these tiers. DreamForge offers:
 
 - **Custom SaaS development**: client portals, booking/scheduling systems, inventory management, CRM tools, payment integrations, automated workflows
 - **Business process automation**: replacing manual workflows, paper forms, spreadsheets, and email chains with automated systems
@@ -23,7 +23,7 @@ Use this as context when identifying which businesses are good prospects. DreamF
 
 **When:** User runs `/research-leads` with no arguments.
 
-**Goal:** Identify 3-5 small business sectors that would benefit from DreamForge's services.
+**Goal:** Identify 3-5 small business sectors that would benefit from DreamForge's services. **Go beyond the known service tiers** — surface sectors and opportunities the user may not have considered.
 
 Use WebSearch to research:
 - "small businesses that need custom software 2025"
@@ -33,6 +33,9 @@ Use WebSearch to research:
 - "industries without good SaaS solutions"
 - "small businesses struggling with manual workflows"
 - "businesses that need IT support and don't have it"
+- "emerging small business niches needing tech help"
+- "small business pain points technology can solve 2025"
+- "fastest growing small business sectors needing digital tools"
 - Local business trends in Florida
 
 Look for sectors where businesses are:
@@ -42,6 +45,10 @@ Look for sectors where businesses are:
 - Managing clients via email and phone with no system
 - Running without IT support or proper backups
 - Using disconnected tools that don't talk to each other
+- In a growing niche where tech adoption is lagging behind demand
+- Facing new regulations or compliance needs that require digital systems
+
+**Important:** At least 1-2 of the 3-5 sectors should be **unexpected or niche** — not obvious picks. The value of this research is surfacing opportunities the user hasn't thought of yet.
 
 Present findings as a ranked table:
 
