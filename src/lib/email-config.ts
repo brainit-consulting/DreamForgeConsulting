@@ -15,7 +15,7 @@ export type EmailConfig = z.infer<typeof emailConfigSchema>;
 
 export const DEFAULT_EMAIL_CONFIG: EmailConfig = {
   companyName: "DreamForge Consulting",
-  logoUrl: "/DreamForgeConsultingLogo.png",
+  logoUrl: "/DreamForgeConsultingLogo-email.png",
   logoSize: 120,
   signOff: "Best regards,\nDreamForge Consulting",
   tagline: "Crafting your digital future.",
@@ -72,8 +72,12 @@ export async function resetEmailConfig(): Promise<EmailConfig> {
 }
 
 /** Get absolute logo URL for use in emails */
-export function getAbsoluteLogoUrl(): string {
-  const base = process.env.NEXT_PUBLIC_APP_URL ?? "https://dreamforgeconsulting.vercel.app";
+export async function getAbsoluteLogoUrl(): Promise<string> {
+  await loadFromDb();
+  // Always use production URL for email assets — localhost is unreachable from email clients
+  const base = process.env.NEXT_PUBLIC_APP_URL?.includes("localhost")
+    ? "https://dreamforgeconsulting.vercel.app"
+    : (process.env.NEXT_PUBLIC_APP_URL ?? "https://dreamforgeconsulting.vercel.app");
   const logo = currentConfig.logoUrl;
   if (logo.startsWith("http")) return logo;
   return `${base}${logo.startsWith("/") ? "" : "/"}${logo}`;

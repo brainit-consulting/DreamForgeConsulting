@@ -477,6 +477,16 @@ export default function OutreachPage() {
                           </Button>
                         </ActionTooltip>
                       )}
+                      {email.status === "SENT" && email.lead && (
+                        <ActionTooltip label="Resend email">
+                          <Button
+                            variant="ghost" size="icon" className="h-7 w-7 text-blue-500"
+                            onClick={() => sendEmail(email.id, email.lead!.name, email.lead!.email ?? "")}
+                          >
+                            <Send className="h-3.5 w-3.5" />
+                          </Button>
+                        </ActionTooltip>
+                      )}
                       {email.status === "FAILED" && email.lead && (
                         <ActionTooltip label="Retry send">
                           <Button

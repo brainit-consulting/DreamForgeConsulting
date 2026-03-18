@@ -22,9 +22,7 @@ export async function POST(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    if (email.status === "SENT") {
-      return NextResponse.json({ error: "Already sent" }, { status: 400 });
-    }
+    // Allow re-sending (no status check — DRAFT, FAILED, and SENT can all be sent)
 
     if (!email.lead) {
       return NextResponse.json({ error: "No recipient assigned — assign a lead first" }, { status: 400 });

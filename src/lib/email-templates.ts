@@ -2,14 +2,14 @@ import { getEmailConfig, getAbsoluteLogoUrl } from "./email-config";
 
 async function emailHeader(): Promise<string> {
   const config = await getEmailConfig();
-  const logoUrl = getAbsoluteLogoUrl();
+  const logoUrl = await getAbsoluteLogoUrl();
   const parts = config.companyName.split(" ");
   const mainName = parts.slice(0, -1).join(" ") || config.companyName;
   const subtitle = parts.length > 1 ? parts[parts.length - 1].toUpperCase() : "";
 
   return `
     <div style="text-align:center;margin-bottom:32px;">
-      <img src="${logoUrl}" alt="${config.companyName}" style="max-height:${config.logoSize}px;max-width:${config.logoSize * 2}px;margin:0 auto 12px;" />
+      <img src="${logoUrl}" alt="${config.companyName}" width="${config.logoSize}" style="display:block;max-height:${config.logoSize}px;max-width:${config.logoSize * 2}px;margin:0 auto 12px;" />
       <h1 style="color:#F59E0B;font-size:28px;margin:0;">${mainName}</h1>
       ${subtitle ? `<p style="color:#888;font-size:12px;letter-spacing:3px;margin:4px 0 0;">${subtitle}</p>` : ""}
     </div>`;

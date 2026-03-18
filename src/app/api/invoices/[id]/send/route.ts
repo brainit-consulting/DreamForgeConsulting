@@ -25,7 +25,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   // Send email
   try {
     const emailCfg = await getEmailConfig();
-    const logoUrl = getAbsoluteLogoUrl();
+    const logoUrl = await getAbsoluteLogoUrl();
     await resend.emails.send({
       from: getFromAddress(),
       to: invoice.client.email,
