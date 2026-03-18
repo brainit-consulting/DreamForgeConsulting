@@ -17,7 +17,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { ActionTooltip } from "@/components/shared/action-tooltip";
 import { useConfirm } from "@/components/shared/confirm-dialog";
 import {
-  Mail, Send, Trash2, FileEdit, Search, Plus, CheckCircle, XCircle, Clock, Eye, Copy,
+  Mail, Send, Trash2, FileEdit, Search, Plus, CheckCircle, XCircle, Clock, Eye, Copy, Pencil,
 } from "lucide-react";
 import { toast } from "sonner";
 import type { OutreachStatus, Lead } from "@/types";
@@ -217,6 +217,41 @@ export default function OutreachPage() {
       fetchEmails();
     } else {
       toast.error("Failed to clone");
+    }
+  }
+
+  // Edit state
+  const [editOpen, setEditOpen] = useState(false);
+  const [editId, setEditId] = useState("");
+  const [editSubject, setEditSubject] = useState("");
+  const [editBody, setEditBody] = useState("");
+  const [editSaving, setEditSaving] = useState(false);
+
+  function openEdit(email: OutreachRow) {
+    setEditId(email.id);
+    setEditSubject(email.subject);
+    setEditBody(email.body);
+    setEditOpen(true);
+  }
+
+  async function handleEditSave(e: React.FormEvent) {
+    e.preventDefault();
+    setEditSaving(true);
+    try {
+      const res = await fetch(`/api/outreach/${editId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subject: editSubject, body: editBody }),
+      });
+      if (res.ok) {
+        toast.success("Draft updated");
+        setEditOpen(false);
+        fetchEmails();
+      } else {
+        toast.error("Failed to update");
+      }
+    } finally {
+      setEditSaving(false);
     }
   }
 
@@ -449,6 +484,16 @@ export default function OutreachPage() {
                           <Eye className="h-3.5 w-3.5" />
                         </Button>
                       </ActionTooltip>
+                      {email.status === "DRAFT" && (
+                        <ActionTooltip label="Edit draft">
+                          <Button
+                            variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground"
+                            onClick={() => openEdit(email)}
+                          >
+                            <Pencil className="h-3.5 w-3.5" />
+                          </Button>
+                        </ActionTooltip>
+                      )}
                       <ActionTooltip label="Clone as new draft">
                         <Button
                           variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground"
@@ -569,6 +614,45 @@ export default function OutreachPage() {
                 {assigning
                   ? "Assigning..."
                   : `Assign to ${assignLeadIds.size} Lead${assignLeadIds.size !== 1 ? "s" : ""}`}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Draft Dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl text-primary">
+              Edit Draft
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleEditSave} className="space-y-4 py-2">
+            <div className="space-y-1">
+              <Label htmlFor="edit-subject">Subject</Label>
+              <Input
+                id="edit-subject"
+                value={editSubject}
+                onChange={(e) => setEditSubject(e.target.value)}
+                className="font-notes text-base"
+                required
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="edit-body">Message</Label>
+              <Textarea
+                id="edit-body"
+                value={editBody}
+                onChange={(e) => setEditBody(e.target.value)}
+                rows={8}
+                className="font-notes !text-base"
+                required
+              />
+            </div>
+            <DialogFooter>
+              <Button type="submit" disabled={editSaving} className="w-full">
+                {editSaving ? "Saving..." : "Save Changes"}
               </Button>
             </DialogFooter>
           </form>
