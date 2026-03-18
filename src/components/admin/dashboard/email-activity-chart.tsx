@@ -82,12 +82,15 @@ export function EmailActivityChart() {
             />
             <Tooltip
               contentStyle={{
-                background: "hsl(var(--popover))",
-                border: "1px solid hsl(var(--border))",
+                backgroundColor: "oklch(0.14 0.015 270 / 85%)",
+                backdropFilter: "blur(8px)",
+                border: "1px solid oklch(1 0 0 / 8%)",
                 borderRadius: "8px",
+                color: "oklch(0.85 0.01 80)",
                 fontSize: "12px",
               }}
-              labelStyle={{ color: "hsl(var(--foreground))" }}
+              labelStyle={{ color: "oklch(0.85 0.01 80)" }}
+              cursor={{ fill: "oklch(1 0 0 / 5%)" }}
             />
             <Bar dataKey="outreach" name="Outreach" stackId="emails" fill="#f59e0b" radius={[0, 0, 0, 0]} />
             <Bar dataKey="invoice" name="Invoice" stackId="emails" fill="#3b82f6" radius={[0, 0, 0, 0]} />
