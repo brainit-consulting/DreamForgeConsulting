@@ -51,7 +51,7 @@ export default function ClientsPage() {
   async function inviteClient(id: string) {
     const ok = await confirm({
       title: "Send Portal Invite",
-      description: "This will create a portal login and email credentials to the client.",
+      description: "This will create a portal account and send an email to the client with their login email and a temporary password. They can use these to sign in to their client portal.",
       confirmLabel: "Send Invite",
       variant: "promote",
     });
