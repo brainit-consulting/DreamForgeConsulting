@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { resend } from "@/lib/resend";
+import { sendEmail } from "@/lib/email-send";
 import { outreachEmail } from "@/lib/email-templates";
 import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
 import { getFromAddress } from "@/lib/email-config";
@@ -39,7 +39,7 @@ export async function POST(
     });
 
     try {
-      await resend.emails.send({
+      await sendEmail({
         from: getFromAddress(),
         to: email.lead.email,
         subject: email.subject,
@@ -50,6 +50,15 @@ export async function POST(
         where: { id },
         data: { status: "SENT", sentAt: new Date() },
         include: { lead: true },
+      });
+
+      await db.activity.create({
+        data: {
+          type: "email_outreach_sent",
+          description: `Outreach email sent to ${email.lead.name} (${email.lead.email})`,
+          entityType: "outreach",
+          entityId: id,
+        },
       });
 
       return NextResponse.json(updated);

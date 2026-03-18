@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { KpiCards } from "@/components/admin/dashboard/kpi-cards";
 import { RevenueChart } from "@/components/admin/dashboard/revenue-chart";
 import { ActivityFeed } from "@/components/admin/dashboard/activity-feed";
+import { EmailActivityChart } from "@/components/admin/dashboard/email-activity-chart";
 import { ProjectOverview } from "@/components/admin/dashboard/project-overview";
 
 interface Stats {
@@ -39,6 +40,7 @@ export default function DashboardPage() {
         <ActivityFeed />
       </div>
 
+      <EmailActivityChart />
       <ProjectOverview />
     </div>
   );

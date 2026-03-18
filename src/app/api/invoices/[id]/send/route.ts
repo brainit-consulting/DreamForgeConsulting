@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { resend } from "@/lib/resend";
+import { sendEmail } from "@/lib/email-send";
 import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
 import { getFromAddress, getEmailConfig, getAbsoluteLogoUrl } from "@/lib/email-config";
 
@@ -26,7 +26,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   try {
     const emailCfg = await getEmailConfig();
     const logoUrl = await getAbsoluteLogoUrl();
-    await resend.emails.send({
+    await sendEmail({
       from: getFromAddress(),
       to: invoice.client.email,
       subject: `Invoice from ${emailCfg.companyName} — $${invoice.amount.toLocaleString()}`,
@@ -66,6 +66,15 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     where: { id },
     data: { status: "SENT" },
     include: { client: true, project: true },
+  });
+
+  await db.activity.create({
+    data: {
+      type: "email_invoice_sent",
+      description: `Invoice emailed to ${invoice.client.company} — $${invoice.amount.toLocaleString()}`,
+      entityType: "invoice",
+      entityId: id,
+    },
   });
 
   return NextResponse.json(updated);

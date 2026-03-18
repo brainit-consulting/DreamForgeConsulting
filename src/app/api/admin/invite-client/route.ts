@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { resend } from "@/lib/resend";
+import { sendEmail } from "@/lib/email-send";
 import { clientInviteEmail } from "@/lib/email-templates";
 import { headers } from "next/headers";
 import crypto from "crypto";
@@ -98,7 +98,7 @@ export async function POST(req: Request) {
     });
 
     try {
-      await resend.emails.send({
+      await sendEmail({
         from: getFromAddress(),
         to: client.email,
         subject: emailContent.subject,
@@ -107,6 +107,15 @@ export async function POST(req: Request) {
     } catch (emailError) {
       console.error("[Invite] Email send failed:", emailError);
     }
+
+    await db.activity.create({
+      data: {
+        type: "email_invite_sent",
+        description: `Portal invite sent to ${client.company} (${client.email})`,
+        entityType: "client",
+        entityId: clientId,
+      },
+    });
 
     return NextResponse.json({
       success: true,

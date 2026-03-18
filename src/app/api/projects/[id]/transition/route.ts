@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
-import { resend } from "@/lib/resend";
+import { sendEmail } from "@/lib/email-send";
 import { approvalRequestEmail } from "@/lib/email-templates";
 import { getFromAddress, getEmailConfig } from "@/lib/email-config";
 import {
@@ -79,7 +79,7 @@ export async function POST(
         clientName: updated.client.company,
         portalUrl,
       });
-      await resend.emails.send({
+      await sendEmail({
         from: getFromAddress(),
         to: updated.client.email,
         subject: emailContent.subject,
