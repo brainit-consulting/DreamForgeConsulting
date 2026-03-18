@@ -21,11 +21,11 @@ export async function GET(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const config = getEmailConfig();
+    const config = await getEmailConfig();
     const leadName = email.lead?.name ?? "{{Lead Name}}";
     const company = email.lead?.company ?? "{{Company}}";
 
-    const html = outreachEmail({
+    const html = await outreachEmail({
       leadName,
       company,
       body: email.body,

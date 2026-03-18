@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { db } from "./db";
+
+const SETTINGS_KEY = "athena";
 
 export const athenaConfigSchema = z.object({
   systemPrompt: z.string().min(1),
@@ -32,21 +35,52 @@ Rules:
   openAIFallbackModel: "gpt-4o-mini",
 };
 
-// In-memory config with defaults (persists across requests in dev/serverless warm starts)
 let currentConfig: AthenaConfig = { ...DEFAULT_ATHENA_CONFIG };
+let loadedFromDb = false;
 
-export function getAthenaConfig(): AthenaConfig {
+async function loadFromDb(): Promise<void> {
+  if (loadedFromDb) return;
+  try {
+    const row = await db.appSettings.findUnique({ where: { key: SETTINGS_KEY } });
+    if (row) {
+      const stored = JSON.parse(row.value);
+      currentConfig = athenaConfigSchema.parse({ ...DEFAULT_ATHENA_CONFIG, ...stored });
+    }
+  } catch {
+    // DB not available or invalid data — use defaults
+  }
+  loadedFromDb = true;
+}
+
+export async function getAthenaConfig(): Promise<AthenaConfig> {
+  await loadFromDb();
   return currentConfig;
 }
 
-export function updateAthenaConfig(partial: Partial<AthenaConfig>): AthenaConfig {
+export async function updateAthenaConfig(partial: Partial<AthenaConfig>): Promise<AthenaConfig> {
+  await loadFromDb();
   const merged = { ...currentConfig, ...partial };
   const validated = athenaConfigSchema.parse(merged);
   currentConfig = validated;
+  try {
+    await db.appSettings.upsert({
+      where: { key: SETTINGS_KEY },
+      update: { value: JSON.stringify(currentConfig) },
+      create: { key: SETTINGS_KEY, value: JSON.stringify(currentConfig) },
+    });
+  } catch {
+    // Log but don't fail — in-memory still updated
+  }
   return currentConfig;
 }
 
-export function resetAthenaConfig(): AthenaConfig {
+export async function resetAthenaConfig(): Promise<AthenaConfig> {
   currentConfig = { ...DEFAULT_ATHENA_CONFIG };
+  loadedFromDb = true;
+  try {
+    await db.appSettings.delete({ where: { key: SETTINGS_KEY } }).catch(() => {});
+  } catch {
+    // Ignore if row doesn't exist
+  }
   return currentConfig;
 }

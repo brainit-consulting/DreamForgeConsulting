@@ -89,7 +89,7 @@ export async function POST(req: Request) {
 
     // Send invite email
     const portalUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://dreamforgeconsulting.vercel.app"}/login`;
-    const emailContent = clientInviteEmail({
+    const emailContent = await clientInviteEmail({
       clientName: client.company,
       company: client.company,
       email: client.email,

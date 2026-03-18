@@ -267,6 +267,18 @@ model Activity {
 }
 
 // =============================================
+// APP SETTINGS (key-value store for persisted config)
+// =============================================
+
+model AppSettings {
+  key       String   @id
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+
+  @@map("app_settings")
+}
+
+// =============================================
 // OUTREACH
 // =============================================
 

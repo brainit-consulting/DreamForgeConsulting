@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { db } from "./db";
+
+const SETTINGS_KEY = "email";
 
 export const emailConfigSchema = z.object({
   companyName: z.string().min(1),
@@ -17,20 +20,52 @@ export const DEFAULT_EMAIL_CONFIG: EmailConfig = {
 };
 
 let currentConfig: EmailConfig = { ...DEFAULT_EMAIL_CONFIG };
+let loadedFromDb = false;
 
-export function getEmailConfig(): EmailConfig {
+async function loadFromDb(): Promise<void> {
+  if (loadedFromDb) return;
+  try {
+    const row = await db.appSettings.findUnique({ where: { key: SETTINGS_KEY } });
+    if (row) {
+      const stored = JSON.parse(row.value);
+      currentConfig = emailConfigSchema.parse({ ...DEFAULT_EMAIL_CONFIG, ...stored });
+    }
+  } catch {
+    // DB not available or invalid data — use defaults
+  }
+  loadedFromDb = true;
+}
+
+export async function getEmailConfig(): Promise<EmailConfig> {
+  await loadFromDb();
   return currentConfig;
 }
 
-export function updateEmailConfig(partial: Partial<EmailConfig>): EmailConfig {
+export async function updateEmailConfig(partial: Partial<EmailConfig>): Promise<EmailConfig> {
+  await loadFromDb();
   const merged = { ...currentConfig, ...partial };
   const validated = emailConfigSchema.parse(merged);
   currentConfig = validated;
+  try {
+    await db.appSettings.upsert({
+      where: { key: SETTINGS_KEY },
+      update: { value: JSON.stringify(currentConfig) },
+      create: { key: SETTINGS_KEY, value: JSON.stringify(currentConfig) },
+    });
+  } catch {
+    // Log but don't fail
+  }
   return currentConfig;
 }
 
-export function resetEmailConfig(): EmailConfig {
+export async function resetEmailConfig(): Promise<EmailConfig> {
   currentConfig = { ...DEFAULT_EMAIL_CONFIG };
+  loadedFromDb = true;
+  try {
+    await db.appSettings.delete({ where: { key: SETTINGS_KEY } }).catch(() => {});
+  } catch {
+    // Ignore
+  }
   return currentConfig;
 }
 

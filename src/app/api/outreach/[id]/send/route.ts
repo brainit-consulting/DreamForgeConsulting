@@ -34,7 +34,7 @@ export async function POST(
       return NextResponse.json({ error: "Lead has no email address" }, { status: 400 });
     }
 
-    const html = outreachEmail({
+    const html = await outreachEmail({
       leadName: email.lead.name,
       company: email.lead.company ?? "",
       body: email.body,

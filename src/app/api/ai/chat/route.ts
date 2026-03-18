@@ -27,7 +27,7 @@ export async function POST(req: Request) {
   await requireAuth();
   const { messages } = await req.json();
   const normalized = normalizeMessages(messages);
-  const config = getAthenaConfig();
+  const config = await getAthenaConfig();
 
   const openrouter = createOpenRouter({
     apiKey: process.env.OPENROUTER_API_KEY,

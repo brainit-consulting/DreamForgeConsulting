@@ -15,7 +15,7 @@ export const auth = betterAuth({
       await resend.emails.send({
         from: getFromAddress(),
         to: user.email,
-        ...passwordResetEmail({ name: user.name, resetUrl: url }),
+        ...(await passwordResetEmail({ name: user.name, resetUrl: url })),
       });
     },
   },
