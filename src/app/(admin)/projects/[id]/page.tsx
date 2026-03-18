@@ -91,7 +91,7 @@ export default function ProjectDetailPage() {
 
   // Fetch proposal notes when at APPROVAL stage
   useEffect(() => {
-    if (project && ["APPROVAL", "DEVELOPMENT", "TESTING", "DEPLOYMENT", "LAUNCHED", "SUPPORT"].includes(project.status)) {
+    if (project && ["PROPOSAL", "APPROVAL", "DEVELOPMENT", "TESTING", "DEPLOYMENT", "LAUNCHED", "SUPPORT"].includes(project.status)) {
       fetch(`/api/projects/${id}/stage-notes?stage=PROPOSAL`)
         .then(r => r.json())
         .then(setProposalNotes)
@@ -336,14 +336,16 @@ export default function ProjectDetailPage() {
       </Card>
 
       {/* Show Proposal notes when at APPROVAL stage for easy editing */}
-      {["APPROVAL", "DEVELOPMENT", "TESTING", "DEPLOYMENT", "LAUNCHED", "SUPPORT"].includes(project.status) && proposalNotes.length > 0 && (
+      {["PROPOSAL", "APPROVAL", "DEVELOPMENT", "TESTING", "DEPLOYMENT", "LAUNCHED", "SUPPORT"].includes(project.status) && proposalNotes.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle className="font-display text-xl text-primary">Proposal Document</CardTitle>
             <p className="text-sm text-muted-foreground">
-              {project.status === "APPROVAL"
-                ? "Review or edit the proposal before notifying the client. Changes save on blur."
-                : "The approved proposal for this project."}
+              {project.status === "PROPOSAL"
+                ? "Edit your proposal draft. Changes save on blur. Submit for approval when ready."
+                : project.status === "APPROVAL"
+                  ? "Review or edit the proposal before notifying the client. Changes save on blur."
+                  : "The approved proposal for this project."}
             </p>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -353,10 +355,10 @@ export default function ProjectDetailPage() {
                   defaultValue={note.content}
                   title="Proposal note"
                   placeholder="Proposal content..."
-                  readOnly={project.status !== "APPROVAL"}
-                  className={`w-full min-h-[200px] bg-transparent font-notes text-sm text-foreground outline-none resize-y ${project.status !== "APPROVAL" ? "cursor-default" : ""}`}
+                  readOnly={project.status !== "PROPOSAL" && project.status !== "APPROVAL"}
+                  className={`w-full min-h-[200px] bg-transparent font-notes text-sm text-foreground outline-none resize-y ${project.status !== "PROPOSAL" && project.status !== "APPROVAL" ? "cursor-default" : ""}`}
                   onBlur={async (e) => {
-                    if (project.status === "APPROVAL" && e.target.value !== note.content) {
+                    if ((project.status === "PROPOSAL" || project.status === "APPROVAL") && e.target.value !== note.content) {
                       await fetch(`/api/projects/${id}/stage-notes/${note.id}`, {
                         method: "PUT",
                         headers: { "Content-Type": "application/json" },
@@ -370,6 +372,33 @@ export default function ProjectDetailPage() {
             ))}
           </CardContent>
         </Card>
+      )}
+
+      {project.status === "PROPOSAL" && proposalNotes.length > 0 && (
+        <div className="flex justify-end">
+          <ActionTooltip label="Advance to Client Approval stage">
+            <Button
+              onClick={async () => {
+                const res = await fetch(`/api/projects/${id}/transition`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ status: "APPROVAL" }),
+                });
+                const data = await res.json();
+                if (res.ok) {
+                  setProject(data);
+                  fetchActivities();
+                  toast.success("Proposal submitted — awaiting client approval");
+                } else {
+                  toast.error(data.error ?? "Failed to submit");
+                }
+              }}
+            >
+              <ArrowRight className="mr-2 h-4 w-4" />
+              Submit for Approval
+            </Button>
+          </ActionTooltip>
+        </div>
       )}
 
       {/* Stage Work — Tasks + Notes */}
