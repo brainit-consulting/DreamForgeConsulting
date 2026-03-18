@@ -187,7 +187,7 @@ export const helpContent: Record<string, HelpSection> = {
     content:
       "This is your internal reference for how to handle key business operations in DreamForge Consulting. Not visible to clients.",
     tips: [
-      "HOW TO ONBOARD A NEW CLIENT: Add Lead (name only required) → work through pipeline (New→Contacted→Qualified→Proposal) → Promote to Client → go to Clients page → click mail icon to Send Portal Invite when ready.",
+      "HOW TO ONBOARD A NEW CLIENT: Add Lead (name only required) → work through pipeline (New→Contacted→Qualified→Proposal) → Promote to Client → go to Clients page → click mail icon to Send Portal Invite when ready. After sending, a dialog shows the login email + temp password — save these in case the email doesn't arrive.",
       "HOW TO START A PROJECT: Go to Projects → New Project → select client, set name/description/budget/dates → project starts at Discovery. Add tasks + notes at each stage as you work.",
       "HOW TO GENERATE A PROPOSAL: At Proposal stage → click 'Copy Prompt' → paste into Claude/ChatGPT → copy result → paste into Stage Work Notes (or use 'Generate via Athena' + Save as Note). Edit in the Proposal Document card. Click green 'Submit for Approval' when ready.",
       "HOW TO SEND FOR CLIENT APPROVAL: After submitting proposal → project moves to Client Approval → if auto-send is ON (Settings > Email Preferences), client gets email automatically. If OFF → click 'Preview' to review the email → click 'Send Notification' manually.",
@@ -200,7 +200,8 @@ export const helpContent: Record<string, HelpSection> = {
       "HOW TO LOG SUPPORT HOURS: On project detail at Support stage → click 'Log Hours' → enter hours + description. Creates a task entry + updates hoursUsed. Overage is calculated automatically on the next invoice.",
       "HOW TO SEND OUTREACH EMAILS: Go to Outreach → New Outreach → write subject + body → optionally select leads (or save as template). Each draft is sent individually with confirmation. Use Preview (eye icon) to see the branded email before sending.",
       "HOW TO BACK UP / RESTORE: Settings > Backups → 'Backup Now' for manual backup. Click cloud icon on any backup to restore (safety backup created first, admin account preserved). Retention is configurable.",
-      "HOW TO RESET A PASSWORD: Client uses 'Forgot your password?' on login page → gets reset email → sets new password. Admin cannot see or reset client passwords directly.",
+      "HOW TO RESET A PASSWORD (SELF-SERVICE): Client uses 'Forgot your password?' on login page → gets reset email → sets new password. No admin action needed.",
+      "HOW TO RESET A PASSWORD (ADMIN): On Clients page → find the client with portal access (green shield) → click the refresh icon (Resend Invite) → confirms → generates new temp password, emails it, and shows credentials on screen. Old password stops working immediately.",
       "BILLING DEFAULTS: Monthly support: configurable in Settings > Support Plan Defaults. Email branding: Settings > Email Preferences. All settings persist to DB across deploys.",
     ],
   },
