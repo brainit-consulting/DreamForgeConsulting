@@ -89,7 +89,7 @@ export const helpContent: Record<string, HelpSection> = {
     content:
       "Welcome to your client portal. Track the real-time status of all your projects with visual workflow indicators, view and pay outstanding invoices via Stripe (including project and support invoices), and submit support tickets. When a project reaches Client Approval, click 'Review & Approve' to approve scope and begin development. Payments are processed securely through Stripe and invoice status updates automatically.",
     tips: [
-      "Projects tab shows your projects with full 9-stage workflow visualization",
+      "Projects tab shows your projects with full 9-stage workflow visualization — launched projects with a support plan show your hours used this month",
       "When a project is awaiting your approval, you'll see a 'Review & Approve' button with an amber banner",
       "Invoices tab lets you view all invoices and pay outstanding ones via Stripe with a single click",
       "After paying via Stripe, the invoice automatically updates to PAID — no manual steps needed",
@@ -124,7 +124,7 @@ export const helpContent: Record<string, HelpSection> = {
       "STAGE 6 — Testing & QA: Quality assurance and bug fixing. Track test cases as tasks.",
       "STAGE 7 — Deployment & Launch: Deploy to production. Track deployment tasks and launch checklist.",
       "STAGE 8 — Launched: Project is live. Progress shows 100%. Support Plan card appears — enable a monthly or annual retainer.",
-      "STAGE 9 — Post-Launch Support: Ongoing maintenance and support. Support Plan shows hours used, overage, and billing cycle. DRAFT invoices auto-generated on the 1st of each month. Proposal Document remains visible as reference.",
+      "STAGE 9 — Post-Launch Support: Ongoing maintenance. Use 'Log Hours' to record work (hours + description — creates a task entry and updates the plan). Support Plan shows hours used, overage, and billing cycle. DRAFT invoices auto-generated on the 1st. Proposal Document remains visible.",
       "Progress auto-calculates: Discovery 5%, Design 15%, Proposal 22%, Approval 30%, Development 50%, Testing 70%, Deployment 85%, Launched/Support 100%",
     ],
   },
