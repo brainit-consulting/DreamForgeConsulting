@@ -3,6 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { KpiCards } from "@/components/admin/dashboard/kpi-cards";
 import { ProjectOverview } from "@/components/admin/dashboard/project-overview";
 import { ActivityFeed } from "@/components/admin/dashboard/activity-feed";
+import { EmailActivityChart } from "@/components/admin/dashboard/email-activity-chart";
 
 // Mock recharts
 vi.mock("recharts", () => ({
@@ -73,6 +74,28 @@ describe("ActivityFeed", () => {
     render(<ActivityFeed />);
     await waitFor(() => {
       expect(screen.getByText("Project moved to Design")).toBeInTheDocument();
+    });
+  });
+});
+
+describe("EmailActivityChart", () => {
+  beforeEach(() => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({
+        data: [
+          { date: "2026-03-18", label: "Mar 18", outreach: 2, invoice: 1, invite: 0, total: 3 },
+        ],
+        totals: { outreach: 5, invoice: 2, invite: 1, total: 8 },
+      }),
+    }));
+  });
+
+  it("renders email activity totals from API", async () => {
+    render(<EmailActivityChart />);
+    await waitFor(() => {
+      expect(screen.getByText("Email Activity")).toBeInTheDocument();
+      expect(screen.getByText("8 sent (30 days)")).toBeInTheDocument();
     });
   });
 });

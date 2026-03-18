@@ -23,6 +23,8 @@ describe("AdminSidebar", () => {
     expect(screen.getByText("Clients")).toBeInTheDocument();
     expect(screen.getByText("Projects")).toBeInTheDocument();
     expect(screen.getByText("Invoices")).toBeInTheDocument();
+    expect(screen.getByText("Tickets")).toBeInTheDocument();
+    expect(screen.getByText("Outreach")).toBeInTheDocument();
     expect(screen.getByText("Settings")).toBeInTheDocument();
   });
 
