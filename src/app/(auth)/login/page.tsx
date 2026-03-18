@@ -42,15 +42,15 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md space-y-8">
+      <div className="w-full max-w-lg space-y-8">
         <div className="flex justify-center">
           <Logo />
         </div>
 
-        <div className="rounded-xl border border-border/50 bg-card p-6 shadow-lg">
+        <div className="rounded-xl border border-border/50 bg-card p-8 shadow-lg">
           <div className="mb-6 text-center">
             <h1 className="font-display text-2xl">Welcome Back</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 font-sans text-[15px] text-muted-foreground">
               Sign in to your DreamForge account
             </p>
           </div>
@@ -63,7 +63,7 @@ export default function LoginPage() {
 
           <div className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium">
+              <label htmlFor="email" className="font-sans text-[15px] font-medium">
                 Email
               </label>
               <input
@@ -73,11 +73,11 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
-                className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/50"
+                className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 py-2 font-sans text-[15px] outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/50"
               />
             </div>
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium">
+              <label htmlFor="password" className="font-sans text-[15px] font-medium">
                 Password
               </label>
               <input
@@ -87,7 +87,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
-                className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/50"
+                className="flex h-11 w-full rounded-md border border-input bg-transparent px-3 py-2 font-sans text-[15px] outline-none placeholder:text-muted-foreground focus:border-ring focus:ring-2 focus:ring-ring/50"
               />
             </div>
 

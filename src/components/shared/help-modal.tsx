@@ -104,6 +104,46 @@ function AdminGuideTips({ tips }: { tips: string[] }) {
   );
 }
 
+/** Portal help with collapsible sections — client-facing equivalent of AdminGuideTips */
+function PortalGuideTips({ tips }: { tips: string[] }) {
+  const chapters: Record<string, string[]> = {
+    "Your Projects": [],
+    "Invoices & Payments": [],
+    "Support Tickets": [],
+    "Your Account": [],
+  };
+
+  for (const tip of tips) {
+    if (tip.toLowerCase().includes("project") || tip.toLowerCase().includes("workflow") || tip.toLowerCase().includes("approval") || tip.toLowerCase().includes("stage")) {
+      chapters["Your Projects"].push(tip);
+    } else if (tip.toLowerCase().includes("invoice") || tip.toLowerCase().includes("pay") || tip.toLowerCase().includes("stripe")) {
+      chapters["Invoices & Payments"].push(tip);
+    } else if (tip.toLowerCase().includes("ticket") || tip.toLowerCase().includes("support request")) {
+      chapters["Support Tickets"].push(tip);
+    } else {
+      chapters["Your Account"].push(tip);
+    }
+  }
+
+  return (
+    <div className="space-y-3">
+      {Object.entries(chapters).map(([chapter, items]) =>
+        items.length > 0 ? (
+          <GuideSection key={chapter} title={chapter}>
+            {items.map((tip, i) => (
+              <p key={i} className="text-sm leading-relaxed text-foreground/80 font-sans">
+                {tip}
+              </p>
+            ))}
+          </GuideSection>
+        ) : null
+      )}
+    </div>
+  );
+}
+
+const PORTAL_SECTION_KEYS = new Set(["portal", "projectDetail"]);
+
 const HelpContext = createContext<HelpContextValue | null>(null);
 
 export function useHelp() {
@@ -179,6 +219,8 @@ function HelpModalPanel() {
             {section.tips && section.tips.length > 0 && (
               state.sectionKey === "adminGuide" ? (
                 <AdminGuideTips tips={section.tips} />
+              ) : PORTAL_SECTION_KEYS.has(state.sectionKey) ? (
+                <PortalGuideTips tips={section.tips} />
               ) : (
                 <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
                   <div className="flex items-center gap-2 mb-3">

@@ -52,7 +52,7 @@ export default function PortalDashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-display">Welcome back</h1>
+        <h1 className="text-3xl font-display">Welcome back, {data.client.company}</h1>
         <p className="mt-1 text-muted-foreground">
           Here&apos;s an overview of your projects and account.
         </p>
