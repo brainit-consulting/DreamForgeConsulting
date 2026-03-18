@@ -10,9 +10,12 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { AddClientDialog } from "@/components/admin/clients/add-client-dialog";
 import { EditClientDialog } from "@/components/admin/clients/edit-client-dialog";
+import {
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 import { ActionTooltip } from "@/components/shared/action-tooltip";
 import { useConfirm } from "@/components/shared/confirm-dialog";
-import { Trash2, Search, Mail, ShieldCheck } from "lucide-react";
+import { Trash2, Search, Mail, ShieldCheck, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
@@ -48,7 +51,15 @@ export default function ClientsPage() {
 
   useEffect(() => { fetchClients(); }, [fetchClients]);
 
+  // Invite result state
+  const [inviteResult, setInviteResult] = useState<{
+    message: string;
+    tempPassword: string;
+    email: string;
+  } | null>(null);
+
   async function inviteClient(id: string) {
+    const client = clients.find((c) => c.id === id);
     const ok = await confirm({
       title: "Send Portal Invite",
       description: "This will create a portal account and send an email to the client with their login email and a temporary password. They can use these to sign in to their client portal.",
@@ -63,7 +74,11 @@ export default function ClientsPage() {
     });
     const data = await res.json();
     if (res.ok) {
-      toast.success(data.message);
+      setInviteResult({
+        message: data.message,
+        tempPassword: data.tempPassword,
+        email: client?.email ?? "",
+      });
       fetchClients();
     } else {
       toast.error(data.error);
@@ -201,6 +216,39 @@ export default function ClientsPage() {
                           </Button>
                         </ActionTooltip>
                       )}
+                      {client.userId && (
+                        <ActionTooltip label="Resend portal invite (new password)">
+                          <Button
+                            variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground"
+                            onClick={async () => {
+                              const ok = await confirm({
+                                title: "Resend Portal Invite",
+                                description: "This will generate a new temporary password and resend the login credentials email. The old password will no longer work.",
+                                confirmLabel: "Resend",
+                                variant: "promote",
+                              });
+                              if (!ok) return;
+                              const res = await fetch("/api/admin/invite-client", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ clientId: client.id, resend: true }),
+                              });
+                              const data = await res.json();
+                              if (res.ok) {
+                                setInviteResult({
+                                  message: data.message,
+                                  tempPassword: data.tempPassword,
+                                  email: client.email ?? "",
+                                });
+                              } else {
+                                toast.error(data.error);
+                              }
+                            }}
+                          >
+                            <RefreshCw className="h-3.5 w-3.5" />
+                          </Button>
+                        </ActionTooltip>
+                      )}
                       <ActionTooltip label="Delete client">
                         <Button
                           variant="ghost" size="icon" className="h-7 w-7 text-destructive"
@@ -217,6 +265,45 @@ export default function ClientsPage() {
           </TableBody>
         </Table>
       </div>}
+
+      {/* Invite Result Dialog — shows credentials persistently */}
+      <Dialog open={!!inviteResult} onOpenChange={(open) => { if (!open) setInviteResult(null); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl text-primary">
+              Portal Invite Sent
+            </DialogTitle>
+          </DialogHeader>
+          {inviteResult && (
+            <div className="space-y-4 py-2">
+              <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4">
+                <p className="text-sm font-medium text-emerald-400">
+                  {inviteResult.message}
+                </p>
+              </div>
+              <div className="rounded-lg border border-border bg-muted p-4 space-y-2">
+                <p className="text-xs text-muted-foreground">Login credentials (also sent via email):</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">Email:</span>
+                  <code className="text-sm font-mono text-foreground">{inviteResult.email}</code>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">Temp Password:</span>
+                  <code className="text-sm font-mono text-primary">{inviteResult.tempPassword}</code>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Save these credentials. You can share them manually if the email doesn&apos;t arrive.
+              </p>
+              <DialogFooter>
+                <Button variant="outline" className="w-full" onClick={() => setInviteResult(null)}>
+                  Done
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

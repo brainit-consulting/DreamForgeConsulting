@@ -12,7 +12,7 @@ export async function POST(req: Request) {
   try {
     await requireAdmin();
 
-    const { clientId } = await req.json();
+    const { clientId, resend } = await req.json();
 
     if (!clientId) {
       return NextResponse.json({ error: "clientId is required" }, { status: 400 });
@@ -24,8 +24,87 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Client not found" }, { status: 404 });
     }
 
+    // Handle resend — generate new password for existing user
+    if (resend && client.userId) {
+      if (!client.email) {
+        return NextResponse.json({ error: "Client has no email address" }, { status: 400 });
+      }
+
+      const tempPassword =
+        crypto.randomBytes(4).toString("hex") +
+        String.fromCharCode(65 + Math.floor(Math.random() * 26)) +
+        "!";
+
+      // Update password via better-auth sign-up won't work for existing users
+      // Instead, use the DB directly to update the hashed password
+      // For simplicity, we'll use the better-auth admin API or just send the credentials
+      // Actually, better-auth doesn't expose a "set password" API easily
+      // So we'll delete the old user and recreate — this preserves the client record since userId is SetNull
+      const headersList = await headers();
+      const origin = headersList.get("origin") ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+
+      // Delete old user (cascades sessions/accounts, SetNull on client)
+      await db.user.delete({ where: { id: client.userId } });
+
+      // Create new user with new password
+      const signUpRes = await fetch(`${origin}/api/auth/sign-up/email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Origin: origin,
+          Cookie: headersList.get("cookie") ?? "",
+        },
+        body: JSON.stringify({
+          email: client.email,
+          password: tempPassword,
+          name: client.company,
+        }),
+      });
+
+      if (!signUpRes.ok) {
+        return NextResponse.json({ error: "Failed to reset credentials" }, { status: 500 });
+      }
+
+      const newUser = await db.user.update({
+        where: { email: client.email },
+        data: { role: "CLIENT", emailVerified: true },
+      });
+
+      await db.client.update({
+        where: { id: clientId },
+        data: { userId: newUser.id },
+      });
+
+      // Send invite email
+      const portalUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://dreamforgeconsulting.vercel.app"}/login`;
+      const emailContent = await clientInviteEmail({
+        clientName: client.company,
+        company: client.company,
+        email: client.email,
+        tempPassword,
+        portalUrl,
+      });
+
+      try {
+        await sendEmail({
+          from: getFromAddress(),
+          to: client.email,
+          subject: emailContent.subject,
+          html: emailContent.html,
+        });
+      } catch (emailError) {
+        console.error("[Resend Invite] Email send failed:", emailError);
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: `New credentials sent to ${client.email}`,
+        tempPassword,
+      });
+    }
+
     if (client.userId) {
-      return NextResponse.json({ error: "Client already has portal access" }, { status: 409 });
+      return NextResponse.json({ error: "Client already has portal access — use resend instead" }, { status: 409 });
     }
 
     if (!client.email) {
