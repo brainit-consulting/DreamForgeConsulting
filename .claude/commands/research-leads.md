@@ -157,12 +157,12 @@ main().catch((e) => { console.error(e); process.exit(1); });
 Field mapping:
 - `source`: "Smart lead discovery"
 - `notes`: Include opportunity score, owner info, services offered, why they're a fit, website quality, suggested DreamForge service
-- `value`: Estimate based on business size and project type:
-  - Website/digital presence: $3-6k
-  - IT support retainer: $500-2k/month
-  - Process automation: $5-12k
-  - Custom SaaS: $8-25k
-  - Training/consulting: $2-5k
+- `value`: Estimate based on business size and project type (conservative — real quotes come later):
+  - Website/digital presence: $1.5-3k
+  - IT support retainer: $250-1k/month
+  - Process automation: $2.5-6k
+  - Custom SaaS: $4-12k
+  - Training/consulting: $1-2.5k
 - `status`: NEW (default)
 
 After generating the script:
