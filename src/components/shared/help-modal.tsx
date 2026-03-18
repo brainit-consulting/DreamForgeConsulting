@@ -2,7 +2,7 @@
 
 import { useState, createContext, useContext, type ReactNode } from "react";
 import { Rnd } from "react-rnd";
-import { HelpCircle, X, Lightbulb } from "lucide-react";
+import { HelpCircle, X, Lightbulb, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { helpContent, type HelpSection } from "@/lib/help-content";
@@ -18,6 +18,90 @@ interface HelpContextValue {
   openHelp: (sectionKey: string) => void;
   closeHelp: () => void;
   state: HelpModalState;
+}
+
+/** Highlight keywords in admin guide tips */
+function highlightKeywords(text: string): ReactNode {
+  // Bold the "HOW TO..." prefix and highlight key terms
+  const parts = text.split(/(HOW TO [A-Z ]+:|→|Settings|Stripe|DRAFT|PAID|SENT|OVERDUE|REFUNDED|CANCELLED)/g);
+  return parts.map((part, i) => {
+    if (part.match(/^HOW TO [A-Z ]+:/)) {
+      return <span key={i} className="font-display text-primary">{part}</span>;
+    }
+    if (part === "→") {
+      return <span key={i} className="text-emerald-400 mx-0.5">{part}</span>;
+    }
+    if (["Settings", "Stripe"].includes(part)) {
+      return <span key={i} className="text-emerald-400 font-medium">{part}</span>;
+    }
+    if (["DRAFT", "PAID", "SENT", "OVERDUE", "REFUNDED", "CANCELLED"].includes(part)) {
+      return <span key={i} className="text-emerald-400 font-mono text-xs">{part}</span>;
+    }
+    return part;
+  });
+}
+
+/** Collapsible section for admin guide */
+function GuideSection({ title, children }: { title: string; children: ReactNode }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="rounded-lg border border-border/50">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center justify-between px-4 py-3 text-left hover:bg-muted/30 transition-colors"
+      >
+        <span className="font-display text-base text-primary">{title}</span>
+        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && <div className="px-4 pb-4 space-y-3">{children}</div>}
+    </div>
+  );
+}
+
+/** Admin guide with collapsible chapters and styled tips */
+function AdminGuideTips({ tips }: { tips: string[] }) {
+  // Group tips by category based on the "HOW TO" prefix
+  const chapters: Record<string, string[]> = {
+    "Client Onboarding": [],
+    "Projects & Proposals": [],
+    "Invoicing & Payments": [],
+    "Support & Maintenance": [],
+    "Outreach & Communication": [],
+    "System Administration": [],
+  };
+
+  for (const tip of tips) {
+    if (tip.includes("ONBOARD") || tip.includes("CLIENT APPROVAL") || tip.includes("HANDLE CLIENT")) {
+      chapters["Client Onboarding"].push(tip);
+    } else if (tip.includes("PROJECT") || tip.includes("PROPOSAL")) {
+      chapters["Projects & Proposals"].push(tip);
+    } else if (tip.includes("INVOICE") || tip.includes("PAYMENT") || tip.includes("REFUND") || tip.includes("DISPUTE")) {
+      chapters["Invoicing & Payments"].push(tip);
+    } else if (tip.includes("SUPPORT") || tip.includes("LOG")) {
+      chapters["Support & Maintenance"].push(tip);
+    } else if (tip.includes("OUTREACH") || tip.includes("SEND")) {
+      chapters["Outreach & Communication"].push(tip);
+    } else {
+      chapters["System Administration"].push(tip);
+    }
+  }
+
+  return (
+    <div className="space-y-3">
+      {Object.entries(chapters).map(([chapter, items]) =>
+        items.length > 0 ? (
+          <GuideSection key={chapter} title={chapter}>
+            {items.map((tip, i) => (
+              <p key={i} className="text-sm leading-relaxed text-foreground/80 font-sans">
+                {highlightKeywords(tip)}
+              </p>
+            ))}
+          </GuideSection>
+        ) : null
+      )}
+    </div>
+  );
 }
 
 const HelpContext = createContext<HelpContextValue | null>(null);
@@ -93,25 +177,29 @@ function HelpModalPanel() {
             </p>
 
             {section.tips && section.tips.length > 0 && (
-              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Lightbulb className="h-4 w-4 text-primary" />
-                  <span className="font-display text-lg text-primary">
-                    Tips
-                  </span>
+              state.sectionKey === "adminGuide" ? (
+                <AdminGuideTips tips={section.tips} />
+              ) : (
+                <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Lightbulb className="h-4 w-4 text-primary" />
+                    <span className="font-display text-lg text-primary">
+                      Tips
+                    </span>
+                  </div>
+                  <ul className="space-y-2">
+                    {section.tips.map((tip, i) => (
+                      <li
+                        key={i}
+                        className="flex items-start gap-2 text-sm text-foreground/80"
+                      >
+                        <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/60" />
+                        {tip}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <ul className="space-y-2">
-                  {section.tips.map((tip, i) => (
-                    <li
-                      key={i}
-                      className="flex items-start gap-2 text-sm text-foreground/80"
-                    >
-                      <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-primary/60" />
-                      {tip}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              )
             )}
           </div>
         </ScrollArea>
