@@ -68,11 +68,14 @@ function AdminGuideTips({ tips }: { tips: string[] }) {
     "Invoicing & Payments": [],
     "Support & Maintenance": [],
     "Outreach & Communication": [],
+    "Price Guidance": [],
     "System Administration": [],
   };
 
   for (const tip of tips) {
-    if (tip.includes("ONBOARD") || tip.includes("CLIENT APPROVAL") || tip.includes("HANDLE CLIENT")) {
+    if (tip.includes("PRICE GUIDANCE")) {
+      chapters["Price Guidance"].push(tip);
+    } else if (tip.includes("ONBOARD") || tip.includes("CLIENT APPROVAL") || tip.includes("HANDLE CLIENT")) {
       chapters["Client Onboarding"].push(tip);
     } else if (tip.includes("PROJECT") || tip.includes("PROPOSAL")) {
       chapters["Projects & Proposals"].push(tip);
