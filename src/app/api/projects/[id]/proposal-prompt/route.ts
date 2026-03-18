@@ -88,16 +88,29 @@ ${formatNotes(designNotes)}
 
 ---
 
+## Pricing Guidelines:
+- Payment structure: 40% at project start, 30% at mid-development milestone, 30% at project completion
+- Break down costs by development phase based on the total budget
+
+## Post-Launch Support (Optional Add-On):
+- Monthly Retainer: $250/month — includes 5 hours of support, minor tweaks, system management, hosting/API costs
+- Annual Plan: $2,500/year (10 months × $250 — months 11 and 12 are free, saving 17%)
+- Additional hours beyond the included 5: $50/hour
+- Unused hours do not roll over to the next month
+
+---
+
 Based on the above discovery and design data, write a professional proposal including:
 
 1. **Executive Summary** — Brief overview of what the client needs and how we'll deliver it
 2. **Scope of Work** — Detailed breakdown based on discovery findings
 3. **Deliverables** — Specific outputs based on the design work completed
 4. **Timeline with Milestones** — Realistic schedule from development through launch
-5. **Pricing Breakdown** — Based on the budget, break down costs by phase
-6. **Terms & Next Steps** — What happens after approval
+5. **Pricing Breakdown** — Based on the budget, break down costs by phase. Include the payment structure (40/30/30)
+6. **Post-Launch Support (Optional)** — Present the monthly and annual retainer options as an optional add-on, positioned as ensuring long-term success
+7. **Terms & Next Steps** — What happens after approval, payment schedule, communication plan
 
-Keep it concise, professional, and specific to the data above. Use markdown formatting.`;
+Keep it concise, professional, and specific to the data above. Position the support plan as a value-add, not a hard sell. Use markdown formatting.`;
 
     return NextResponse.json({ prompt, projectName: project.name });
   } catch (error) {

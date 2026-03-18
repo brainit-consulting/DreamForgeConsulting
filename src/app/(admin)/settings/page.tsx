@@ -26,11 +26,13 @@ import {
   UploadCloud,
   Mail,
   ChevronDown,
+  Headphones,
 } from "lucide-react";
 import Image from "next/image";
 import type { AthenaConfig } from "@/lib/athena-config";
 import type { EmailConfig } from "@/lib/email-config";
 import type { BackupConfig } from "@/lib/backup-config";
+import type { SupportConfig } from "@/lib/support-config";
 import type { BackupEntry } from "@/lib/backup";
 import { HelpButton } from "@/components/shared/help-modal";
 import { ActionTooltip } from "@/components/shared/action-tooltip";
@@ -126,6 +128,7 @@ export default function SettingsPage() {
   const [athenaOpen, setAthenaOpen] = useState(false);
   const [emailOpen, setEmailOpen] = useState(false);
   const [backupsOpen, setBackupsOpen] = useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
 
   const [config, setConfig] = useState<AthenaConfig | null>(null);
   const [saving, setSaving] = useState(false);
@@ -141,6 +144,11 @@ export default function SettingsPage() {
   const [backupConfig, setBackupConfig] = useState<BackupConfig | null>(null);
   const [backupSaving, setBackupSaving] = useState(false);
   const [backupSaved, setBackupSaved] = useState(false);
+
+  // Support config state
+  const [supportConfig, setSupportConfig] = useState<SupportConfig | null>(null);
+  const [supportSaving, setSupportSaving] = useState(false);
+  const [supportSaved, setSupportSaved] = useState(false);
 
   // Backup state
   const [backups, setBackups] = useState<BackupList | null>(null);
@@ -161,6 +169,9 @@ export default function SettingsPage() {
     fetch("/api/backup/config")
       .then((r) => r.json())
       .then(setBackupConfig);
+    fetch("/api/support/config")
+      .then((r) => r.json())
+      .then(setSupportConfig);
   }, []);
 
   const loadBackups = useCallback(async () => {
@@ -287,6 +298,33 @@ export default function SettingsPage() {
     if (res.ok) {
       setBackupConfig(await res.json());
       toast.success("Backup retention reset to defaults");
+    }
+  }
+
+  async function handleSupportSave() {
+    if (!supportConfig) return;
+    setSupportSaving(true);
+    setSupportSaved(false);
+    try {
+      const res = await fetch("/api/support/config", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(supportConfig),
+      });
+      if (res.ok) {
+        setSupportConfig(await res.json());
+        setSupportSaved(true);
+        toast.success("Support defaults saved");
+        setTimeout(() => setSupportSaved(false), 3000);
+      } else { toast.error("Failed to save support defaults"); }
+    } finally { setSupportSaving(false); }
+  }
+
+  async function handleSupportReset() {
+    const res = await fetch("/api/support/config", { method: "DELETE" });
+    if (res.ok) {
+      setSupportConfig(await res.json());
+      toast.success("Support defaults reset");
     }
   }
 
@@ -950,6 +988,97 @@ export default function SettingsPage() {
             </TabsContent>
           </Tabs>
         </CardContent>}
+      </Card>
+
+      <Separator />
+
+      {/* Support Defaults */}
+      <Card>
+        <CardHeader className="cursor-pointer select-none" onClick={() => setSupportOpen(!supportOpen)}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <Headphones className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="font-display text-2xl text-primary">
+                  Support Plan Defaults
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Default rates for post-launch support retainers.
+                </p>
+              </div>
+            </div>
+            <ChevronDown className={`h-5 w-5 text-muted-foreground transition-transform ${supportOpen ? "rotate-180" : ""}`} />
+          </div>
+        </CardHeader>
+        {supportOpen && supportConfig && (
+          <CardContent className="space-y-6">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="support-rate" className="text-base text-primary">Monthly Rate ($)</Label>
+                <Input
+                  id="support-rate"
+                  type="number"
+                  min={0}
+                  value={supportConfig.defaultMonthlyRate}
+                  onChange={(e) => setSupportConfig({ ...supportConfig, defaultMonthlyRate: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="support-hours" className="text-base text-primary">Included Hours</Label>
+                <Input
+                  id="support-hours"
+                  type="number"
+                  min={0}
+                  value={supportConfig.defaultIncludedHours}
+                  onChange={(e) => setSupportConfig({ ...supportConfig, defaultIncludedHours: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="support-overage" className="text-base text-primary">Overage Rate ($/hr)</Label>
+                <Input
+                  id="support-overage"
+                  type="number"
+                  min={0}
+                  value={supportConfig.defaultOverageRate}
+                  onChange={(e) => setSupportConfig({ ...supportConfig, defaultOverageRate: parseFloat(e.target.value) || 0 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="support-free" className="text-base text-primary">Annual Free Months</Label>
+                <p className="text-xs text-muted-foreground">
+                  Months waived on annual plans (e.g., 2 = pay 10 months, get 12).
+                </p>
+                <Input
+                  id="support-free"
+                  type="number"
+                  min={0}
+                  max={6}
+                  value={supportConfig.annualFreeMonths}
+                  onChange={(e) => setSupportConfig({ ...supportConfig, annualFreeMonths: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-border bg-muted/20 p-3 text-sm text-muted-foreground">
+              <p>Annual plan: {12 - supportConfig.annualFreeMonths} × ${supportConfig.defaultMonthlyRate} = <strong className="text-foreground">${(12 - supportConfig.annualFreeMonths) * supportConfig.defaultMonthlyRate}/year</strong> ({supportConfig.annualFreeMonths} months free)</p>
+            </div>
+
+            <Separator />
+
+            <div className="flex items-center gap-3">
+              <Button onClick={handleSupportSave} disabled={supportSaving}>
+                <Save className="mr-2 h-4 w-4" />
+                {supportSaving ? "Saving..." : supportSaved ? "Saved!" : "Save Defaults"}
+              </Button>
+              <Button variant="outline" onClick={handleSupportReset}>
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Reset
+              </Button>
+            </div>
+          </CardContent>
+        )}
       </Card>
     </div>
   );

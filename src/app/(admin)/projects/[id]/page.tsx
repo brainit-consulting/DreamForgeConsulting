@@ -52,6 +52,13 @@ export default function ProjectDetailPage() {
   const [error, setError] = useState(false);
   const confirmAction = useConfirm();
 
+  // Support plan state
+  const [supportPlan, setSupportPlan] = useState<{
+    planType: string; monthlyRate: number; includedHours: number;
+    overageRate: number; hoursUsed: number; active: boolean; monthsInvoiced: number;
+  } | null>(null);
+  const [supportLoading, setSupportLoading] = useState(false);
+
   // Proposal generation state
   const [proposalOpen, setProposalOpen] = useState(false);
   const [proposalContent, setProposalContent] = useState("");
@@ -91,6 +98,16 @@ export default function ProjectDetailPage() {
     // Fetch email config for approval banner
     fetch("/api/email/config").then(r => r.json()).then(c => setAutoSendEnabled(c.autoApprovalEmail)).catch(() => {});
   }, [fetchProject, fetchActivities]);
+
+  // Fetch support plan when at LAUNCHED/SUPPORT
+  useEffect(() => {
+    if (project && ["LAUNCHED", "SUPPORT"].includes(project.status)) {
+      fetch(`/api/projects/${id}/support-plan`)
+        .then(r => r.json())
+        .then(data => { if (data && data.planType) setSupportPlan(data); })
+        .catch(() => {});
+    }
+  }, [project?.status, id]);
 
   // Fetch proposal notes when at APPROVAL stage
   useEffect(() => {
@@ -441,6 +458,95 @@ export default function ProjectDetailPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Support Plan — LAUNCHED / SUPPORT */}
+      {["LAUNCHED", "SUPPORT"].includes(project.status) && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="font-display text-xl text-primary">Support Plan</CardTitle>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {supportPlan ? `${supportPlan.planType} plan — ${supportPlan.active ? "Active" : "Inactive"}` : "No support plan configured."}
+                </p>
+              </div>
+              {!supportPlan && (
+                <Button
+                  size="sm"
+                  disabled={supportLoading}
+                  onClick={async () => {
+                    setSupportLoading(true);
+                    const res = await fetch(`/api/projects/${id}/support-plan`, { method: "POST" });
+                    if (res.ok) {
+                      setSupportPlan(await res.json());
+                      toast.success("Support plan created with defaults");
+                    } else { toast.error("Failed to create plan"); }
+                    setSupportLoading(false);
+                  }}
+                >
+                  {supportLoading ? "Creating..." : "Enable Support Plan"}
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          {supportPlan && (
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-4">
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">Plan Type</p>
+                  <select
+                    value={supportPlan.planType}
+                    onChange={async (e) => {
+                      const res = await fetch(`/api/projects/${id}/support-plan`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ planType: e.target.value }),
+                      });
+                      if (res.ok) { setSupportPlan(await res.json()); toast.success("Plan type updated"); }
+                    }}
+                    className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm"
+                  >
+                    <option value="MONTHLY">Monthly</option>
+                    <option value="ANNUAL">Annual</option>
+                    <option value="NONE">None</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">Monthly Rate</p>
+                  <p className="text-lg font-display text-primary">${supportPlan.monthlyRate}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">Hours This Month</p>
+                  <p className="text-lg font-display">
+                    <span className={supportPlan.hoursUsed > supportPlan.includedHours ? "text-red-500" : "text-foreground"}>
+                      {supportPlan.hoursUsed}
+                    </span>
+                    <span className="text-muted-foreground text-sm"> / {supportPlan.includedHours} included</span>
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">Overage Rate</p>
+                  <p className="text-lg font-display">${supportPlan.overageRate}/hr</p>
+                </div>
+              </div>
+              {supportPlan.hoursUsed > supportPlan.includedHours && (
+                <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-2">
+                  <p className="text-sm text-amber-400">
+                    {(supportPlan.hoursUsed - supportPlan.includedHours).toFixed(1)} overage hours ×
+                    ${supportPlan.overageRate} = ${((supportPlan.hoursUsed - supportPlan.includedHours) * supportPlan.overageRate).toFixed(0)} additional
+                  </p>
+                </div>
+              )}
+              {supportPlan.planType === "ANNUAL" && (
+                <p className="text-xs text-muted-foreground">
+                  Annual billing cycle: {supportPlan.monthsInvoiced} of 12 months invoiced
+                  {supportPlan.monthsInvoiced >= 10 && supportPlan.monthsInvoiced < 12 && " — free months!"}
+                </p>
+              )}
+            </CardContent>
+          )}
+        </Card>
+      )}
 
       {/* Metrics */}
       <div className="grid gap-4 sm:grid-cols-4">

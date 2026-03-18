@@ -148,8 +148,9 @@ model Project {
   client     Client      @relation(fields: [clientId], references: [id], onDelete: Cascade)
   invoices   Invoice[]
   tickets    Ticket[]
-  stageTasks StageTask[]
-  stageNotes StageNote[]
+  stageTasks   StageTask[]
+  stageNotes   StageNote[]
+  supportPlan  SupportPlan?
 
   @@map("projects")
 }
@@ -303,4 +304,27 @@ enum OutreachStatus {
   DRAFT
   SENT
   FAILED
+}
+
+// =============================================
+// SUPPORT PLANS
+// =============================================
+
+model SupportPlan {
+  id             String   @id @default(cuid())
+  projectId      String   @unique
+  planType       String   @default("MONTHLY") // MONTHLY | ANNUAL | NONE
+  monthlyRate    Float    @default(250)
+  includedHours  Float    @default(5)
+  overageRate    Float    @default(50)
+  startDate      DateTime @default(now())
+  hoursUsed      Float    @default(0)
+  monthsInvoiced Int      @default(0)
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("support_plans")
 }
