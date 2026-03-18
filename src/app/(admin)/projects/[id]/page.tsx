@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { ActionTooltip } from "@/components/shared/action-tooltip";
 import { toast } from "sonner";
-import { ArrowRight, Clock, FileText, Copy, Bot, Save } from "lucide-react";
+import { ArrowRight, Clock, FileText, Copy, Bot, Save, Eye, Mail } from "lucide-react";
 import type { ProjectStatus, InvoiceStatus, TicketPriority, Activity } from "@/types";
 
 const statusVariant: Record<ProjectStatus, "info" | "ember" | "warning" | "success" | "default"> = {
@@ -55,6 +55,13 @@ export default function ProjectDetailPage() {
   const [proposalLoading, setProposalLoading] = useState(false);
   const [proposalSaving, setProposalSaving] = useState(false);
 
+  // Approval state
+  const [autoSendEnabled, setAutoSendEnabled] = useState<boolean | null>(null);
+  const [approvalPreviewOpen, setApprovalPreviewOpen] = useState(false);
+  const [approvalPreviewHtml, setApprovalPreviewHtml] = useState("");
+  const [approvalSending, setApprovalSending] = useState(false);
+  const [proposalNotes, setProposalNotes] = useState<Array<{ id: string; content: string }>>([]);
+
   const fetchProject = useCallback(async () => {
     try {
       const res = await fetch(`/api/projects/${id}`);
@@ -78,7 +85,19 @@ export default function ProjectDetailPage() {
   useEffect(() => {
     fetchProject();
     fetchActivities();
+    // Fetch email config for approval banner
+    fetch("/api/email/config").then(r => r.json()).then(c => setAutoSendEnabled(c.autoApprovalEmail)).catch(() => {});
   }, [fetchProject, fetchActivities]);
+
+  // Fetch proposal notes when at APPROVAL stage
+  useEffect(() => {
+    if (project?.status === "APPROVAL") {
+      fetch(`/api/projects/${id}/stage-notes?stage=PROPOSAL`)
+        .then(r => r.json())
+        .then(setProposalNotes)
+        .catch(() => {});
+    }
+  }, [project?.status, id]);
 
   async function handleStageClick(newStatus: ProjectStatus) {
     const res = await fetch(`/api/projects/${id}/transition`, {
@@ -198,10 +217,45 @@ export default function ProjectDetailPage() {
       {project.status === "APPROVAL" && (
         <div className="flex items-center gap-3 rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3">
           <Clock className="h-5 w-5 text-amber-400 shrink-0" />
-          <div>
+          <div className="flex-1">
             <p className="text-sm font-medium text-amber-400">Awaiting Client Approval</p>
-            <p className="text-xs text-amber-400/70">The client has been notified and can approve from their portal. You can also advance manually.</p>
+            <p className="text-xs text-amber-400/70">
+              {autoSendEnabled
+                ? "The client has been notified and can approve from their portal. You can also advance manually."
+                : "Auto-notification is off. Preview and send the approval email manually, or advance via the workflow."}
+            </p>
           </div>
+          {autoSendEnabled === false && (
+            <div className="flex gap-2 shrink-0">
+              <ActionTooltip label="Preview approval email">
+                <Button variant="outline" size="sm" onClick={async () => {
+                  const res = await fetch(`/api/projects/${id}/approval-preview`);
+                  if (res.ok) {
+                    const data = await res.json();
+                    setApprovalPreviewHtml(data.html);
+                    setApprovalPreviewOpen(true);
+                  } else { toast.error("Failed to load preview"); }
+                }}>
+                  <Eye className="mr-2 h-3.5 w-3.5" />
+                  Preview
+                </Button>
+              </ActionTooltip>
+              <ActionTooltip label="Send approval request email to client">
+                <Button size="sm" disabled={approvalSending} onClick={async () => {
+                  setApprovalSending(true);
+                  try {
+                    const res = await fetch(`/api/projects/${id}/notify-approval`, { method: "POST" });
+                    const data = await res.json();
+                    if (res.ok) { toast.success(data.message ?? "Approval email sent"); }
+                    else { toast.error(data.error ?? "Failed to send"); }
+                  } finally { setApprovalSending(false); }
+                }}>
+                  <Mail className="mr-2 h-3.5 w-3.5" />
+                  {approvalSending ? "Sending..." : "Send Notification"}
+                </Button>
+              </ActionTooltip>
+            </div>
+          )}
         </div>
       )}
 
@@ -281,8 +335,61 @@ export default function ProjectDetailPage() {
         </CardContent>
       </Card>
 
+      {/* Show Proposal notes when at APPROVAL stage for easy editing */}
+      {project.status === "APPROVAL" && proposalNotes.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="font-display text-xl text-primary">Proposal Document</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Review or edit the proposal before notifying the client. Changes save on blur.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {proposalNotes.map((note) => (
+              <div key={note.id} className="rounded-lg border border-border bg-muted/20 p-4">
+                <textarea
+                  defaultValue={note.content}
+                  title="Edit proposal note"
+                  placeholder="Proposal content..."
+                  className="w-full min-h-[200px] bg-transparent font-notes text-sm text-foreground outline-none resize-y"
+                  onBlur={async (e) => {
+                    if (e.target.value !== note.content) {
+                      await fetch(`/api/projects/${id}/stage-notes/${note.id}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ content: e.target.value }),
+                      });
+                      toast.success("Proposal note saved");
+                    }
+                  }}
+                />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Stage Work — Tasks + Notes */}
       <StageWorkPanel projectId={project.id} currentStage={project.status} />
+
+      {/* Approval Email Preview Modal */}
+      <Dialog open={approvalPreviewOpen} onOpenChange={setApprovalPreviewOpen}>
+        <DialogContent className="sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl text-primary">
+              Approval Email Preview
+            </DialogTitle>
+          </DialogHeader>
+          <div className="rounded-lg border border-border overflow-hidden">
+            <iframe
+              srcDoc={approvalPreviewHtml}
+              title="Approval email preview"
+              className="w-full h-[450px] bg-[#0A0A0F]"
+              sandbox=""
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Metrics */}
       <div className="grid gap-4 sm:grid-cols-4">
