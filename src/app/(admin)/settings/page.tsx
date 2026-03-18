@@ -30,6 +30,7 @@ import {
 import Image from "next/image";
 import type { AthenaConfig } from "@/lib/athena-config";
 import type { EmailConfig } from "@/lib/email-config";
+import type { BackupConfig } from "@/lib/backup-config";
 import type { BackupEntry } from "@/lib/backup";
 import { HelpButton } from "@/components/shared/help-modal";
 import { ActionTooltip } from "@/components/shared/action-tooltip";
@@ -136,6 +137,11 @@ export default function SettingsPage() {
   const [emailSaving, setEmailSaving] = useState(false);
   const [emailSaved, setEmailSaved] = useState(false);
 
+  // Backup config state
+  const [backupConfig, setBackupConfig] = useState<BackupConfig | null>(null);
+  const [backupSaving, setBackupSaving] = useState(false);
+  const [backupSaved, setBackupSaved] = useState(false);
+
   // Backup state
   const [backups, setBackups] = useState<BackupList | null>(null);
   const [backupsLoading, setBackupsLoading] = useState(false);
@@ -152,6 +158,9 @@ export default function SettingsPage() {
     fetch("/api/email/config")
       .then((r) => r.json())
       .then(setEmailConfig);
+    fetch("/api/backup/config")
+      .then((r) => r.json())
+      .then(setBackupConfig);
   }, []);
 
   const loadBackups = useCallback(async () => {
@@ -247,6 +256,37 @@ export default function SettingsPage() {
       setEmailSaved(true);
       toast.success("Email preferences reset to defaults");
       setTimeout(() => setEmailSaved(false), 3000);
+    }
+  }
+
+  async function handleBackupConfigSave() {
+    if (!backupConfig) return;
+    setBackupSaving(true);
+    setBackupSaved(false);
+    try {
+      const res = await fetch("/api/backup/config", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(backupConfig),
+      });
+      if (res.ok) {
+        setBackupConfig(await res.json());
+        setBackupSaved(true);
+        toast.success("Backup retention settings saved");
+        setTimeout(() => setBackupSaved(false), 3000);
+      } else {
+        toast.error("Failed to save backup settings");
+      }
+    } finally {
+      setBackupSaving(false);
+    }
+  }
+
+  async function handleBackupConfigReset() {
+    const res = await fetch("/api/backup/config", { method: "DELETE" });
+    if (res.ok) {
+      setBackupConfig(await res.json());
+      toast.success("Backup retention reset to defaults");
     }
   }
 
@@ -772,7 +812,9 @@ export default function SettingsPage() {
             <span className="text-muted-foreground">Daily at ~2:00 AM UTC</span>
             <span className="mx-1 text-muted-foreground">·</span>
             <Clock className="h-4 w-4 text-muted-foreground" />
-            <span className="text-muted-foreground">7 daily · 4 weekly · 6 monthly retained</span>
+            <span className="text-muted-foreground">
+              {backupConfig ? `${backupConfig.retainDaily} daily · ${backupConfig.retainWeekly} weekly · ${backupConfig.retainMonthly} monthly retained` : "7 daily · 4 weekly · 6 monthly retained"}
+            </span>
           </div>
 
           {/* Manual trigger */}
@@ -816,6 +858,58 @@ export default function SettingsPage() {
               </div>
             )}
           </div>
+
+          {/* Retention settings */}
+          {backupConfig && (
+            <div className="rounded-lg border border-border bg-muted/20 p-4 space-y-3">
+              <p className="text-sm font-medium text-primary">Retention Policy</p>
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="space-y-1">
+                  <Label htmlFor="retain-daily" className="text-xs text-muted-foreground">Daily (days)</Label>
+                  <Input
+                    id="retain-daily"
+                    type="number"
+                    min={1}
+                    max={30}
+                    value={backupConfig.retainDaily}
+                    onChange={(e) => setBackupConfig({ ...backupConfig, retainDaily: parseInt(e.target.value) || 7 })}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="retain-weekly" className="text-xs text-muted-foreground">Weekly (weeks)</Label>
+                  <Input
+                    id="retain-weekly"
+                    type="number"
+                    min={1}
+                    max={12}
+                    value={backupConfig.retainWeekly}
+                    onChange={(e) => setBackupConfig({ ...backupConfig, retainWeekly: parseInt(e.target.value) || 4 })}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="retain-monthly" className="text-xs text-muted-foreground">Monthly (months)</Label>
+                  <Input
+                    id="retain-monthly"
+                    type="number"
+                    min={1}
+                    max={24}
+                    value={backupConfig.retainMonthly}
+                    onChange={(e) => setBackupConfig({ ...backupConfig, retainMonthly: parseInt(e.target.value) || 6 })}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button size="sm" onClick={handleBackupConfigSave} disabled={backupSaving}>
+                  <Save className="mr-2 h-3.5 w-3.5" />
+                  {backupSaving ? "Saving..." : backupSaved ? "Saved!" : "Save Retention"}
+                </Button>
+                <Button size="sm" variant="outline" onClick={handleBackupConfigReset}>
+                  <RotateCcw className="mr-2 h-3.5 w-3.5" />
+                  Reset
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Backup list tabs */}
           <Tabs defaultValue="daily">

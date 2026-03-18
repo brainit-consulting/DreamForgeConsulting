@@ -1,5 +1,6 @@
 import { put, del, list } from "@vercel/blob";
 import { db } from "@/lib/db";
+import { getBackupConfig } from "@/lib/backup-config";
 
 export interface BackupEntry {
   url: string;
@@ -132,10 +133,11 @@ export async function runBackup(): Promise<BackupResult> {
     // 5. Cleanup old backups
     const allBlobs = await list({ prefix: "backups/" });
 
+    const retention = await getBackupConfig();
     const cutoffs = {
-      daily: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
-      weekly: new Date(now.getTime() - 28 * 24 * 60 * 60 * 1000),
-      monthly: new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000),
+      daily: new Date(now.getTime() - retention.retainDaily * 24 * 60 * 60 * 1000),
+      weekly: new Date(now.getTime() - retention.retainWeekly * 7 * 24 * 60 * 60 * 1000),
+      monthly: new Date(now.getTime() - retention.retainMonthly * 30 * 24 * 60 * 60 * 1000),
     };
 
     for (const blob of allBlobs.blobs) {
