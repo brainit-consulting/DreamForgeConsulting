@@ -45,7 +45,7 @@ export const helpContent: Record<string, HelpSection> = {
   projects: {
     title: "Projects — SaaS Delivery Tracker",
     content:
-      "Projects track the SaaS applications you're building for clients through a 9-stage workflow: Discovery & Planning → Design & Wireframing → Proposal → Client Approval → Development → Testing & QA → Deployment & Launch → Launched → Support. After completing Discovery and Design, you prepare a Proposal, then move to Client Approval where the client can review and approve from their portal before development begins.",
+      "Projects track the SaaS applications you're building for clients through a 9-stage workflow: Discovery → Design → Proposal → Client Approval → Development → Testing → Deployment → Launched → Support. Development uses a 40/30/30 payment structure (start, mid, completion). After launch, an optional support retainer can be enabled for ongoing maintenance with auto-generated monthly invoices.",
     tips: [
       "Use the search bar to filter projects by name or client company",
       "Click a project name to open its detail page with the interactive workflow tracker",
@@ -58,20 +58,22 @@ export const helpContent: Record<string, HelpSection> = {
   invoices: {
     title: "Invoices — Billing & Payments",
     content:
-      "Track all client invoices across your projects. Stat cards show Collected (paid), Pending (sent), Overdue, and Draft counts. Filter by status using the buttons. Each invoice shows description, client, project, status, amount, and due date. Invoices integrate with Stripe — clients pay through their portal via Stripe Checkout, and invoices are automatically marked PAID via webhook.",
+      "Track all client invoices across your projects. There are two types of invoices: project development invoices (created manually with a 40/30/30 payment structure) and support retainer invoices (auto-generated as DRAFT on the 1st of each month for active support plans). Stat cards show Collected, Pending, Overdue, and Draft counts. Invoices integrate with Stripe — clients pay through their portal, and status updates to PAID automatically via webhook.",
     tips: [
+      "Project invoices use a 40/30/30 payment structure: 40% start, 30% mid-development, 30% completion",
+      "Support invoices are auto-generated as DRAFT on the 1st — review and send manually",
       "Filter buttons (All, Draft, Sent, Paid, Overdue) let you quickly find specific invoices",
       "Send icon emails the invoice to the client with a branded template",
       "Clients click 'Pay Now' in their portal to pay via Stripe Checkout",
-      "After Stripe payment completes, invoice status updates to PAID automatically via webhook",
-      "Mark as Paid (credit card icon) lets you manually mark invoices paid for offline payments",
+      "After Stripe payment, invoice status updates to PAID automatically via webhook",
+      "Mark as Paid (credit card icon) for offline payments",
       "Overdue invoices are highlighted in red",
     ],
   },
   settings: {
     title: "Settings — Configuration Hub",
     content:
-      "The Settings page has three collapsible sections: Athena Preferences (AI assistant configuration), Email Preferences (branding, logo, sign-off for all outgoing emails), and Backups & Cron (automated database backups). Click any section header to expand or collapse it. All changes persist to the database and survive deploys.",
+      "The Settings page has four collapsible sections: Athena Preferences (AI assistant), Email Preferences (branding for all outgoing emails), Backups & Cron (automated database backups), and Support Plan Defaults (post-launch retainer rates). Click any section header to expand or collapse it. All changes persist to the database and survive deploys.",
     tips: [
       "Click a section header to expand/collapse — the chevron indicates open/closed state",
       "Athena: edit system prompt, temperature, max tokens, model list, and OpenAI fallback",
@@ -85,7 +87,7 @@ export const helpContent: Record<string, HelpSection> = {
   portal: {
     title: "Client Portal — Your Project Hub",
     content:
-      "Welcome to your client portal. Track the real-time status of all your projects with visual workflow indicators, view and pay outstanding invoices via Stripe, and submit support tickets. When a project reaches the Client Approval stage, you'll see a prominent 'Review & Approve' button — click it to approve the scope and design and begin development. Payments are processed securely through Stripe and invoice status updates automatically.",
+      "Welcome to your client portal. Track the real-time status of all your projects with visual workflow indicators, view and pay outstanding invoices via Stripe (including project and support invoices), and submit support tickets. When a project reaches Client Approval, click 'Review & Approve' to approve scope and begin development. Payments are processed securely through Stripe and invoice status updates automatically.",
     tips: [
       "Projects tab shows your projects with full 9-stage workflow visualization",
       "When a project is awaiting your approval, you'll see a 'Review & Approve' button with an amber banner",
