@@ -8,9 +8,10 @@ export const helpContent: Record<string, HelpSection> = {
   dashboard: {
     title: "Dashboard — Command Center",
     content:
-      "The Dashboard gives you a real-time snapshot of your entire consulting business. The four KPI cards at the top show Total Revenue (sum of all paid invoices), Active Projects (currently in progress), New Leads (in your pipeline), and Active Clients. The Revenue Overview chart displays monthly income over the past 6 months. The Recent Activity feed logs every significant action — project stage changes, invoice payments, client approvals, and lead conversions. The Active Projects section shows each project's current workflow stage and progress percentage.",
+      "The Dashboard gives you a real-time snapshot of your entire consulting business. The four KPI cards at the top show Total Revenue (sum of all paid invoices), Active Projects (currently in progress), New Leads (in your pipeline), and Active Clients. The Revenue Overview chart displays monthly income over the past 6 months. The Email Activity chart shows outreach, invoice, and invite emails sent over the last 30 days. The Recent Activity feed logs every significant action. The Active Projects section shows each project's current workflow stage and progress percentage.",
     tips: [
       "KPI data updates automatically as you add leads, clients, projects, and invoices",
+      "The Email Activity chart tracks outreach (amber), invoice (blue), and invite (emerald) emails with 30-day totals",
       "The activity feed shows stage transitions, client approvals, lead promotions, and invoice payments",
       "Revenue chart reflects paid invoice amounts grouped by month",
     ],
@@ -75,7 +76,7 @@ export const helpContent: Record<string, HelpSection> = {
       "Click a section header to expand/collapse — the chevron indicates open/closed state",
       "Athena: edit system prompt, temperature, max tokens, model list, and OpenAI fallback",
       "Email: set logo (with size slider), company name, sign-off, tagline, and approval email toggle",
-      "Backups: view daily/weekly/monthly snapshots, trigger manual backup, restore from any backup",
+      "Backups: view snapshots, trigger manual backup, restore, and configure retention policy",
       "All settings persist to the database — they survive Vercel deploys and cold starts",
       "Click 'Reset to Defaults' in any section to restore original configuration",
     ],
@@ -133,11 +134,12 @@ export const helpContent: Record<string, HelpSection> = {
   emailPreferences: {
     title: "Email Preferences — Branding & Automation",
     content:
-      "Configure branding and behavior for all outgoing emails — outreach, invoices, client invites, password resets, and approval requests. Company Name sets the 'From' display name and email headers. Logo URL points to the image in email headers (use the size slider to adjust). Sign-Off sets the closing lines in outreach emails. Tagline appears in every email footer. The 'Auto-send approval email' toggle controls whether clients are automatically notified when a project reaches the Client Approval stage.",
+      "Configure branding and behavior for all outgoing emails — outreach, invoices, client invites, password resets, and approval requests. Company Name sets the 'From' display name and email headers. Logo URL points to the image in email headers (use the size slider to adjust). Sign-Off sets the closing lines in outreach emails. Tagline appears in every email footer. The greeting toggles control whether outreach emails include the lead's name and/or company. The 'Auto-send approval email' toggle controls whether clients are automatically notified when a project reaches the Client Approval stage. All emails are rate-limited to stay under Resend's 5 requests/second limit.",
     tips: [
       "The logo preview updates live as you adjust the URL and size slider (30–300px)",
       "Sign-Off supports multiple lines — first line is the greeting, rest are bold (e.g., 'Kind Regards,\\nEmile du Toit')",
       "Tagline appears after the company name in the footer of every email",
+      "'Use lead name' and 'Use company name' toggles control the outreach greeting (e.g., 'Hi Sarah at TechFlow' vs 'Hi there')",
       "Toggle 'Auto-send approval email' off if you prefer to manually notify clients about project approvals",
       "All email settings persist to the database — they survive deploys",
       "Click 'Reset to Defaults' to restore original DreamForge branding",
@@ -152,7 +154,8 @@ export const helpContent: Record<string, HelpSection> = {
       "Save a draft with no leads selected to create a reusable email template",
       "Mail icon on template rows opens the lead picker to assign recipients",
       "Eye icon previews the full branded email with logo, header, and footer",
-      "Copy icon clones any email as a new template draft for editing",
+      "Pencil icon edits the subject and body of any draft",
+      "Copy icon clones any email as a new template draft",
       "Send icon (green) on draft rows sends with confirmation; blue send on sent rows re-sends",
       "Failed emails show an amber retry button",
       "Only leads with email addresses appear in the lead picker",
@@ -162,11 +165,11 @@ export const helpContent: Record<string, HelpSection> = {
   backups: {
     title: "Database Backups — Automated & Versioned",
     content:
-      "Automated daily database backups stored in Vercel Blob. The daily cron runs at ~2:00 AM UTC (±59 min on Hobby). Each backup exports all tables as a JSON file. Backups follow a tiered promotion: daily kept 7 days, weekly (Sundays) kept 4 weeks, monthly (1st) kept 6 months. Use 'Backup Now' for a manual snapshot. Restore from any backup by clicking the cloud icon — a safety backup is created first, and your admin account is always preserved.",
+      "Automated daily database backups stored in Vercel Blob. The daily cron runs at ~2:00 AM UTC (±59 min on Hobby). Each backup exports all tables as a JSON file. Backups follow a tiered promotion: daily, weekly (Sundays), and monthly (1st). Retention is configurable — set how many days, weeks, and months to keep in the Retention Policy section. Use 'Backup Now' for a manual snapshot. Restore from any backup by clicking the cloud icon — a safety backup is created first, and your admin account is always preserved.",
     tips: [
       "Daily backups run at ~2:00 AM UTC — Vercel Hobby plan has ±59 minute timing variance",
       "Weekly backups created every Sunday; monthly on the 1st of each month",
-      "Retention: 7 daily, 4 weekly, 6 monthly — older backups deleted automatically",
+      "Retention is configurable: set daily (days), weekly (weeks), and monthly (months) counts and click 'Save Retention'",
       "Use 'Backup Now' before major data operations (bulk imports, migrations, etc.)",
       "Cloud icon restores from that backup — confirm dialog warns this replaces all data",
       "Restoring creates a safety backup first — your admin account is always preserved",
