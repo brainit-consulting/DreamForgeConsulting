@@ -6,6 +6,7 @@ import { clientInviteEmail } from "@/lib/email-templates";
 import { headers } from "next/headers";
 import crypto from "crypto";
 import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
+import { getFromAddress } from "@/lib/email-config";
 
 export async function POST(req: Request) {
   try {
@@ -98,7 +99,7 @@ export async function POST(req: Request) {
 
     try {
       await resend.emails.send({
-        from: "DreamForge Consulting <noreply@dreamforgeworld.com>",
+        from: getFromAddress(),
         to: client.email,
         subject: emailContent.subject,
         html: emailContent.html,

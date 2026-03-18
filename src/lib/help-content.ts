@@ -126,6 +126,17 @@ export const helpContent: Record<string, HelpSection> = {
       "High/Urgent count includes both HIGH and URGENT priority tickets",
     ],
   },
+  emailPreferences: {
+    title: "Email Preferences — Logo & Branding",
+    content:
+      "Configure the logo and company name used in all outgoing emails — outreach, invoices, client invites, and password resets. The Company Name appears in the 'From' field and email headers. The Logo URL points to an image displayed at the top of every email. Use a path like /DreamForgeConsultingLogo.png for images in your public folder, or a full https:// URL for externally hosted logos.",
+    tips: [
+      "The logo preview shows how it will look — if it's blank, the URL may be incorrect",
+      "Changes apply immediately to all future emails after saving",
+      "Use 'Reset to Defaults' to restore the original DreamForge branding",
+      "The email 'from' address (noreply@dreamforgeworld.com) is fixed by your Resend domain",
+    ],
+  },
   outreach: {
     title: "Outreach — Lead Email Campaigns",
     content:

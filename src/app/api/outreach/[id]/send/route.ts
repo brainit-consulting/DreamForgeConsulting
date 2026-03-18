@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { resend } from "@/lib/resend";
 import { outreachEmail } from "@/lib/email-templates";
 import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
+import { getFromAddress } from "@/lib/email-config";
 
 export async function POST(
   _req: Request,
@@ -41,7 +42,7 @@ export async function POST(
 
     try {
       await resend.emails.send({
-        from: "DreamForge Consulting <noreply@dreamforgeworld.com>",
+        from: getFromAddress(),
         to: email.lead.email,
         subject: email.subject,
         html,

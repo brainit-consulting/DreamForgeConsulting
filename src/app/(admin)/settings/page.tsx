@@ -24,9 +24,11 @@ import {
   Clock,
   CalendarDays,
   UploadCloud,
+  Mail,
 } from "lucide-react";
 import Image from "next/image";
 import type { AthenaConfig } from "@/lib/athena-config";
+import type { EmailConfig } from "@/lib/email-config";
 import type { BackupEntry } from "@/lib/backup";
 import { HelpButton } from "@/components/shared/help-modal";
 import { ActionTooltip } from "@/components/shared/action-tooltip";
@@ -123,6 +125,11 @@ export default function SettingsPage() {
   const [saved, setSaved] = useState(false);
   const [newModel, setNewModel] = useState("");
 
+  // Email config state
+  const [emailConfig, setEmailConfig] = useState<EmailConfig | null>(null);
+  const [emailSaving, setEmailSaving] = useState(false);
+  const [emailSaved, setEmailSaved] = useState(false);
+
   // Backup state
   const [backups, setBackups] = useState<BackupList | null>(null);
   const [backupsLoading, setBackupsLoading] = useState(false);
@@ -136,6 +143,9 @@ export default function SettingsPage() {
     fetch("/api/athena/config")
       .then((r) => r.json())
       .then(setConfig);
+    fetch("/api/email/config")
+      .then((r) => r.json())
+      .then(setEmailConfig);
   }, []);
 
   const loadBackups = useCallback(async () => {
@@ -199,6 +209,39 @@ export default function SettingsPage() {
   function removeModel(model: string) {
     if (!config || config.freeModels.length <= 1) return;
     setConfig({ ...config, freeModels: config.freeModels.filter((m) => m !== model) });
+  }
+
+  async function handleEmailSave() {
+    if (!emailConfig) return;
+    setEmailSaving(true);
+    setEmailSaved(false);
+    try {
+      const res = await fetch("/api/email/config", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(emailConfig),
+      });
+      if (res.ok) {
+        setEmailConfig(await res.json());
+        setEmailSaved(true);
+        toast.success("Email preferences saved");
+        setTimeout(() => setEmailSaved(false), 3000);
+      } else {
+        toast.error("Failed to save email preferences");
+      }
+    } finally {
+      setEmailSaving(false);
+    }
+  }
+
+  async function handleEmailReset() {
+    const res = await fetch("/api/email/config", { method: "DELETE" });
+    if (res.ok) {
+      setEmailConfig(await res.json());
+      setEmailSaved(true);
+      toast.success("Email preferences reset to defaults");
+      setTimeout(() => setEmailSaved(false), 3000);
+    }
   }
 
   async function handleBackupNow() {
@@ -465,6 +508,88 @@ export default function SettingsPage() {
             </Button>
           </div>
         </CardContent>
+      </Card>
+
+      <Separator />
+
+      {/* Email Preferences */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                <Mail className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="font-display text-2xl text-primary">
+                  Email Preferences
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Logo and company name used in all outgoing emails.
+                </p>
+              </div>
+            </div>
+            <HelpButton sectionKey="emailPreferences" />
+          </div>
+        </CardHeader>
+        {emailConfig && (
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="email-company" className="text-base text-primary">Company Name</Label>
+              <p className="text-sm text-muted-foreground">
+                Appears in the &quot;From&quot; field and email header of all outgoing emails.
+              </p>
+              <Input
+                id="email-company"
+                value={emailConfig.companyName}
+                onChange={(e) =>
+                  setEmailConfig({ ...emailConfig, companyName: e.target.value })
+                }
+              />
+            </div>
+
+            <Separator />
+
+            <div className="space-y-2">
+              <Label htmlFor="email-logo" className="text-base text-primary">Logo URL</Label>
+              <p className="text-sm text-muted-foreground">
+                Path or full URL to the logo image displayed in email headers. Use a path like /logo.png for images in the public folder, or a full https:// URL.
+              </p>
+              <Input
+                id="email-logo"
+                value={emailConfig.logoUrl}
+                onChange={(e) =>
+                  setEmailConfig({ ...emailConfig, logoUrl: e.target.value })
+                }
+                placeholder="/DreamForgeConsultingLogo.png"
+              />
+              {emailConfig.logoUrl && (
+                <div className="mt-3 rounded-lg border border-border bg-muted/30 p-4">
+                  <p className="mb-2 text-xs text-muted-foreground">Preview:</p>
+                  <img
+                    src={emailConfig.logoUrl.startsWith("http") ? emailConfig.logoUrl : emailConfig.logoUrl}
+                    alt="Email logo preview"
+                    className="h-12 max-w-[200px] object-contain"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                  />
+                </div>
+              )}
+            </div>
+
+            <Separator />
+
+            <div className="flex items-center gap-3">
+              <Button onClick={handleEmailSave} disabled={emailSaving}>
+                <Save className="mr-2 h-4 w-4" />
+                {emailSaving ? "Saving..." : emailSaved ? "Saved!" : "Save Changes"}
+              </Button>
+              <Button variant="outline" onClick={handleEmailReset}>
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Reset to Defaults
+              </Button>
+            </div>
+          </CardContent>
+        )}
       </Card>
 
       <Separator />

@@ -1,3 +1,27 @@
+import { getEmailConfig, getAbsoluteLogoUrl } from "./email-config";
+
+function emailHeader(): string {
+  const config = getEmailConfig();
+  const logoUrl = getAbsoluteLogoUrl();
+  const parts = config.companyName.split(" ");
+  const mainName = parts.slice(0, -1).join(" ") || config.companyName;
+  const subtitle = parts.length > 1 ? parts[parts.length - 1].toUpperCase() : "";
+
+  return `
+    <div style="text-align:center;margin-bottom:32px;">
+      <img src="${logoUrl}" alt="${config.companyName}" style="max-height:60px;max-width:200px;margin:0 auto 12px;" />
+      <h1 style="color:#F59E0B;font-size:28px;margin:0;">${mainName}</h1>
+      ${subtitle ? `<p style="color:#888;font-size:12px;letter-spacing:3px;margin:4px 0 0;">${subtitle}</p>` : ""}
+    </div>`;
+}
+
+function emailFooter(): string {
+  const config = getEmailConfig();
+  return `<p style="color:#555;font-size:11px;text-align:center;margin:24px 0 0;">
+      ${config.companyName} &mdash; Crafting your digital future.
+    </p>`;
+}
+
 export function passwordResetEmail({
   name,
   resetUrl,
@@ -6,7 +30,7 @@ export function passwordResetEmail({
   resetUrl: string;
 }) {
   return {
-    subject: "Reset Your Password — DreamForge Consulting",
+    subject: `Reset Your Password — ${getEmailConfig().companyName}`,
     html: `
 <!DOCTYPE html>
 <html>
@@ -16,10 +40,7 @@ export function passwordResetEmail({
 </head>
 <body style="margin:0;padding:0;background:#0A0A0F;font-family:system-ui,-apple-system,sans-serif;">
   <div style="max-width:560px;margin:0 auto;padding:40px 24px;">
-    <div style="text-align:center;margin-bottom:32px;">
-      <h1 style="color:#F59E0B;font-size:28px;margin:0;">DreamForge</h1>
-      <p style="color:#888;font-size:12px;letter-spacing:3px;margin:4px 0 0;">CONSULTING</p>
-    </div>
+    ${emailHeader()}
     <div style="background:#16161E;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:32px;">
       <h2 style="color:#E8E4DF;font-size:20px;margin:0 0 16px;">Password Reset</h2>
       <p style="color:#AAA;font-size:14px;line-height:1.6;margin:0 0 24px;">
@@ -33,9 +54,7 @@ export function passwordResetEmail({
         This link expires in 1 hour. If you didn't request this, you can safely ignore this email.
       </p>
     </div>
-    <p style="color:#555;font-size:11px;text-align:center;margin:24px 0 0;">
-      DreamForge Consulting &mdash; Crafting your digital future.
-    </p>
+    ${emailFooter()}
   </div>
 </body>
 </html>`,
@@ -60,6 +79,8 @@ export function outreachEmail({
     .map((p) => `<p style="color:#CCC;font-size:14px;line-height:1.6;margin:0 0 12px;">${p}</p>`)
     .join("");
 
+  const config = getEmailConfig();
+
   return `
 <!DOCTYPE html>
 <html>
@@ -69,21 +90,16 @@ export function outreachEmail({
 </head>
 <body style="margin:0;padding:0;background:#0A0A0F;font-family:system-ui,-apple-system,sans-serif;">
   <div style="max-width:560px;margin:0 auto;padding:40px 24px;">
-    <div style="text-align:center;margin-bottom:32px;">
-      <h1 style="color:#F59E0B;font-size:28px;margin:0;">DreamForge</h1>
-      <p style="color:#888;font-size:12px;letter-spacing:3px;margin:4px 0 0;">CONSULTING</p>
-    </div>
+    ${emailHeader()}
     <div style="background:#16161E;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:32px;">
       <h2 style="color:#E8E4DF;font-size:18px;margin:0 0 16px;">${greeting},</h2>
       ${paragraphs}
       <div style="margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);">
         <p style="color:#888;font-size:13px;margin:0;">Best regards,</p>
-        <p style="color:#E8E4DF;font-size:14px;font-weight:600;margin:4px 0 0;">DreamForge Consulting</p>
+        <p style="color:#E8E4DF;font-size:14px;font-weight:600;margin:4px 0 0;">${config.companyName}</p>
       </div>
     </div>
-    <p style="color:#555;font-size:11px;text-align:center;margin:24px 0 0;">
-      DreamForge Consulting &mdash; Crafting your digital future.
-    </p>
+    ${emailFooter()}
   </div>
 </body>
 </html>`;
@@ -103,7 +119,7 @@ export function clientInviteEmail({
   portalUrl: string;
 }) {
   return {
-    subject: `Welcome to DreamForge Consulting — Your Portal Access`,
+    subject: `Welcome to ${getEmailConfig().companyName} — Your Portal Access`,
     html: `
 <!DOCTYPE html>
 <html>
@@ -113,10 +129,7 @@ export function clientInviteEmail({
 </head>
 <body style="margin:0;padding:0;background:#0A0A0F;font-family:system-ui,-apple-system,sans-serif;">
   <div style="max-width:560px;margin:0 auto;padding:40px 24px;">
-    <div style="text-align:center;margin-bottom:32px;">
-      <h1 style="color:#F59E0B;font-size:28px;margin:0;">DreamForge</h1>
-      <p style="color:#888;font-size:12px;letter-spacing:3px;margin:4px 0 0;">CONSULTING</p>
-    </div>
+    ${emailHeader()}
     <div style="background:#16161E;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:32px;">
       <h2 style="color:#E8E4DF;font-size:20px;margin:0 0 16px;">Welcome, ${clientName}!</h2>
       <p style="color:#AAA;font-size:14px;line-height:1.6;margin:0 0 24px;">
@@ -135,9 +148,7 @@ export function clientInviteEmail({
         We recommend changing your password after your first login.
       </p>
     </div>
-    <p style="color:#555;font-size:11px;text-align:center;margin:24px 0 0;">
-      DreamForge Consulting &mdash; Crafting your digital future.
-    </p>
+    ${emailFooter()}
   </div>
 </body>
 </html>`,
