@@ -10,6 +10,7 @@ const updateLeadSchema = z.object({
   phone: z.string().optional(),
   website: z.string().optional(),
   address: z.string().optional(),
+  cardSent: z.boolean().optional(),
   status: z.enum(["NEW", "CONTACTED", "QUALIFIED", "PROPOSAL", "CONVERTED", "LOST"]).optional(),
   source: z.string().optional(),
   notes: z.string().optional(),

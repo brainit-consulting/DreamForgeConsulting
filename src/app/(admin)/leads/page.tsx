@@ -137,6 +137,7 @@ export default function LeadsPage() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-12 text-center">Card</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Company</TableHead>
               <TableHead>Status</TableHead>
@@ -148,13 +149,29 @@ export default function LeadsPage() {
           </TableHeader>
           <TableBody>
             {loading && (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
             )}
             {!loading && filtered.length === 0 && (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">{search ? "No leads match your search." : "No leads yet. Add your first one!"}</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">{search ? "No leads match your search." : "No leads yet. Add your first one!"}</TableCell></TableRow>
             )}
             {filtered.map((lead) => (
               <TableRow key={lead.id}>
+                <TableCell className="text-center">
+                  <input
+                    type="checkbox"
+                    checked={lead.cardSent ?? false}
+                    title="Postcard sent"
+                    className="h-4 w-4 accent-primary cursor-pointer"
+                    onChange={async (e) => {
+                      const res = await fetch(`/api/leads/${lead.id}`, {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ cardSent: e.target.checked }),
+                      });
+                      if (res.ok) fetchLeads();
+                    }}
+                  />
+                </TableCell>
                 <TableCell>
                   <div>
                     <p className="font-medium">{lead.name}</p>

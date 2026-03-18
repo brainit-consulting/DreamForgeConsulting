@@ -9,6 +9,7 @@ const updateClientSchema = z.object({
   phone: z.string().optional(),
   website: z.string().optional(),
   address: z.string().optional(),
+  cardSent: z.boolean().optional(),
 });
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {

@@ -22,6 +22,7 @@ interface ClientRow {
   company: string;
   email: string;
   phone?: string;
+  cardSent?: boolean;
   createdAt: string;
   _count: { projects: number };
 }
@@ -123,6 +124,7 @@ export default function ClientsPage() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-12 text-center">Card</TableHead>
               <TableHead>Client</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Phone</TableHead>
@@ -134,15 +136,31 @@ export default function ClientsPage() {
           </TableHeader>
           <TableBody>
             {loading && (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
             )}
             {!loading && filtered.length === 0 && (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">{search ? "No clients match your search." : "No clients yet. Add your first one!"}</TableCell></TableRow>
+              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">{search ? "No clients match your search." : "No clients yet. Add your first one!"}</TableCell></TableRow>
             )}
             {filtered.map((client) => {
               const initials = client.company.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
               return (
                 <TableRow key={client.id}>
+                  <TableCell className="text-center">
+                    <input
+                      type="checkbox"
+                      checked={client.cardSent ?? false}
+                      title="Postcard sent"
+                      className="h-4 w-4 accent-primary cursor-pointer"
+                      onChange={async (e) => {
+                        const res = await fetch(`/api/clients/${client.id}`, {
+                          method: "PUT",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ cardSent: e.target.checked }),
+                        });
+                        if (res.ok) fetchClients();
+                      }}
+                    />
+                  </TableCell>
                   <TableCell>
                     <Link href={`/clients/${client.id}`} className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">

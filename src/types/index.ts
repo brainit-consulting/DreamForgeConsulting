@@ -42,6 +42,7 @@ export interface Lead {
   phone?: string;
   website?: string;
   address?: string;
+  cardSent?: boolean;
   status: LeadStatus;
   source?: string;
   notes?: string;
