@@ -7,8 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { WorkflowTracker } from "@/components/shared/workflow-tracker";
 import { StageWorkPanel } from "@/components/admin/projects/stage-work-panel";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import { ActionTooltip } from "@/components/shared/action-tooltip";
 import { toast } from "sonner";
-import { ArrowRight, Clock } from "lucide-react";
+import { ArrowRight, Clock, FileText, Copy, Bot, Save } from "lucide-react";
 import type { ProjectStatus, InvoiceStatus, TicketPriority, Activity } from "@/types";
 
 const statusVariant: Record<ProjectStatus, "info" | "ember" | "warning" | "success" | "default"> = {
@@ -43,6 +48,12 @@ export default function ProjectDetailPage() {
   const [loading, setLoading] = useState(true);
 
   const [error, setError] = useState(false);
+
+  // Proposal generation state
+  const [proposalOpen, setProposalOpen] = useState(false);
+  const [proposalContent, setProposalContent] = useState("");
+  const [proposalLoading, setProposalLoading] = useState(false);
+  const [proposalSaving, setProposalSaving] = useState(false);
 
   const fetchProject = useCallback(async () => {
     try {
@@ -82,6 +93,73 @@ export default function ProjectDetailPage() {
       toast.success(`Moved to ${newStatus.toLowerCase().replace("_", " ")}`);
     } else {
       toast.error(data.error);
+    }
+  }
+
+  async function copyProposalPrompt() {
+    const res = await fetch(`/api/projects/${id}/proposal-prompt`);
+    if (!res.ok) { toast.error("Failed to generate prompt"); return; }
+    const { prompt } = await res.json();
+    await navigator.clipboard.writeText(prompt);
+    toast.success("Proposal prompt copied — paste into Claude or ChatGPT");
+  }
+
+  async function generateViaAthena() {
+    setProposalLoading(true);
+    setProposalContent("");
+    setProposalOpen(true);
+    try {
+      const promptRes = await fetch(`/api/projects/${id}/proposal-prompt`);
+      if (!promptRes.ok) { toast.error("Failed to gather data"); setProposalOpen(false); return; }
+      const { prompt } = await promptRes.json();
+
+      const chatRes = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: [{ role: "user", content: prompt }],
+        }),
+      });
+
+      if (!chatRes.ok || !chatRes.body) {
+        toast.error("Athena failed to generate proposal");
+        setProposalOpen(false);
+        return;
+      }
+
+      // Stream the response
+      const reader = chatRes.body.getReader();
+      const decoder = new TextDecoder();
+      let full = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        full += chunk;
+        setProposalContent(full);
+      }
+    } finally {
+      setProposalLoading(false);
+    }
+  }
+
+  async function saveProposalAsNote() {
+    if (!proposalContent) return;
+    setProposalSaving(true);
+    try {
+      const res = await fetch(`/api/projects/${id}/stage-notes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stage: "PROPOSAL", content: proposalContent }),
+      });
+      if (res.ok) {
+        toast.success("Proposal saved as stage note");
+        setProposalOpen(false);
+      } else {
+        toast.error("Failed to save note");
+      }
+    } finally {
+      setProposalSaving(false);
     }
   }
 
@@ -126,6 +204,67 @@ export default function ProjectDetailPage() {
           </div>
         </div>
       )}
+
+      {project.status === "PROPOSAL" && (
+        <div className="flex items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
+          <FileText className="h-5 w-5 text-primary shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-primary">Generate Proposal</p>
+            <p className="text-xs text-muted-foreground">
+              Auto-build a proposal from Discovery &amp; Design data.
+            </p>
+          </div>
+          <ActionTooltip label="Copy prompt to clipboard for Claude/ChatGPT">
+            <Button variant="outline" size="sm" onClick={copyProposalPrompt}>
+              <Copy className="mr-2 h-3.5 w-3.5" />
+              Copy Prompt
+            </Button>
+          </ActionTooltip>
+          <ActionTooltip label="Generate proposal draft via Athena AI">
+            <Button size="sm" onClick={generateViaAthena}>
+              <Bot className="mr-2 h-3.5 w-3.5" />
+              Generate via Athena
+            </Button>
+          </ActionTooltip>
+        </div>
+      )}
+
+      {/* Athena Proposal Modal */}
+      <Dialog open={proposalOpen} onOpenChange={setProposalOpen}>
+        <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="font-display text-xl text-primary">
+              {proposalLoading ? "Generating Proposal..." : "Proposal Draft"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto rounded-lg border border-border bg-muted/30 p-4">
+            {proposalContent ? (
+              <div className="prose prose-invert prose-sm max-w-none whitespace-pre-wrap font-notes text-sm">
+                {proposalContent}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground animate-pulse">
+                Athena is writing your proposal...
+              </p>
+            )}
+          </div>
+          {!proposalLoading && proposalContent && (
+            <DialogFooter className="gap-2">
+              <Button variant="outline" onClick={() => {
+                navigator.clipboard.writeText(proposalContent);
+                toast.success("Proposal copied to clipboard");
+              }}>
+                <Copy className="mr-2 h-3.5 w-3.5" />
+                Copy
+              </Button>
+              <Button onClick={saveProposalAsNote} disabled={proposalSaving}>
+                <Save className="mr-2 h-3.5 w-3.5" />
+                {proposalSaving ? "Saving..." : "Save as Note"}
+              </Button>
+            </DialogFooter>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Interactive Workflow */}
       <Card>
