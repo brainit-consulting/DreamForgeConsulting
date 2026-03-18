@@ -92,8 +92,64 @@ function AdminGuideTips({ tips }: { tips: string[] }) {
 
   return (
     <div className="space-y-3">
-      {Object.entries(chapters).map(([chapter, items]) =>
-        items.length > 0 ? (
+      {Object.entries(chapters).map(([chapter, items]) => {
+        if (items.length === 0) return null;
+
+        if (chapter === "Price Guidance") {
+          // Parse "PRICE GUIDANCE — Label: $range (details)" into table rows
+          const rows = items
+            .filter((t) => t.startsWith("PRICE GUIDANCE — "))
+            .map((t) => {
+              const after = t.replace("PRICE GUIDANCE — ", "");
+              const colonIdx = after.indexOf(":");
+              if (colonIdx === -1) return { service: after, rate: "", note: "" };
+              const service = after.slice(0, colonIdx).trim();
+              const rest = after.slice(colonIdx + 1).trim();
+              // Split on first parenthesis for note
+              const parenIdx = rest.indexOf("(");
+              if (parenIdx === -1) return { service, rate: rest, note: "" };
+              return {
+                service,
+                rate: rest.slice(0, parenIdx).trim(),
+                note: rest.slice(parenIdx + 1).replace(/\)$/, "").trim(),
+              };
+            });
+
+          // Find the market comparison note (last entry)
+          const marketNote = items.find((t) => t.includes("below-market rates"));
+
+          return (
+            <GuideSection key={chapter} title={chapter}>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border-collapse">
+                  <thead>
+                    <tr className="border-b border-border/50">
+                      <th className="text-left py-2 pr-4 font-display text-primary text-sm">Service</th>
+                      <th className="text-left py-2 pr-4 font-display text-primary text-sm">Our Rate</th>
+                      <th className="text-left py-2 font-display text-primary text-sm">Details</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((row, i) => (
+                      <tr key={i} className="border-b border-border/20">
+                        <td className="py-2 pr-4 font-sans text-foreground/90 whitespace-nowrap">{row.service}</td>
+                        <td className="py-2 pr-4 font-mono text-emerald-400 whitespace-nowrap">{row.rate}</td>
+                        <td className="py-2 font-sans text-foreground/60">{row.note}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {marketNote && (
+                <p className="mt-3 text-xs text-foreground/50 font-sans italic">
+                  {marketNote.replace("PRICE GUIDANCE — ", "")}
+                </p>
+              )}
+            </GuideSection>
+          );
+        }
+
+        return (
           <GuideSection key={chapter} title={chapter}>
             {items.map((tip, i) => (
               <p key={i} className="text-sm leading-relaxed text-foreground/80 font-sans">
@@ -101,8 +157,8 @@ function AdminGuideTips({ tips }: { tips: string[] }) {
               </p>
             ))}
           </GuideSection>
-        ) : null
-      )}
+        );
+      })}
     </div>
   );
 }
