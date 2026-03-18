@@ -1,7 +1,7 @@
 import { createOpenRouter } from "@openrouter/ai-sdk-provider";
 import { openai } from "@ai-sdk/openai";
 import { streamText } from "ai";
-import { getAthenaConfig } from "@/lib/athena-config";
+import { getAthenaConfig, CLIENT_SYSTEM_PROMPT } from "@/lib/athena-config";
 import { requireAuth } from "@/lib/auth-helpers";
 
 export const maxDuration = 30;
@@ -24,10 +24,14 @@ function normalizeMessages(
 }
 
 export async function POST(req: Request) {
-  await requireAuth();
+  const session = await requireAuth();
+  const isClient = session.user.role === "CLIENT";
   const { messages } = await req.json();
   const normalized = normalizeMessages(messages);
   const config = await getAthenaConfig();
+
+  // CRITICAL: Clients get a restricted prompt — never expose admin internals
+  const systemPrompt = isClient ? CLIENT_SYSTEM_PROMPT : config.systemPrompt;
 
   const openrouter = createOpenRouter({
     apiKey: process.env.OPENROUTER_API_KEY,
@@ -40,7 +44,7 @@ export async function POST(req: Request) {
       console.log(`[Athena] Trying ${id}`);
       const result = streamText({
         model: openrouter(id),
-        system: config.systemPrompt,
+        system: systemPrompt,
         messages: normalized,
         maxOutputTokens: config.maxOutputTokens,
         temperature: config.temperature,
@@ -81,7 +85,7 @@ export async function POST(req: Request) {
       console.log(`[Athena] Fallback → OpenAI ${config.openAIFallbackModel}`);
       const result = streamText({
         model: openai(config.openAIFallbackModel),
-        system: config.systemPrompt,
+        system: systemPrompt,
         messages: normalized,
         maxOutputTokens: config.maxOutputTokens,
         temperature: config.temperature,
