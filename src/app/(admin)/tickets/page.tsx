@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { format } from "date-fns";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
@@ -158,9 +158,8 @@ export default function TicketsPage() {
               <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No tickets found.</TableCell></TableRow>
             )}
             {filtered.map((ticket) => (
-              <>
+              <React.Fragment key={ticket.id}>
                 <TableRow
-                  key={ticket.id}
                   className="cursor-pointer"
                   onClick={() => setExpanded(expanded === ticket.id ? null : ticket.id)}
                 >
@@ -242,7 +241,7 @@ export default function TicketsPage() {
                     </TableCell>
                   </TableRow>
                 )}
-              </>
+              </React.Fragment>
             ))}
           </TableBody>
         </Table>
