@@ -19,27 +19,31 @@ export const helpContent: Record<string, HelpSection> = {
   leads: {
     title: "Leads — Sales Pipeline",
     content:
-      "Leads are potential clients you're tracking through your sales pipeline. Each lead has a status: New → Contacted → Qualified → Proposal → Converted (or Lost). Use 'Add Lead' to create one — only the name is required, email and other fields can be added later. Change status directly from the dropdown. When ready, click the green checkmark to promote a lead to a client record. Portal access is granted separately from the Clients page.",
+      "Leads are potential clients you're tracking through your sales pipeline. Each lead has a status: New → Contacted → Qualified → Proposal → Converted (or Lost). Use 'Add Lead' to create one — only the name is required, email and other fields can be added later. Change status directly from the dropdown. When ready, click the green person-check icon to promote a lead to a client record. Portal access is granted separately from the Clients page.",
     tips: [
       "Use the search bar to filter leads by name, email, company, or source",
       "Click the pencil icon to edit any lead detail (name, email, company, phone, website, address, source, value, notes)",
       "The status dropdown updates pipeline stage instantly with a toast confirmation",
-      "Promoting a lead (green ✓) creates a client record — portal invite is a separate step from Clients",
-      "The pipeline summary at the top shows how many leads are in each stage",
+      "Promoting a lead (green person-check icon) creates a client record — portal invite is a separate step from Clients",
+      "The subtitle shows total lead count, how many are New, and how many are Qualified",
       "Leads marked as Converted or Lost no longer show the promote button",
+      "The Card checkbox (first column) tracks whether you've sent a handwritten postcard to this lead — check it to mark as sent",
     ],
   },
   clients: {
     title: "Clients — Your Roster",
     content:
-      "Clients are businesses you work with. They can be added directly via 'Add Client' or promoted from leads. Each client has a company name, email, phone, website, and project count. The Portal column shows whether a client has portal login access (green shield icon). Portal access is granted separately — click the mail icon (Send Invite) on any client without portal access to create their login and email credentials.",
+      "Clients are businesses you work with. They can be added directly via 'Add Client' or promoted from leads. Each client has a company name, email, phone, and project count. The Portal column shows whether a client has portal login access (green shield icon). Portal access is granted separately — click the mail icon (Send Invite) on any client without portal access to create their login and email credentials. After sending, a dialog shows the login email and temp password — keep it on screen until you're done.",
     tips: [
       "Use the search bar to filter clients by company name, email, or phone",
       "Click a client's company name to see their full detail page with projects and invoices",
       "Green shield icon in Portal column = client has portal access; dash = no access yet",
-      "Mail icon sends a portal invite — creates login and emails temporary credentials",
-      "Pencil icon edits client details (company, email, phone, website, address)",
+      "Mail icon (blue) sends a portal invite — creates login and emails temporary credentials; a dialog shows the credentials on screen",
+      "Refresh icon (circular arrow) on clients with portal access resends the invite with a new temp password — old password stops working immediately",
+      "Pencil icon edits client details (company, email, phone)",
+      "Trash icon permanently deletes the client and all their projects, invoices, and tickets",
       "Email is optional when adding a client, but required before sending a portal invite",
+      "The Card checkbox (first column) tracks whether you've sent a handwritten postcard to this client — check it to mark as sent",
     ],
   },
   projects: {
@@ -144,10 +148,12 @@ export const helpContent: Record<string, HelpSection> = {
     content:
       "All support requests submitted by clients through their portal. Each ticket has a subject, description, priority (Low/Medium/High/Urgent), and a status you manage: Open → In Progress → Resolved → Closed. Click any row to expand and read the full description. Use the priority and status dropdowns to update tickets directly. Stats cards show open, in-progress, resolved, and high-priority counts.",
     tips: [
+      "Use the search bar to filter tickets by subject, client name, email, or project",
+      "Use the status filter tabs (All / Open / In Progress / Resolved / Closed) to narrow the list",
       "Click a ticket row to expand and read the full description",
       "Change ticket status via the dropdown: Open → In Progress → Resolved → Closed",
       "Adjust priority if a client's issue is more or less urgent than indicated",
-      "Use the Archive button to quickly close resolved tickets",
+      "Use the Archive button (close icon) to quickly close any open ticket without going through each status",
       "High/Urgent count includes both HIGH and URGENT priority tickets",
     ],
   },
@@ -196,8 +202,8 @@ export const helpContent: Record<string, HelpSection> = {
       "HOW TO HANDLE A PAYMENT: Client clicks 'Pay Now' in portal → Stripe Checkout → payment completes → invoice auto-marked PAID via webhook. You don't need to do anything.",
       "HOW TO ISSUE A REFUND: Agree on refund with client → go to dashboard.stripe.com → Payments → find the payment → click 'Refund' (full or partial). Our system automatically marks the invoice as REFUNDED via webhook + logs activity. Client sees REFUNDED status in portal. Money returns to their card in 2-10 business days.",
       "HOW TO HANDLE A DISPUTE: If a client disputes a charge via their bank, Stripe notifies us automatically. A warning activity is logged with the dispute reason. Go to Stripe Dashboard → Disputes to respond with evidence.",
-      "HOW TO SET UP SUPPORT PLAN: When project reaches Launched/Support → click 'Enable Support Plan' on project detail → configure plan type (Monthly/Annual), rates, hours. DRAFT invoices auto-generate on the 1st of each month.",
-      "HOW TO LOG SUPPORT HOURS: On project detail at Support stage → click 'Log Hours' → enter hours + description. Creates a task entry + updates hoursUsed. Overage is calculated automatically on the next invoice.",
+      "HOW TO SET UP SUPPORT PLAN: When project reaches Launched or Support → click 'Enable Support Plan' on project detail → choose plan type (Monthly/Annual/None). Rates and included hours come from Settings > Support Plan Defaults — they can't be changed per-project. DRAFT invoices auto-generate on the 1st of each month.",
+      "HOW TO LOG SUPPORT HOURS: On project detail at Launched or Support stage, with a support plan enabled → click 'Log Hours' → enter hours + description. Creates a task entry + updates hoursUsed. Overage is calculated automatically on the next invoice.",
       "HOW TO SEND OUTREACH EMAILS: Go to Outreach → New Outreach → write subject + body → optionally select leads (or save as template). Each draft is sent individually with confirmation. Use Preview (eye icon) to see the branded email before sending.",
       "HOW TO BACK UP / RESTORE: Settings > Backups → 'Backup Now' for manual backup. Click cloud icon on any backup to restore (safety backup created first, admin account preserved). Retention is configurable.",
       "HOW TO RESET A PASSWORD (SELF-SERVICE): Client uses 'Forgot your password?' on login page → gets reset email → sets new password. No admin action needed.",
