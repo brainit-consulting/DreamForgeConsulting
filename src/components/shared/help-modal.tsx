@@ -175,7 +175,7 @@ function AdminGuideTips({ tips }: { tips: string[] }) {
         ) : (
           <div className="space-y-4">
             {activeItems.map((tip, i) => (
-              <div key={i} className="rounded-lg bg-muted/10 border border-border/20 px-4 py-3">
+              <div key={i} className="rounded-lg bg-white/5 border border-white/10 px-4 py-3">
                 <p className="text-sm leading-relaxed text-foreground/80 font-sans">
                   {highlightKeywords(tip)}
                 </p>
