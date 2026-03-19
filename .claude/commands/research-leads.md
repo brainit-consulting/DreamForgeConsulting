@@ -86,6 +86,25 @@ Search for real businesses matching the interview criteria:
   - Website quality (modern vs outdated — outdated = higher opportunity)
   - Visible tech stack (online booking? client login? forms?)
 
+### Contact Enrichment
+
+After the initial pass, do a **second pass** on any lead missing an owner name or email. For each incomplete lead, try these additional sources:
+
+1. **"{business name}" {city} owner** — general web search for owner name
+2. **"{business name}" {city} email contact** — look for email on directories, Yelp, BBB, Facebook
+3. **WebFetch on /about, /contact, /team pages** — many sites hide contact details off the homepage
+4. **Facebook business page** — often has email, phone, and owner name in the "About" section
+5. **BBB profile** — search bbb.org for the business name, often lists principals
+6. **LinkedIn** — search for "{owner name} {business name}" to confirm identity and find direct contact
+7. **Yelp business page** — sometimes has email or owner response names
+8. **Sunbiz registered agent** — the registered agent on sunbiz.org is often the owner for small businesses
+
+**Rules:**
+- Do NOT fabricate contact details — only use what you actually find
+- If an email is still missing after enrichment, note "email not found" in the lead — do not block import
+- If only a first name is found (e.g., "Scott"), note it and move on — partial data is better than none
+- Prefer business domain emails (info@company.com) over generic (gmail, outlook) when both exist
+
 ### Verification
 
 Cross-reference each lead against Florida public records to build confidence:
