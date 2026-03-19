@@ -30,10 +30,10 @@ async function loadFromDb(): Promise<void> {
       const stored = JSON.parse(row.value);
       currentConfig = supportConfigSchema.parse({ ...DEFAULT_SUPPORT_CONFIG, ...stored });
     }
+    loadedFromDb = true;
   } catch {
-    // DB not available — use defaults
+    // DB not available — do NOT cache, retry on next call
   }
-  loadedFromDb = true;
 }
 
 export async function getSupportConfig(): Promise<SupportConfig> {

@@ -24,7 +24,7 @@ export const DEFAULT_EMAIL_CONFIG: EmailConfig = {
   tagline: "Crafting your digital future.",
   greetingUseName: true,
   greetingUseCompany: true,
-  autoApprovalEmail: true,
+  autoApprovalEmail: false,
 };
 
 let currentConfig: EmailConfig = { ...DEFAULT_EMAIL_CONFIG };
@@ -38,10 +38,10 @@ async function loadFromDb(): Promise<void> {
       const stored = JSON.parse(row.value);
       currentConfig = emailConfigSchema.parse({ ...DEFAULT_EMAIL_CONFIG, ...stored });
     }
+    loadedFromDb = true;
   } catch {
-    // DB not available or invalid data — use defaults
+    // DB not available — do NOT cache, retry on next call
   }
-  loadedFromDb = true;
 }
 
 export async function getEmailConfig(): Promise<EmailConfig> {

@@ -28,10 +28,10 @@ async function loadFromDb(): Promise<void> {
       const stored = JSON.parse(row.value);
       currentConfig = backupConfigSchema.parse({ ...DEFAULT_BACKUP_CONFIG, ...stored });
     }
+    loadedFromDb = true;
   } catch {
-    // DB not available or invalid data — use defaults
+    // DB not available — do NOT cache, retry on next call
   }
-  loadedFromDb = true;
 }
 
 export async function getBackupConfig(): Promise<BackupConfig> {

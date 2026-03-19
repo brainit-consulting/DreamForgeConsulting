@@ -89,10 +89,10 @@ async function loadFromDb(): Promise<void> {
       const stored = JSON.parse(row.value);
       currentConfig = athenaConfigSchema.parse({ ...DEFAULT_ATHENA_CONFIG, ...stored });
     }
+    loadedFromDb = true;
   } catch {
-    // DB not available or invalid data — use defaults
+    // DB not available — do NOT cache, retry on next call
   }
-  loadedFromDb = true;
 }
 
 export async function getAthenaConfig(): Promise<AthenaConfig> {
