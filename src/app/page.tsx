@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   Cpu, Workflow, ShoppingBag, Server, Globe, GraduationCap,
-  ArrowRight, Calendar, LogIn, Phone, Mail, CheckCircle,
+  ArrowRight, Calendar, LogIn, Phone, Mail,
 } from "lucide-react";
 
 const services = [
@@ -66,7 +66,8 @@ export default function LandingPage() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full bg-primary/10 blur-[120px]" />
         <div className="relative mx-auto max-w-4xl px-6 py-24 sm:py-32 text-center">
           <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl leading-tight">
-            Smart Automation Solutions That Help Small Businesses{" "}
+            Smart Automation Solutions<br />
+            That Help Small Businesses<br />
             <span className="text-primary">Save Time & Cut Costs</span>
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground leading-relaxed">
