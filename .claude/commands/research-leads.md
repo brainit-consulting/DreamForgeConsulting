@@ -26,7 +26,7 @@ These are DreamForge's **known** service lines — use them as context when scor
 **Goal:** Identify 3-5 small business sectors that would benefit from DreamForge's services. **Go beyond the known service tiers** — surface sectors and opportunities the user may not have considered.
 
 Use WebSearch to research:
-- "small businesses that need custom software 2025"
+- "small businesses that need custom software" (use current year)
 - "industries still using paper processes"
 - "small business sectors underserved by technology"
 - "businesses that need online booking portals"
@@ -34,7 +34,7 @@ Use WebSearch to research:
 - "small businesses struggling with manual workflows"
 - "businesses that need IT support and don't have it"
 - "emerging small business niches needing tech help"
-- "small business pain points technology can solve 2025"
+- "small business pain points technology can solve" (use current year)
 - "fastest growing small business sectors needing digital tools"
 - Local business trends in Florida
 
@@ -86,6 +86,22 @@ Search for real businesses matching the interview criteria:
   - Website quality (modern vs outdated — outdated = higher opportunity)
   - Visible tech stack (online booking? client login? forms?)
 
+### Verification
+
+Cross-reference each lead against Florida public records to build confidence:
+
+1. **Sunbiz (sunbiz.org)** — always check. Search by business name or owner name. Confirms legal entity registration, status (Active/Inactive), and registered agent.
+
+2. **Sector-specific license check** — only for regulated industries:
+   - **Veterinary**: DBPR / Board of Veterinary Medicine at myfloridalicense.com — search by name or license number
+   - **Human healthcare practitioners**: FL DOH / HealthSource at flhealthsource.gov — search by name or license number
+   - **Healthcare facilities / Elder Care / Home Health**: AHCA facility lookup at ahca.myflorida.com — search by facility name or location
+   - **Other DBPR-regulated professions/businesses** (contractors, cosmetology, real estate): DBPR at myfloridalicense.com — search by name or business
+
+3. **Verification is additive, not a gate.** A lead that can't be verified is NOT discarded — it receives a lower confidence rating. The opportunity score (pain points) remains the primary ranking factor.
+
+4. **Store a verification summary in notes** for each lead, e.g.: `verification: sunbiz+dbpr+website-match` or `verification: sunbiz+website-only` or `verification: website-only`. This helps with downstream filtering.
+
 ### Opportunity Scoring (1-10)
 
 Score each lead based on signals that they need DreamForge's services:
@@ -109,9 +125,9 @@ Deduct points: modern website with booking (-3), already uses visible SaaS tools
 
 Rank leads by opportunity score (highest first). Discard leads scoring below 3 or where basic info can't be verified.
 
-| # | Score | Business | Owner | Email | Phone | Website | Why They're a Fit |
-|---|-------|----------|-------|-------|-------|---------|-------------------|
-| 1 | 8/10 | Example Vet | Dr. Smith | smith@... | 407-... | outdated | No online booking, paper intake forms, needs automation |
+| # | Score | Confidence | Business | Owner | Email | Phone | Website | Why They're a Fit |
+|---|-------|------------|----------|-------|-------|-------|---------|-------------------|
+| 1 | 8/10 | High | Example Vet | Dr. Smith | smith@... | 407-... | outdated | No online booking, paper intake forms |
 
 Ask user to confirm which leads to import (all, or select specific ones).
 
@@ -147,6 +163,7 @@ async function main() {
         phone: lead.phone || null,
         website: lead.website || null,
         address: lead.address || null,
+        sector: lead.sector,
         source: lead.source,
         notes: lead.notes,
         value: lead.value,
@@ -163,6 +180,7 @@ main().catch((e) => { console.error(e); process.exit(1); });
 ```
 
 Field mapping:
+- `sector`: The industry/sector from the interview (e.g., "Veterinary / Pet Care", "Elder Care / Home Health")
 - `source`: "Smart lead discovery"
 - `notes`: Include opportunity score, owner info, services offered, why they're a fit, website quality, suggested DreamForge service
 - `value`: Estimate based on business size and project type (conservative — real quotes come later):
