@@ -9,10 +9,14 @@ const createOutreachSchema = z.object({
   leadIds: z.array(z.string().min(1)).optional(),
 });
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     await requireAdmin();
+    const { searchParams } = new URL(req.url);
+    const templatesOnly = searchParams.get("templates") === "true";
+
     const emails = await db.outreachEmail.findMany({
+      where: templatesOnly ? { leadId: null } : undefined,
       orderBy: { createdAt: "desc" },
       include: { lead: true },
     });
