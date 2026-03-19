@@ -187,6 +187,24 @@ export default function RequestProjectPage() {
         </CardContent>
       </Card>
 
+      {/* Book a Discovery Call — always visible */}
+      <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 flex items-center gap-4">
+        <Calendar className="h-8 w-8 text-primary shrink-0" />
+        <div className="flex-1">
+          <p className="text-sm font-medium text-foreground">Ready to discuss a project?</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Book a free 30-minute discovery call and we&apos;ll help you plan the next steps.</p>
+        </div>
+        <a
+          href="https://cal.com/emile-du-toit-lhb4qv/discovery-call"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors shrink-0"
+        >
+          <Calendar className="h-4 w-4" />
+          Book a Call
+        </a>
+      </div>
+
       {/* Previous Requests */}
       {!loading && requests.length > 0 && (
         <Card>
