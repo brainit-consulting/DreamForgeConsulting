@@ -44,6 +44,7 @@ export function EditLeadDialog({ lead, onUpdated, variant = "icon" }: { lead: Le
         website: lead.website ?? "",
         address: lead.address ?? "",
         source: lead.source ?? "",
+        sector: lead.sector ?? "",
         notes: lead.notes ?? "",
         value: lead.value?.toString() ?? "",
       });

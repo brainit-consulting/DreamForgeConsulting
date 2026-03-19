@@ -39,14 +39,8 @@ export default async function ClientDetailPage({
         <div className="flex items-center gap-2">
           <InviteButton clientId={client.id} hasPortal={!!client.userId} />
           <EditClientDialog
-            client={{
-              id: client.id,
-              company: client.company,
-              email: client.email,
-              phone: client.phone,
-              website: client.website,
-              address: client.address,
-            }}
+            client={client}
+            onUpdated={() => window.location.reload()}
           />
         </div>
       </div>

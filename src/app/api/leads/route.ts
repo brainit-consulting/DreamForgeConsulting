@@ -11,6 +11,7 @@ const createLeadSchema = z.object({
   website: z.string().optional(),
   address: z.string().optional(),
   source: z.string().optional(),
+  sector: z.string().optional(),
   notes: z.string().optional(),
   value: z.number().optional(),
 });

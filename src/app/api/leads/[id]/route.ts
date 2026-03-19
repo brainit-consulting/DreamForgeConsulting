@@ -13,6 +13,7 @@ const updateLeadSchema = z.object({
   cardSent: z.boolean().optional(),
   status: z.enum(["NEW", "CONTACTED", "QUALIFIED", "PROPOSAL", "CONVERTED", "LOST"]).optional(),
   source: z.string().optional(),
+  sector: z.string().optional(),
   notes: z.string().optional(),
   value: z.number().optional(),
 });

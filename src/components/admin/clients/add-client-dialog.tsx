@@ -21,6 +21,7 @@ export function AddClientDialog({ onCreated }: { onCreated: () => void }) {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     company: "",
+    name: "",
     email: "",
     phone: "",
     website: "",
@@ -40,7 +41,7 @@ export function AddClientDialog({ onCreated }: { onCreated: () => void }) {
       });
       if (res.ok) {
         toast.success("Client added");
-        setForm({ company: "", email: "", phone: "", website: "", address: "", sector: "", notes: "" });
+        setForm({ company: "", name: "", email: "", phone: "", website: "", address: "", sector: "", notes: "" });
         setOpen(false);
         onCreated();
       } else {
@@ -79,6 +80,17 @@ export function AddClientDialog({ onCreated }: { onCreated: () => void }) {
                 required
               />
             </div>
+            <div className="space-y-1">
+              <Label htmlFor="client-name">Contact Name</Label>
+              <Input
+                id="client-name"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                placeholder="Primary contact person"
+              />
+            </div>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1">
               <Label htmlFor="client-email">Email</Label>
               <Input

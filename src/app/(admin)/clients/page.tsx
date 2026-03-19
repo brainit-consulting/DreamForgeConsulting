@@ -228,7 +228,7 @@ export default function ClientsPage() {
                   <TableCell>
                     <div className="flex gap-1">
                       <EditClientDialog
-                        client={{ id: client.id, company: client.company, email: client.email, phone: client.phone }}
+                        client={client}
                         onUpdated={fetchClients}
                         variant="icon"
                       />
