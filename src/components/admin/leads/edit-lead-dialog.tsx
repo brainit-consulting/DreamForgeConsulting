@@ -23,7 +23,7 @@ export function EditLeadDialog({ lead, onUpdated, variant = "icon" }: { lead: Le
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     name: lead.name,
-    email: lead.email,
+    email: lead.email ?? "",
     company: lead.company ?? "",
     phone: lead.phone ?? "",
     website: lead.website ?? "",
@@ -37,7 +37,7 @@ export function EditLeadDialog({ lead, onUpdated, variant = "icon" }: { lead: Le
     if (isOpen) {
       setForm({
         name: lead.name,
-        email: lead.email,
+        email: lead.email ?? "",
         company: lead.company ?? "",
         phone: lead.phone ?? "",
         website: lead.website ?? "",
