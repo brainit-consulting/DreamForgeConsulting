@@ -29,6 +29,7 @@ export function EditLeadDialog({ lead, onUpdated, variant = "icon" }: { lead: Le
     website: lead.website ?? "",
     address: lead.address ?? "",
     source: lead.source ?? "",
+    sector: lead.sector ?? "",
     notes: lead.notes ?? "",
     value: lead.value?.toString() ?? "",
   });
@@ -119,7 +120,12 @@ export function EditLeadDialog({ lead, onUpdated, variant = "icon" }: { lead: Le
             </div>
           </div>
           <div className="space-y-1">
-            <Label htmlFor="edit-website">Website</Label>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="edit-website">Website</Label>
+              {form.website && (
+                <a href={form.website.startsWith("http") ? form.website : `https://${form.website}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs cursor-pointer">↗ Visit</a>
+              )}
+            </div>
             <Input id="edit-website" value={form.website} onChange={(e) => setForm({ ...form, website: e.target.value })} placeholder="https://company.com" />
           </div>
           <div className="space-y-1">
@@ -128,13 +134,17 @@ export function EditLeadDialog({ lead, onUpdated, variant = "icon" }: { lead: Le
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1">
-              <Label htmlFor="edit-source">Source</Label>
-              <Input id="edit-source" value={form.source} onChange={(e) => setForm({ ...form, source: e.target.value })} placeholder="Website, Referral, LinkedIn..." />
+              <Label htmlFor="edit-sector">Sector</Label>
+              <Input id="edit-sector" value={form.sector} onChange={(e) => setForm({ ...form, sector: e.target.value })} placeholder="e.g., Veterinary, Elder Care..." />
             </div>
             <div className="space-y-1">
               <Label htmlFor="edit-value">Est. Value ($)</Label>
               <Input id="edit-value" type="number" value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} />
             </div>
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="edit-source">Source</Label>
+            <Input id="edit-source" value={form.source} onChange={(e) => setForm({ ...form, source: e.target.value })} placeholder="Website, Referral, LinkedIn..." />
           </div>
           <div className="space-y-1">
             <Label htmlFor="edit-notes">Notes</Label>

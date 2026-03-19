@@ -125,6 +125,9 @@ export function AdminSidebar() {
             </div>
           </ActionTooltip>
         )}
+        {!collapsed && (
+          <p className="mt-2 text-center text-[10px] text-muted-foreground/50">v0.1.0</p>
+        )}
       </div>
     </aside>
   );

@@ -153,19 +153,18 @@ export default function LeadsPage() {
         </div>
       )}
 
-      {!error && <div className="rounded-lg border border-border">
-        <Table>
+      {!error && <div className="rounded-lg border border-border overflow-hidden">
+        <Table className="table-fixed w-full">
           <TableHeader>
             <TableRow>
-              <TableHead className="w-12 text-center">Card</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Company</TableHead>
-              <TableHead>Sector</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Source</TableHead>
-              <TableHead className="text-right">Value</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead className="w-24" />
+              <TableHead className="w-[3%] text-center">Card</TableHead>
+              <TableHead className="w-[20%]">Name</TableHead>
+              <TableHead className="w-[20%]">Company</TableHead>
+              <TableHead className="w-[16%]">Sector</TableHead>
+              <TableHead className="w-[12%]">Status</TableHead>
+              <TableHead className="w-[8%] text-right">Value</TableHead>
+              <TableHead className="w-[12%]">Created</TableHead>
+              <TableHead className="w-[9%]" />
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -193,11 +192,11 @@ export default function LeadsPage() {
                     }}
                   />
                 </TableCell>
-                <TableCell>
+                <TableCell className="truncate">
                   <EditLeadDialog lead={lead} onUpdated={fetchLeads} variant="name" />
                 </TableCell>
-                <TableCell>{lead.company ?? "—"}</TableCell>
-                <TableCell className="text-muted-foreground">{lead.sector ?? "—"}</TableCell>
+                <TableCell className="truncate">{lead.company ?? "—"}</TableCell>
+                <TableCell className="truncate text-muted-foreground">{lead.sector ?? "—"}</TableCell>
                 <TableCell>
                   <Select
                     value={lead.status}
@@ -213,7 +212,6 @@ export default function LeadsPage() {
                     </SelectContent>
                   </Select>
                 </TableCell>
-                <TableCell className="text-muted-foreground">{lead.source ?? "—"}</TableCell>
                 <TableCell className="text-right font-medium">
                   {lead.value ? `$${lead.value.toLocaleString()}` : "—"}
                 </TableCell>

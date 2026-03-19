@@ -125,6 +125,7 @@ model Client {
   website   String?
   address   String?  @db.Text
   sector    String?
+  notes     String?    @db.Text
   cardSent  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -20,7 +20,7 @@ export function AddLeadDialog({ onCreated }: { onCreated: () => void }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
-    name: "", email: "", company: "", phone: "", website: "", address: "", source: "", notes: "", value: "",
+    name: "", email: "", company: "", phone: "", website: "", address: "", source: "", sector: "", notes: "", value: "",
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -37,7 +37,7 @@ export function AddLeadDialog({ onCreated }: { onCreated: () => void }) {
       });
       if (res.ok) {
         toast.success("Lead created");
-        setForm({ name: "", email: "", company: "", phone: "", website: "", address: "", source: "", notes: "", value: "" });
+        setForm({ name: "", email: "", company: "", phone: "", website: "", address: "", source: "", sector: "", notes: "", value: "" });
         setOpen(false);
         onCreated();
       } else {
@@ -90,13 +90,17 @@ export function AddLeadDialog({ onCreated }: { onCreated: () => void }) {
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1">
-              <Label htmlFor="lead-source">Source</Label>
-              <Input id="lead-source" value={form.source} onChange={(e) => setForm({ ...form, source: e.target.value })} placeholder="Website, Referral, LinkedIn..." />
+              <Label htmlFor="lead-sector">Sector</Label>
+              <Input id="lead-sector" value={form.sector} onChange={(e) => setForm({ ...form, sector: e.target.value })} placeholder="e.g., Veterinary, Elder Care..." />
             </div>
             <div className="space-y-1">
               <Label htmlFor="lead-value">Est. Value ($)</Label>
               <Input id="lead-value" type="number" value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} />
             </div>
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="lead-source">Source</Label>
+            <Input id="lead-source" value={form.source} onChange={(e) => setForm({ ...form, source: e.target.value })} placeholder="Website, Referral, LinkedIn..." />
           </div>
           <div className="space-y-1">
             <Label htmlFor="lead-notes">Notes</Label>

@@ -25,6 +25,8 @@ export function AddClientDialog({ onCreated }: { onCreated: () => void }) {
     phone: "",
     website: "",
     address: "",
+    sector: "",
+    notes: "",
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -38,7 +40,7 @@ export function AddClientDialog({ onCreated }: { onCreated: () => void }) {
       });
       if (res.ok) {
         toast.success("Client added");
-        setForm({ company: "", email: "", phone: "", website: "", address: "" });
+        setForm({ company: "", email: "", phone: "", website: "", address: "", sector: "", notes: "" });
         setOpen(false);
         onCreated();
       } else {
@@ -115,6 +117,26 @@ export function AddClientDialog({ onCreated }: { onCreated: () => void }) {
               value={form.address}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
               placeholder="123 Main St, City, FL 33901"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="client-sector">Sector</Label>
+            <Input
+              id="client-sector"
+              value={form.sector}
+              onChange={(e) => setForm({ ...form, sector: e.target.value })}
+              placeholder="e.g., Veterinary, Elder Care..."
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="client-notes">Notes</Label>
+            <textarea
+              id="client-notes"
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              placeholder="Internal notes about this client..."
+              rows={3}
+              className="font-notes text-base w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
           <DialogFooter>

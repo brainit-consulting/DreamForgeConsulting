@@ -23,6 +23,8 @@ interface ClientData {
   phone?: string | null;
   website?: string | null;
   address?: string | null;
+  sector?: string | null;
+  notes?: string | null;
 }
 
 export function EditClientDialog({
@@ -42,6 +44,8 @@ export function EditClientDialog({
     phone: client.phone ?? "",
     website: client.website ?? "",
     address: client.address ?? "",
+    sector: client.sector ?? "",
+    notes: client.notes ?? "",
   });
 
   function handleOpen(isOpen: boolean) {
@@ -52,6 +56,8 @@ export function EditClientDialog({
         phone: client.phone ?? "",
         website: client.website ?? "",
         address: client.address ?? "",
+        sector: client.sector ?? "",
+        notes: client.notes ?? "",
       });
     }
     setOpen(isOpen);
@@ -136,7 +142,12 @@ export function EditClientDialog({
             />
           </div>
           <div className="space-y-1">
-            <Label htmlFor="edit-website">Website</Label>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="edit-website">Website</Label>
+              {form.website && (
+                <a href={form.website.startsWith("http") ? form.website : `https://${form.website}`} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs cursor-pointer">↗ Visit</a>
+              )}
+            </div>
             <Input
               id="edit-website"
               value={form.website}
@@ -151,6 +162,26 @@ export function EditClientDialog({
               value={form.address}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
               placeholder="123 Main St, City, FL 33901"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="edit-sector">Sector</Label>
+            <Input
+              id="edit-sector"
+              value={form.sector}
+              onChange={(e) => setForm({ ...form, sector: e.target.value })}
+              placeholder="e.g., Veterinary, Elder Care..."
+            />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="edit-notes">Notes</Label>
+            <textarea
+              id="edit-notes"
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              placeholder="Internal notes about this client..."
+              rows={3}
+              className="font-notes text-base w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
           <DialogFooter>

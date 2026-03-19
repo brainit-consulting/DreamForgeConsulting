@@ -84,6 +84,7 @@ export function PortalSidebar() {
       {/* Footer */}
       <div className="border-t border-sidebar-border p-3">
         <p className="text-center text-[10px] text-muted-foreground">Client Portal</p>
+        <p className="mt-1 text-center text-[10px] text-muted-foreground/50">v0.1.0</p>
       </div>
     </aside>
   );

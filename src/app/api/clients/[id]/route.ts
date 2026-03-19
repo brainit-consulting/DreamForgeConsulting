@@ -9,6 +9,8 @@ const updateClientSchema = z.object({
   phone: z.string().optional(),
   website: z.string().optional(),
   address: z.string().optional(),
+  sector: z.string().optional(),
+  notes: z.string().optional(),
   cardSent: z.boolean().optional(),
 });
 
