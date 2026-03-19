@@ -17,7 +17,7 @@ import { ActionTooltip } from "@/components/shared/action-tooltip";
 import { useConfirm } from "@/components/shared/confirm-dialog";
 import { HelpButton } from "@/components/shared/help-modal";
 import { toast } from "sonner";
-import { ArrowRight, Clock, FileText, Copy, Bot, Save, Eye, Mail } from "lucide-react";
+import { ArrowRight, Clock, FileText, Copy, Bot, Save, Eye, Mail, ShieldCheck, ChevronDown } from "lucide-react";
 import type { ProjectStatus, InvoiceStatus, TicketPriority, Activity } from "@/types";
 
 const statusVariant: Record<ProjectStatus, "info" | "ember" | "warning" | "success" | "default"> = {
@@ -614,6 +614,82 @@ export default function ProjectDetailPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Agreements & Licensing — visible from APPROVAL onward */}
+      {["APPROVAL", "DEVELOPMENT", "TESTING", "DEPLOYMENT", "LAUNCHED", "SUPPORT"].includes(project.status) && (() => {
+        const approvalActivity = activities.find((a) => a.type === "client_approval");
+        const licenseActive = supportPlan?.active;
+        const licenseStatus = licenseActive ? "Active" : supportPlan ? "Lapsed" : "Pending";
+        const licenseColor = licenseActive ? "text-emerald-400" : supportPlan ? "text-red-400" : "text-muted-foreground";
+
+        return (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <ShieldCheck className="h-5 w-5 text-primary" />
+                  <div>
+                    <CardTitle className="font-display text-xl">Agreements & Licensing</CardTitle>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      IP ownership, use license, and approval status for this project.
+                    </p>
+                  </div>
+                </div>
+                <span className={`text-sm font-medium ${licenseColor}`}>
+                  License: {licenseStatus}
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Approval Status */}
+              <div className="rounded-lg border border-border/30 bg-white/5 p-4 space-y-2">
+                <p className="text-sm font-medium text-foreground/90">Approval Status</p>
+                {approvalActivity ? (
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                    <p className="text-sm text-emerald-400">
+                      Approved — {approvalActivity.description}
+                    </p>
+                    <span className="text-xs text-muted-foreground ml-auto">
+                      {format(new Date(approvalActivity.createdAt), "MMM d, yyyy 'at' h:mm a")}
+                    </span>
+                  </div>
+                ) : project.status === "APPROVAL" ? (
+                  <p className="text-sm text-amber-400">Awaiting client approval</p>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Approved (advanced manually by admin)</p>
+                )}
+              </div>
+
+              {/* Proposal Reference */}
+              {proposalNotes.length > 0 && (
+                <div className="rounded-lg border border-border/30 bg-white/5 p-4 space-y-2">
+                  <p className="text-sm font-medium text-foreground/90">Proposal Document</p>
+                  <p className="text-xs text-muted-foreground">
+                    {proposalNotes.length} note(s) — scroll up to view the full proposal including scope, pricing, and licensing terms.
+                  </p>
+                </div>
+              )}
+
+              {/* Standard Licensing Terms */}
+              <details className="rounded-lg border border-border/30 bg-white/5">
+                <summary className="flex items-center justify-between px-4 py-3 text-sm font-medium text-foreground/90 cursor-pointer select-none">
+                  <span>Ownership & Licensing Terms</span>
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                </summary>
+                <div className="px-4 pb-4 space-y-2 text-xs text-foreground/60 leading-relaxed">
+                  <p>DreamForge Consulting retains full ownership of all source code, architecture, and intellectual property developed during this engagement.</p>
+                  <p>The client receives a <strong className="text-foreground/80">perpetual, non-exclusive license</strong> to use the product for their business operations, maintained through an active support retainer.</p>
+                  <p>The client may <strong className="text-foreground/80">NOT</strong> resell, redistribute, sublicense, reverse-engineer, decompile, or clone the product or any part of it.</p>
+                  <p>If the support retainer lapses beyond <strong className="text-foreground/80">60 days</strong>, DreamForge reserves the right to suspend or disable the software. During the 60-day grace period, the software continues to function but no support or updates are provided.</p>
+                  <p>The client may submit a written offer to <strong className="text-foreground/80">purchase full source code ownership</strong> (buyout) at any time. Buyout pricing is negotiated separately.</p>
+                  <p>All custom assets (logos, content, branding) provided by the client remain client property.</p>
+                </div>
+              </details>
+            </CardContent>
+          </Card>
+        );
+      })()}
 
       {/* Metrics */}
       <div className="grid gap-4 sm:grid-cols-4">
