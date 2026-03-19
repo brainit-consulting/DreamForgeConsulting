@@ -11,15 +11,23 @@ CRM and project management SaaS for a consulting business that builds SaaS apps,
 
 ## Tech Stack
 
-- **Next.js 16** (App Router, TypeScript, Turbopack)
-- **Tailwind CSS v4** + **shadcn/ui** (base-nova style, Base UI primitives)
-- **Prisma v7** + **Neon** PostgreSQL
-- **better-auth** (email/password, sessions, role-based access)
-- **Stripe** (checkout, webhooks for payment/refund/dispute)
-- **Resend** (transactional email with branded templates)
-- **Vercel AI SDK v6** + **OpenRouter** (Athena AI assistant)
-- **Vercel Blob** (automated database backups)
-- **Vitest** + React Testing Library
+| Package | Version | Purpose |
+|---|---|---|
+| Next.js | 16.1.7 | App Router, TypeScript, Turbopack |
+| React | 19.2.3 | UI framework |
+| TypeScript | 5.x | Type safety |
+| Tailwind CSS | 4.x | Utility-first styling |
+| shadcn/ui | base-nova | Component library (Base UI primitives, not Radix) |
+| Prisma | 7.5.0 | ORM + migrations (Neon PostgreSQL via `@prisma/adapter-neon`) |
+| Zod | 4.3.6 | Runtime schema validation (config validation, type inference) |
+| better-auth | 1.5.5 | Email/password auth, sessions, role-based access (ADMIN/CLIENT) |
+| Stripe | 20.4.1 | Checkout, webhooks (payment/refund/dispute) |
+| Resend | 6.9.4 | Transactional email with branded HTML templates |
+| Vercel AI SDK | 6.x | Athena AI assistant (streaming, chat transport) |
+| OpenRouter | — | Free model rotation for Athena (Mistral, Llama, Qwen, Nemotron) |
+| Vercel Blob | — | Automated database backups (production) |
+| Vitest | 4.1.0 | Unit + integration testing |
+| React Testing Library | — | Component test rendering |
 
 ## Getting Started
 
