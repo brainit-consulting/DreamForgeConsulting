@@ -54,6 +54,7 @@ export function EditClientDialog({
     if (isOpen) {
       setForm({
         company: client.company,
+        name: client.name ?? "",
         email: client.email ?? "",
         phone: client.phone ?? "",
         website: client.website ?? "",
