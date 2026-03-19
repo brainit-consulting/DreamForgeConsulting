@@ -10,7 +10,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { FolderPlus, CheckCircle } from "lucide-react";
+import { FolderPlus, CheckCircle, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -112,15 +112,30 @@ export default function RequestProjectPage() {
         </CardHeader>
         <CardContent>
           {submitted ? (
-            <div className="flex items-center gap-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4">
-              <CheckCircle className="h-5 w-5 text-emerald-500 shrink-0" />
-              <div>
-                <p className="text-sm font-medium text-emerald-400">Request submitted successfully!</p>
-                <p className="text-xs text-emerald-400/70 mt-1">We&apos;ll review it and get back to you shortly.</p>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4">
+                <CheckCircle className="h-5 w-5 text-emerald-500 shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-emerald-400">Request submitted successfully!</p>
+                  <p className="text-xs text-emerald-400/70 mt-1">We&apos;ll review it and get back to you shortly.</p>
+                </div>
+                <Button variant="outline" size="sm" className="ml-auto" onClick={() => setSubmitted(false)}>
+                  Submit Another
+                </Button>
               </div>
-              <Button variant="outline" size="sm" className="ml-auto" onClick={() => setSubmitted(false)}>
-                Submit Another
-              </Button>
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+                <p className="text-sm font-medium text-foreground mb-2">Want to discuss your project?</p>
+                <p className="text-xs text-muted-foreground mb-3">Book a free discovery call so we can understand your needs and walk you through next steps.</p>
+                <a
+                  href="https://cal.com/emiledutoit"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+                >
+                  <Calendar className="h-4 w-4" />
+                  Book a Discovery Call
+                </a>
+              </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
