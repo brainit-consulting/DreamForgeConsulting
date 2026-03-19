@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { WorkflowTracker } from "@/components/shared/workflow-tracker";
 import { useConfirm } from "@/components/shared/confirm-dialog";
-import { CheckCircle, Headphones, Clock } from "lucide-react";
+import { CheckCircle, Headphones, Clock, ShieldCheck, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import type { ProjectStatus } from "@/types";
 
@@ -117,6 +117,23 @@ export default function PortalProjectsPage() {
                   </div>
                 </div>
               </div>
+            )}
+            {["DEVELOPMENT", "TESTING", "DEPLOYMENT", "LAUNCHED", "SUPPORT"].includes(project.status) && (
+              <details className="rounded-lg border border-border/30 bg-white/5">
+                <summary className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-foreground/80 cursor-pointer select-none">
+                  <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+                  <span>Ownership & Licensing Terms</span>
+                  <ChevronDown className="h-4 w-4 text-muted-foreground ml-auto" />
+                </summary>
+                <div className="px-4 pb-4 space-y-2 text-xs text-foreground/60 leading-relaxed">
+                  <p>DreamForge Consulting retains full ownership of all source code, architecture, and intellectual property developed during this engagement.</p>
+                  <p>You receive a <strong className="text-foreground/80">perpetual, non-exclusive license</strong> to use the product for your business operations, maintained through an active support retainer.</p>
+                  <p>You may <strong className="text-foreground/80">not</strong> resell, redistribute, sublicense, reverse-engineer, decompile, or clone the product or any part of it.</p>
+                  <p>If the support retainer lapses beyond <strong className="text-foreground/80">60 days</strong>, DreamForge reserves the right to suspend or disable the software. During the 60-day grace period, the software continues to function but no support or updates are provided.</p>
+                  <p>You may submit a written offer to <strong className="text-foreground/80">purchase full source code ownership</strong> (buyout) at any time. Buyout pricing is negotiated separately.</p>
+                  <p>All custom assets (logos, content, branding) you provided remain your property.</p>
+                </div>
+              </details>
             )}
           </CardContent>
         </Card>
