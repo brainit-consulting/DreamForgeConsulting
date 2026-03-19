@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import { ActionTooltip } from "@/components/shared/action-tooltip";
 import type { Lead } from "@/types";
 
-export function EditLeadDialog({ lead, onUpdated }: { lead: Lead; onUpdated: () => void }) {
+export function EditLeadDialog({ lead, onUpdated, variant = "icon" }: { lead: Lead; onUpdated: () => void; variant?: "icon" | "name" }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
@@ -77,13 +77,22 @@ export function EditLeadDialog({ lead, onUpdated }: { lead: Lead; onUpdated: () 
 
   return (
     <Dialog open={open} onOpenChange={handleOpen}>
-      <ActionTooltip label="Edit lead">
+      {variant === "name" ? (
         <DialogTrigger
-          render={<Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" />}
+          render={<button type="button" title="Edit lead" className="text-left hover:text-primary transition-colors" />}
         >
-          <Pencil className="h-3.5 w-3.5" />
+          <p className="font-medium">{lead.name}</p>
+          {lead.email && <p className="text-xs text-muted-foreground">{lead.email}</p>}
         </DialogTrigger>
-      </ActionTooltip>
+      ) : (
+        <ActionTooltip label="Edit lead">
+          <DialogTrigger
+            render={<Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" />}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </DialogTrigger>
+        </ActionTooltip>
+      )}
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="font-display text-xl text-primary">Edit Lead</DialogTitle>

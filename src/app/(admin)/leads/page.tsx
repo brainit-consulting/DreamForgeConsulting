@@ -173,10 +173,7 @@ export default function LeadsPage() {
                   />
                 </TableCell>
                 <TableCell>
-                  <div>
-                    <p className="font-medium">{lead.name}</p>
-                    <p className="text-xs text-muted-foreground">{lead.email}</p>
-                  </div>
+                  <EditLeadDialog lead={lead} onUpdated={fetchLeads} variant="name" />
                 </TableCell>
                 <TableCell>{lead.company ?? "—"}</TableCell>
                 <TableCell>
