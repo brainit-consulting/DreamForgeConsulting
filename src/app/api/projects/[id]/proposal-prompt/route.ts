@@ -98,6 +98,15 @@ ${formatNotes(designNotes)}
 - Additional hours beyond the included 5: $50/hour
 - Unused hours do not roll over to the next month
 
+## Ownership & Licensing:
+- DreamForge Consulting retains full ownership of all source code, architecture, and intellectual property developed during this engagement
+- Client receives a perpetual, non-exclusive license to use the product for their business operations
+- The license is maintained through an active support retainer — if the retainer lapses beyond 60 days, DreamForge reserves the right to suspend or disable the software
+- Client may NOT resell, redistribute, sublicense, reverse-engineer, decompile, or clone the product or any part of it
+- If the retainer lapses but is within the 60-day grace period, the software continues to function but no support or updates are provided
+- Client may submit a written offer to purchase full source code ownership (buyout) at any time — buyout pricing is negotiated separately
+- All custom assets (logos, content, branding) provided by the client remain client property
+
 ---
 
 Based on the above discovery and design data, write a professional proposal including:
@@ -108,9 +117,10 @@ Based on the above discovery and design data, write a professional proposal incl
 4. **Timeline with Milestones** — Realistic schedule from development through launch
 5. **Pricing Breakdown** — Based on the budget, break down costs by phase. Include the payment structure (40/30/30)
 6. **Post-Launch Support (Optional)** — Present the monthly and annual retainer options as an optional add-on, positioned as ensuring long-term success
-7. **Terms & Next Steps** — What happens after approval, payment schedule, communication plan
+7. **Ownership & Licensing** — Clearly state that DreamForge retains IP ownership, the client receives a use license maintained through the retainer, and include the restrictions and buyout option. Present this factually and professionally — not as a threat but as standard practice for custom software development
+8. **Terms & Next Steps** — What happens after approval, payment schedule, communication plan
 
-Keep it concise, professional, and specific to the data above. Position the support plan as a value-add, not a hard sell. Use markdown formatting.`;
+Keep it concise, professional, and specific to the data above. Position the support plan as a value-add, not a hard sell. Present licensing terms as standard industry practice. Use markdown formatting.`;
 
     return NextResponse.json({ prompt, projectName: project.name });
   } catch (error) {

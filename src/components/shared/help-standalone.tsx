@@ -91,6 +91,7 @@ function AdminGuideLayout({ tips }: { tips: string[] }) {
 
   for (const tip of tips) {
     if (tip.includes("PRICE GUIDANCE")) chapters["Price Guidance"].push(tip);
+    else if (tip.startsWith("OWNERSHIP & LICENSING")) chapters["System Administration"].push(tip);
     else if (tip.includes("ONBOARD") || tip.includes("CLIENT APPROVAL") || tip.includes("HANDLE CLIENT") || tip.includes("ADD A LEAD") || tip.includes("WORK A LEAD") || tip.includes("PROMOTE") || tip.includes("RESEND") || tip.includes("MANAGE CLIENT")) chapters["Client Onboarding"].push(tip);
     else if (tip.includes("PROJECT") || tip.includes("PROPOSAL") || tip.includes("WORKFLOW") || tip.includes("SUBMIT FOR")) chapters["Projects & Proposals"].push(tip);
     else if (tip.includes("INVOICE") || tip.includes("PAYMENT") || tip.includes("REFUND") || tip.includes("DISPUTE")) chapters["Invoicing & Payments"].push(tip);

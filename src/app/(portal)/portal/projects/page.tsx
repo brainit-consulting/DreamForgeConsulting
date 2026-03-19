@@ -41,7 +41,7 @@ export default function PortalProjectsPage() {
   async function handleApprove(projectId: string, projectName: string) {
     const ok = await confirmAction({
       title: "Approve Project",
-      description: `Approve "${projectName}" to begin development? This confirms the scope, design, and budget.`,
+      description: `Approve "${projectName}" to begin development? This confirms the scope, design, budget, and the Ownership & Licensing terms outlined in the proposal.`,
       confirmLabel: "Approve & Begin Development",
       variant: "promote",
     });

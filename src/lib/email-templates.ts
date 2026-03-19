@@ -149,6 +149,9 @@ export async function approvalRequestEmail({
       <a href="${portalUrl}" style="display:inline-block;background:#F59E0B;color:#0A0A0F;font-weight:600;font-size:14px;padding:12px 32px;border-radius:8px;text-decoration:none;">
         Review & Approve
       </a>
+      <p style="color:#666;font-size:11px;margin:24px 0 0;line-height:1.5;">
+        By approving this proposal, you agree to the terms outlined in the proposal document including the Ownership &amp; Licensing section. DreamForge Consulting retains ownership of all source code and IP. You receive a license to use the product, maintained through an active support retainer.
+      </p>
     </div>
     ${footer}
   </div>
