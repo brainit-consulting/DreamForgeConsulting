@@ -91,6 +91,7 @@ function AdminGuideLayout({ tips }: { tips: string[] }) {
 
   for (const tip of tips) {
     if (tip.includes("PRICE GUIDANCE")) chapters["Price Guidance"].push(tip);
+    else if (tip.startsWith("LICENSING FLOW")) chapters["System Administration"].push(tip);
     else if (tip.startsWith("OWNERSHIP & LICENSING")) chapters["System Administration"].push(tip);
     else if (tip.includes("ONBOARD") || tip.includes("CLIENT APPROVAL") || tip.includes("HANDLE CLIENT") || tip.includes("ADD A LEAD") || tip.includes("WORK A LEAD") || tip.includes("PROMOTE") || tip.includes("RESEND") || tip.includes("MANAGE CLIENT")) chapters["Client Onboarding"].push(tip);
     else if (tip.includes("PROJECT") || tip.includes("PROPOSAL") || tip.includes("WORKFLOW") || tip.includes("SUBMIT FOR")) chapters["Projects & Proposals"].push(tip);
@@ -129,13 +130,54 @@ function AdminGuideLayout({ tips }: { tips: string[] }) {
           <PriceGuidanceContent items={activeItems} />
         ) : (
           <div className="space-y-4">
-            {activeItems.map((tip, i) => (
-              <div key={i} className="rounded-lg bg-white/5 border border-white/10 px-4 py-3">
-                <p className="text-sm leading-relaxed text-foreground/80 font-sans">
-                  {highlightKeywords(tip)}
-                </p>
-              </div>
-            ))}
+            {/* Render LICENSING FLOW entries as a table */}
+            {(() => {
+              const flowItems = activeItems.filter((t) => t.startsWith("LICENSING FLOW"));
+              const regularItems = activeItems.filter((t) => !t.startsWith("LICENSING FLOW"));
+              return (
+                <>
+                  {regularItems.map((tip, i) => (
+                    <div key={i} className="rounded-lg bg-white/5 border border-white/10 px-4 py-3">
+                      <p className="text-sm leading-relaxed text-foreground/80 font-sans">
+                        {highlightKeywords(tip)}
+                      </p>
+                    </div>
+                  ))}
+                  {flowItems.length > 0 && (
+                    <div>
+                      <p className="text-sm font-medium text-foreground/90 mb-3">Licensing Touchpoints — Workflow</p>
+                      <div className="overflow-x-auto rounded-lg border border-border/30">
+                        <table className="w-full text-sm border-collapse">
+                          <thead>
+                            <tr className="bg-muted/30">
+                              <th className="text-left py-2.5 px-4 font-display text-primary text-sm">Stage</th>
+                              <th className="text-left py-2.5 px-4 font-display text-primary text-sm">What Happens</th>
+                              <th className="text-left py-2.5 px-4 font-display text-primary text-sm">Licensing Touchpoint</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {flowItems.map((tip, i) => {
+                              const after = tip.replace(/^LICENSING FLOW — /, "");
+                              const colonIdx = after.indexOf(":");
+                              const stage = colonIdx > -1 ? after.slice(0, colonIdx).trim() : after;
+                              const rest = colonIdx > -1 ? after.slice(colonIdx + 1).trim() : "";
+                              const parts = rest.split("|").map((s) => s.trim());
+                              return (
+                                <tr key={i} className="border-t border-border/20 hover:bg-muted/10 transition-colors">
+                                  <td className="py-2.5 px-4 font-sans text-foreground/90 whitespace-nowrap font-medium">{stage}</td>
+                                  <td className="py-2.5 px-4 font-sans text-foreground/70 text-xs">{parts[0] ?? ""}</td>
+                                  <td className="py-2.5 px-4 font-sans text-emerald-400 text-xs">{parts[1] ?? ""}</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         )}
       </div>
