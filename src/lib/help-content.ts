@@ -98,6 +98,7 @@ export const helpContent: Record<string, HelpSection> = {
       "Invoices tab lets you view all invoices and pay outstanding ones via Stripe with a single click",
       "After paying via Stripe, the invoice automatically updates to PAID — no manual steps needed",
       "Tickets tab lets you submit new support requests — select the project and priority level",
+      "Your Ownership & Licensing terms are on the Projects page — expand the 'Ownership & Licensing Terms' section on any active project to review the full agreement including IP ownership, your use license, and buyout options",
       "Change your password anytime from Settings in the sidebar — enter your current (or temp) password and choose a new one",
       "If you forget your password, use the 'Forgot your password?' link on the login page to get a reset email",
       "The Athena AI assistant (bottom-right) can answer questions about your projects and invoices",
