@@ -157,6 +157,11 @@
   html {
     @apply font-sans;
   }
+  /* Consistent pointer cursor on all interactive elements */
+  a, button, [role="button"], [type="checkbox"], [type="radio"],
+  select, summary, label[for], [tabindex]:not([tabindex="-1"]) {
+    cursor: pointer;
+  }
   h1, h2, h3, h4, h5, h6,
   .font-display {
     font-family: var(--font-patrick-hand), cursive;
