@@ -365,59 +365,97 @@ export default function LeadsPage() {
             <X className="mr-1 h-3.5 w-3.5" />
             Clear
           </Button>
-          <Button
-            size="sm"
-            onClick={openBulkDialog}
-            disabled={bulkSending}
-            className="bg-primary text-primary-foreground hover:bg-primary/90"
-          >
-            <Send className="mr-1.5 h-3.5 w-3.5" />
-            {bulkSending ? "Sending..." : "Send Outreach"}
-          </Button>
+          <ActionTooltip label="Choose an outreach template to send to selected leads">
+            <Button
+              size="sm"
+              onClick={openBulkDialog}
+              disabled={bulkSending}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              <Send className="mr-1.5 h-3.5 w-3.5" />
+              {bulkSending ? "Sending..." : "Continue"}
+            </Button>
+          </ActionTooltip>
         </div>
       )}
 
-      {/* Template picker dialog */}
+      {/* Bulk outreach dialog — selected leads + template picker */}
       <Dialog open={bulkDialogOpen} onOpenChange={setBulkDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="font-display text-xl text-primary">Select Outreach Template</DialogTitle>
+            <DialogTitle className="font-display text-xl text-primary">Bulk Outreach</DialogTitle>
           </DialogHeader>
-          <div className="space-y-3 py-2">
-            {templates.length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                No templates found. Create one from the Outreach page first.
-              </p>
-            )}
-            {templates.map((t) => (
-              <label
-                key={t.id}
-                className={`flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-colors ${
-                  selectedTemplate === t.id
-                    ? "border-primary bg-primary/10"
-                    : "border-border hover:border-primary/50"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="template"
-                  value={t.id}
-                  checked={selectedTemplate === t.id}
-                  onChange={() => setSelectedTemplate(t.id)}
-                  className="accent-primary"
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm truncate">{t.subject}</p>
-                  <p className="text-xs text-muted-foreground truncate">{t.body.slice(0, 80)}...</p>
-                </div>
-              </label>
-            ))}
+          <div className="space-y-4 py-2">
+            {/* Selected leads */}
+            <div>
+              <p className="text-sm font-display text-primary mb-2">Selected Leads ({selectedIds.size})</p>
+              <div className="max-h-40 overflow-y-auto space-y-1 rounded-lg border border-border p-2">
+                {leads.filter((l) => selectedIds.has(l.id)).map((lead) => (
+                  <div key={lead.id} className="flex items-center justify-between rounded px-2 py-1.5 hover:bg-muted/50">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate">{lead.name}</p>
+                      <p className="text-xs text-muted-foreground truncate">{lead.email ?? "no email"} · {lead.company}</p>
+                    </div>
+                    <ActionTooltip label="Remove from selection">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 text-muted-foreground hover:text-destructive shrink-0"
+                        onClick={() => {
+                          const next = new Set(selectedIds);
+                          next.delete(lead.id);
+                          setSelectedIds(next);
+                          if (next.size === 0) setBulkDialogOpen(false);
+                        }}
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </Button>
+                    </ActionTooltip>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Template picker */}
+            <div>
+              <p className="text-sm font-display text-primary mb-2">Choose Template</p>
+              {templates.length === 0 && (
+                <p className="text-sm text-muted-foreground text-center py-4 border border-dashed border-border rounded-lg">
+                  No templates found. Create one from the Outreach page first.
+                </p>
+              )}
+              <div className="space-y-2">
+                {templates.map((t) => (
+                  <label
+                    key={t.id}
+                    className={`flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-colors ${
+                      selectedTemplate === t.id
+                        ? "border-primary bg-primary/10"
+                        : "border-border hover:border-primary/50"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="template"
+                      value={t.id}
+                      checked={selectedTemplate === t.id}
+                      onChange={() => setSelectedTemplate(t.id)}
+                      className="accent-primary"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{t.subject}</p>
+                      <p className="text-xs text-muted-foreground truncate">{t.body.slice(0, 80)}...</p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setBulkDialogOpen(false)}>Cancel</Button>
             <Button
               onClick={handleBulkSend}
-              disabled={!selectedTemplate}
+              disabled={!selectedTemplate || selectedIds.size === 0}
               className="bg-primary text-primary-foreground"
             >
               <Send className="mr-1.5 h-3.5 w-3.5" />
