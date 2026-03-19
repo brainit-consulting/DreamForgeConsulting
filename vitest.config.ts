@@ -9,6 +9,10 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./src/test/setup.tsx"],
     include: ["src/**/*.test.{ts,tsx}"],
+    env: {
+      // Load .env.local for Stripe test keys etc.
+      ...require("dotenv").config({ path: ".env.local" }).parsed,
+    },
   },
   resolve: {
     alias: {
