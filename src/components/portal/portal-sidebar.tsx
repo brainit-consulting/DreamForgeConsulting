@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   FolderKanban,
+  FolderPlus,
   Receipt,
   TicketCheck,
   Settings,
@@ -15,6 +16,7 @@ import { Logo } from "@/components/shared/logo";
 const portalNav = [
   { label: "Dashboard", href: "/portal", icon: LayoutDashboard },
   { label: "Projects", href: "/portal/projects", icon: FolderKanban },
+  { label: "Request a Project", href: "/portal/request-project", icon: FolderPlus },
   { label: "Invoices", href: "/portal/invoices", icon: Receipt },
   { label: "Tickets", href: "/portal/tickets", icon: TicketCheck },
   { label: "Settings", href: "/portal/settings", icon: Settings },

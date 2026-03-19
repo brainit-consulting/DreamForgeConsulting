@@ -129,12 +129,30 @@ model Client {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user     User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
-  projects Project[]
-  invoices Invoice[]
-  tickets  Ticket[]
+  user            User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
+  projects        Project[]
+  invoices        Invoice[]
+  tickets         Ticket[]
+  projectRequests ProjectRequest[]
 
   @@map("clients")
+}
+
+model ProjectRequest {
+  id             String   @id @default(cuid())
+  clientId       String
+  name           String
+  description    String   @db.Text
+  budgetRange    String?
+  timeline       String?
+  additionalInfo String?  @db.Text
+  status         String   @default("PENDING")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@map("project_requests")
 }
 
 model Project {
