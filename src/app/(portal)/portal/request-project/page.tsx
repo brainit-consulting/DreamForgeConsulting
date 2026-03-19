@@ -127,7 +127,7 @@ export default function RequestProjectPage() {
                 <p className="text-sm font-medium text-foreground mb-2">Want to discuss your project?</p>
                 <p className="text-xs text-muted-foreground mb-3">Book a free discovery call so we can understand your needs and walk you through next steps.</p>
                 <a
-                  href="https://cal.com/emiledutoit"
+                  href="https://cal.com/emile-du-toit-lhb4qv/discovery-call"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
