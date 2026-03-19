@@ -100,6 +100,12 @@ export async function outreachEmail({
     <div style="background:#16161E;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:32px;">
       <h2 style="color:#E8E4DF;font-size:18px;margin:0 0 16px;">${greeting},</h2>
       ${paragraphs}
+      ${config.bookingUrl ? `
+      <div style="margin-top:24px;text-align:center;">
+        <a href="${config.bookingUrl}" style="display:inline-block;background:#F59E0B;color:#0A0A0F;font-weight:600;font-size:14px;padding:12px 32px;border-radius:8px;text-decoration:none;">
+          Book a Free Discovery Call
+        </a>
+      </div>` : ""}
       <div style="margin-top:24px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);">
         ${config.signOff.split("\n").map((line, i) =>
           i === 0

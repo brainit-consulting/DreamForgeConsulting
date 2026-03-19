@@ -718,6 +718,21 @@ export default function SettingsPage() {
               />
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="email-booking-url" className="text-base text-primary">Booking URL</Label>
+              <p className="text-sm text-muted-foreground">
+                URL for the &quot;Book a Discovery Call&quot; button in outreach emails. Leave empty to disable.
+              </p>
+              <Input
+                id="email-booking-url"
+                value={emailConfig.bookingUrl}
+                onChange={(e) =>
+                  setEmailConfig({ ...emailConfig, bookingUrl: e.target.value })
+                }
+                placeholder="https://dreamforgeconsulting.vercel.app"
+              />
+            </div>
+
             <Separator />
 
             <div className="flex items-center justify-between rounded-lg border border-border p-3">

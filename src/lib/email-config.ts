@@ -12,6 +12,7 @@ export const emailConfigSchema = z.object({
   greetingUseName: z.boolean(),
   greetingUseCompany: z.boolean(),
   autoApprovalEmail: z.boolean(),
+  bookingUrl: z.string(),
 });
 
 export type EmailConfig = z.infer<typeof emailConfigSchema>;
@@ -25,6 +26,7 @@ export const DEFAULT_EMAIL_CONFIG: EmailConfig = {
   greetingUseName: true,
   greetingUseCompany: true,
   autoApprovalEmail: false,
+  bookingUrl: "https://dreamforgeconsulting.vercel.app",
 };
 
 let currentConfig: EmailConfig = { ...DEFAULT_EMAIL_CONFIG };
