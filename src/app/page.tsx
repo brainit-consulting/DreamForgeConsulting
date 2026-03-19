@@ -219,6 +219,10 @@ export default function LandingPage() {
                 <LogIn className="h-3.5 w-3.5" />
                 Client Portal
               </Link>
+              <a href="https://dreamforgeworld.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-foreground transition-colors">
+                <GraduationCap className="h-3.5 w-3.5" />
+                Free Learning Resources
+              </a>
             </div>
           </div>
           <div className="mt-8 pt-6 border-t border-border/30 text-center text-xs text-muted-foreground">
