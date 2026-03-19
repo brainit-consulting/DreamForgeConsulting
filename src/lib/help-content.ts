@@ -21,8 +21,9 @@ export const helpContent: Record<string, HelpSection> = {
     content:
       "Leads are potential clients you're tracking through your sales pipeline. Each lead has a status: New → Contacted → Qualified → Proposal → Converted (or Lost). Use 'Add Lead' to create one — only the name is required, email and other fields can be added later. Change status directly from the dropdown. When ready, click the green person-check icon to promote a lead to a client record. Portal access is granted separately from the Clients page.",
     tips: [
-      "Use the search bar to filter leads by name, email, company, or source",
-      "Click the pencil icon to edit any lead detail (name, email, company, phone, website, address, source, value, notes)",
+      "Use the search bar to filter leads by name, email, company, or sector",
+      "Use the sector dropdown filter (top-right) to view leads by industry (e.g., Veterinary, Elder Care, Boutique Fitness)",
+      "Click the pencil icon to edit any lead detail (name, email, company, phone, website, address, sector, source, value, notes)",
       "The status dropdown updates pipeline stage instantly with a toast confirmation",
       "Promoting a lead (green person-check icon) creates a client record — portal invite is a separate step from Clients",
       "The subtitle shows total lead count, how many are New, and how many are Qualified",
@@ -40,7 +41,7 @@ export const helpContent: Record<string, HelpSection> = {
       "Green shield icon in Portal column = client has portal access; dash = no access yet",
       "Mail icon (blue) sends a portal invite — creates login and emails temporary credentials; a dialog shows the credentials on screen",
       "Refresh icon (circular arrow) on clients with portal access resends the invite with a new temp password — old password stops working immediately",
-      "Pencil icon edits client details (company, email, phone)",
+      "Pencil icon edits client details (company, contact name, email, phone, website, address, sector, notes)",
       "Trash icon permanently deletes the client and all their projects, invoices, and tickets",
       "Email is optional when adding a client, but required before sending a portal invite",
       "The Card checkbox (first column) tracks whether you've sent a handwritten postcard to this client — check it to mark as sent",
@@ -98,6 +99,8 @@ export const helpContent: Record<string, HelpSection> = {
       "Invoices tab lets you view all invoices and pay outstanding ones via Stripe with a single click",
       "After paying via Stripe, the invoice automatically updates to PAID — no manual steps needed",
       "Tickets tab lets you submit new support requests — select the project and priority level",
+      "Request a Project lets you submit a new project idea with name, description, budget range, timeline, and additional details — we'll review it and get back to you with a proposal",
+      "Book a Call — use the 'Book a Call' link in the sidebar or on the Request a Project page to schedule a free 30-minute discovery call",
       "Your Ownership & Licensing terms are on the Projects page — expand the 'Ownership & Licensing Terms' section on any active project to review the full agreement including IP ownership, your use license, and buyout options",
       "Change your password anytime from Settings in the sidebar — enter your current (or temp) password and choose a new one",
       "If you forget your password, use the 'Forgot your password?' link on the login page to get a reset email",
@@ -137,12 +140,12 @@ export const helpContent: Record<string, HelpSection> = {
   clientDetail: {
     title: "Client Detail — Overview & History",
     content:
-      "Everything about a single client in one place. The portal status badge shows whether the client has portal access — 'Send Invite' grants access, 'Portal Active' shows they're already set up. Click 'Edit' to update company name, email, phone, website, or address. Below that: Projects with workflow stage, progress bar, and status; and Invoices with amounts, status badges, and due dates.",
+      "Everything about a single client in one place. The portal status badge shows whether the client has portal access — 'Send Invite' grants access, 'Portal Active' shows they're already set up. Click 'Edit' to update company name, contact name, email, phone, website, address, sector, and notes. Below that: Projects with workflow stage, progress bar, and status; and Invoices with amounts, status badges, and due dates.",
     tips: [
       "Click a project row to navigate directly to the project detail page",
       "Invoice status badges: amber = Draft, blue = Sent, green = Paid, red = Overdue",
       "Click 'Send Invite' to create portal login and email credentials to the client",
-      "Click 'Edit' to update company name, email, phone, website, or address",
+      "Click 'Edit' to update company, contact name, email, phone, website, address, sector, and notes",
     ],
   },
   tickets: {
@@ -195,12 +198,12 @@ export const helpContent: Record<string, HelpSection> = {
     content:
       "This is your internal reference for how to handle key business operations in DreamForge Consulting. Not visible to clients.",
     tips: [
-      "HOW TO ADD A LEAD: Go to Leads → '+ Add Lead' → only name is required, all other fields (email, company, phone, website, address, source, value, notes) are optional. Lead starts as NEW status.",
-      "HOW TO WORK A LEAD: Use the status dropdown to move through the pipeline: New → Contacted → Qualified → Proposal → Converted (or Lost). Search bar filters by name, email, company, or source. The Card checkbox tracks if you've sent a handwritten postcard.",
-      "HOW TO PROMOTE A LEAD: Click the green person-check icon on any lead that isn't Converted or Lost. Confirm dialog explains a client record will be created. Portal invite is a separate step from the Clients page. Lead status auto-sets to CONVERTED.",
+      "HOW TO ADD A LEAD: Go to Leads → '+ Add Lead' → only name is required, all other fields (email, company, phone, website, address, sector, source, value, notes) are optional. Lead starts as NEW status.",
+      "HOW TO WORK A LEAD: Use the status dropdown to move through the pipeline: New → Contacted → Qualified → Proposal → Converted (or Lost). Search bar filters by name, email, company, or sector. Sector dropdown filters by industry. The Card checkbox tracks if you've sent a handwritten postcard.",
+      "HOW TO PROMOTE A LEAD: Click the green person-check icon on any lead that isn't Converted or Lost. Confirm dialog explains a client record will be created. All fields are copied including sector, notes, and card status. Portal invite is a separate step from the Clients page. Lead status auto-sets to CONVERTED.",
       "HOW TO ONBOARD A CLIENT: After promoting a lead (or adding directly via '+ Add Client'), go to Clients → click the blue mail icon to Send Portal Invite. This creates a portal account and emails the client their login email + temp password. A persistent dialog shows the credentials on screen — save these in case the email doesn't arrive.",
       "HOW TO RESEND AN INVITE: On the Clients page, clients with portal access show a green shield icon. Click the refresh icon (circular arrow) next to them → confirms → generates a new temp password, emails it, and shows credentials. The old password stops working immediately. This doubles as an admin password reset.",
-      "HOW TO MANAGE CLIENTS: Pencil icon edits company, email, phone. Trash icon deletes client and all their projects, invoices, and tickets (confirm dialog warns). Click the company name to open the client detail page with projects and invoices. The Card checkbox tracks postcards sent.",
+      "HOW TO MANAGE CLIENTS: Pencil icon edits company, contact name, email, phone, website, address, sector, and notes. Trash icon deletes client and all their projects, invoices, and tickets (confirm dialog warns). Click the company name to open the client detail page with projects and invoices. The Card checkbox tracks postcards sent.",
       "HOW TO START A PROJECT: Go to Projects → '+ Add Project' → select client, set name/description/budget/dates → project starts at Discovery stage (5% progress). Add tasks and notes at each stage as you work through the 9-stage workflow.",
       "HOW TO USE THE WORKFLOW TRACKER: On project detail, click the next stage circle to advance one step, or click any earlier stage to revert. Each transition is logged in the Timeline. Progress auto-calculates: Discovery 5%, Design 15%, Proposal 22%, Approval 30%, Development 50%, Testing 70%, Deployment 85%, Launched/Support 100%.",
       "HOW TO GENERATE A PROPOSAL: At Proposal stage, an amber banner appears with two options. 'Copy Prompt' copies an AI prompt built from Discovery + Design data to your clipboard — paste into Claude or ChatGPT. 'Generate via Athena' does it in-app with streaming — click 'Save as Note' when done. Edit freely in the Proposal Document card.",
@@ -230,6 +233,8 @@ export const helpContent: Record<string, HelpSection> = {
       "LICENSING FLOW — Admin View: Admin views project detail from Development onward | Agreements & Licensing card shows approval date + terms + license status",
       "LICENSING FLOW — Client Portal: Client views their project from Development onward | Collapsible Ownership & Licensing Terms section visible",
       "LICENSING FLOW — Support Retainer: Monthly retainer maintains the license | Active while paid — suspendable after 60-day lapse",
+      "HOW TO HANDLE PROJECT REQUESTS: Clients submit requests via 'Request a Project' in their portal. A green alert card appears on your Dashboard with the project name and PENDING badge. Click to open the full request — see client name, description, budget range, timeline, and additional info. Click 'Acknowledge & Review' to set status to REVIEWED (client sees this update), or 'Decline' to reject. To convert a request into an actual project, go to Projects → '+ Add Project' and reference the request details.",
+      "HOW TO USE CAL.COM BOOKING: Discovery call booking is integrated via cal.com/emile-du-toit-lhb4qv/discovery-call. Clients see a 'Book a Call' link in their portal sidebar and on the Request a Project page. The public landing page also has a 'Book a Free Discovery Call' CTA. Calendar syncs with your Google Calendar — availability updates automatically.",
       "HOW TO RUN TESTS: Run 'npm test' from the project root to execute all unit and integration tests via Vitest. Run 'npm run test:watch' for watch mode during development. Tests include Stripe integration (uses test keys — never touches real money), component rendering, schema validation, and more.",
       "HOW TO TEST STRIPE PAYMENTS: Local dev uses Stripe test mode keys (sk_test_ / pk_test_) automatically. Use test card 4242 4242 4242 4242 with any future expiry and any 3-digit CVC for successful payments. Use 4000 0000 0000 0002 to simulate a decline. Use 4000 0025 0000 3155 to test 3D Secure. Never use live keys locally — they're only on Vercel production.",
       "PRICE GUIDANCE — Shopify & E-commerce: $800–1.5k (boutique store, <2k products, theme + setup + AI agent + automations)",
