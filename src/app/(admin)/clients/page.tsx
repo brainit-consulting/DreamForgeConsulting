@@ -7,6 +7,9 @@ import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { AddClientDialog } from "@/components/admin/clients/add-client-dialog";
 import { EditClientDialog } from "@/components/admin/clients/edit-client-dialog";
@@ -25,6 +28,7 @@ interface ClientRow {
   company: string;
   email: string;
   phone?: string;
+  sector?: string;
   cardSent?: boolean;
   createdAt: string;
   _count: { projects: number };
@@ -34,6 +38,7 @@ export default function ClientsPage() {
   const [clients, setClients] = useState<ClientRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [sectorFilter, setSectorFilter] = useState("ALL");
   const [error, setError] = useState(false);
   const confirm = useConfirm();
 
@@ -98,13 +103,17 @@ export default function ClientsPage() {
     fetchClients();
   }
 
-  const filtered = search
-    ? clients.filter((c) =>
-        [c.company, c.email, c.phone].some((f) =>
-          f?.toLowerCase().includes(search.toLowerCase())
-        )
-      )
-    : clients;
+  const sectors = [...new Set(clients.map((c) => c.sector).filter(Boolean))] as string[];
+
+  const filtered = clients.filter((c) => {
+    if (sectorFilter !== "ALL" && c.sector !== sectorFilter) return false;
+    if (search) {
+      return [c.company, c.email, c.phone, c.sector].some((f) =>
+        f?.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+    return true;
+  });
 
   return (
     <div className="space-y-6">
@@ -118,14 +127,29 @@ export default function ClientsPage() {
         <AddClientDialog onCreated={fetchClients} />
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Search clients by company, email..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-9"
-        />
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search clients by company, email, sector..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        {sectors.length > 0 && (
+          <Select value={sectorFilter} onValueChange={(v) => setSectorFilter(v ?? "ALL")}>
+            <SelectTrigger className="h-8 w-[180px] text-xs">
+              <SelectValue placeholder="All Sectors" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All Sectors</SelectItem>
+              {sectors.map((s) => (
+                <SelectItem key={s} value={s}>{s}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       {error && (
@@ -143,6 +167,7 @@ export default function ClientsPage() {
               <TableHead>Client</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Phone</TableHead>
+              <TableHead>Sector</TableHead>
               <TableHead className="text-center">Portal</TableHead>
               <TableHead className="text-center">Projects</TableHead>
               <TableHead>Since</TableHead>
@@ -151,10 +176,10 @@ export default function ClientsPage() {
           </TableHeader>
           <TableBody>
             {loading && (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
             )}
             {!loading && filtered.length === 0 && (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">{search ? "No clients match your search." : "No clients yet. Add your first one!"}</TableCell></TableRow>
+              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">{search ? "No clients match your search." : "No clients yet. Add your first one!"}</TableCell></TableRow>
             )}
             {filtered.map((client) => {
               const initials = client.company.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
@@ -186,6 +211,7 @@ export default function ClientsPage() {
                   </TableCell>
                   <TableCell className="text-muted-foreground">{client.email}</TableCell>
                   <TableCell className="text-muted-foreground">{client.phone ?? "—"}</TableCell>
+                  <TableCell className="text-muted-foreground">{client.sector ?? "—"}</TableCell>
                   <TableCell className="text-center">
                     {client.userId ? (
                       <ActionTooltip label="Has portal access">

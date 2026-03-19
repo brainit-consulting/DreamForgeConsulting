@@ -30,6 +30,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
         phone: lead.phone,
         website: lead.website,
         address: lead.address,
+        sector: lead.sector,
       },
     });
 

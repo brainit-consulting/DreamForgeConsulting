@@ -92,6 +92,7 @@ model Lead {
   phone     String?
   website   String?
   address   String?    @db.Text
+  sector    String?
   cardSent  Boolean    @default(false)
   status    LeadStatus @default(NEW)
   source    String?
@@ -123,6 +124,7 @@ model Client {
   phone     String?
   website   String?
   address   String?  @db.Text
+  sector    String?
   cardSent  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

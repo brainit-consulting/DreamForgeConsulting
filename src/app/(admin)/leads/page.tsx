@@ -28,6 +28,7 @@ export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [sectorFilter, setSectorFilter] = useState("ALL");
   const confirm = useConfirm();
 
   const [error, setError] = useState(false);
@@ -91,13 +92,17 @@ export default function LeadsPage() {
     }
   }
 
-  const filtered = search
-    ? leads.filter((l) =>
-        [l.name, l.email, l.company, l.source].some((f) =>
-          f?.toLowerCase().includes(search.toLowerCase())
-        )
-      )
-    : leads;
+  const sectors = [...new Set(leads.map((l) => l.sector).filter(Boolean))] as string[];
+
+  const filtered = leads.filter((l) => {
+    if (sectorFilter !== "ALL" && l.sector !== sectorFilter) return false;
+    if (search) {
+      return [l.name, l.email, l.company, l.source, l.sector].some((f) =>
+        f?.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+    return true;
+  });
 
   const counts = leads.reduce((acc, l) => {
     acc[l.status] = (acc[l.status] ?? 0) + 1;
@@ -116,14 +121,29 @@ export default function LeadsPage() {
         <AddLeadDialog onCreated={fetchLeads} />
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Search leads by name, email, company..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-9"
-        />
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Search leads by name, email, company, sector..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        {sectors.length > 0 && (
+          <Select value={sectorFilter} onValueChange={(v) => setSectorFilter(v ?? "ALL")}>
+            <SelectTrigger className="h-8 w-[180px] text-xs">
+              <SelectValue placeholder="All Sectors" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All Sectors</SelectItem>
+              {sectors.map((s) => (
+                <SelectItem key={s} value={s}>{s}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       {error && (
@@ -140,6 +160,7 @@ export default function LeadsPage() {
               <TableHead className="w-12 text-center">Card</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Company</TableHead>
+              <TableHead>Sector</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Source</TableHead>
               <TableHead className="text-right">Value</TableHead>
@@ -149,10 +170,10 @@ export default function LeadsPage() {
           </TableHeader>
           <TableBody>
             {loading && (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">Loading...</TableCell></TableRow>
             )}
             {!loading && filtered.length === 0 && (
-              <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">{search ? "No leads match your search." : "No leads yet. Add your first one!"}</TableCell></TableRow>
+              <TableRow><TableCell colSpan={9} className="text-center py-8 text-muted-foreground">{search ? "No leads match your search." : "No leads yet. Add your first one!"}</TableCell></TableRow>
             )}
             {filtered.map((lead) => (
               <TableRow key={lead.id}>
@@ -176,6 +197,7 @@ export default function LeadsPage() {
                   <EditLeadDialog lead={lead} onUpdated={fetchLeads} variant="name" />
                 </TableCell>
                 <TableCell>{lead.company ?? "—"}</TableCell>
+                <TableCell className="text-muted-foreground">{lead.sector ?? "—"}</TableCell>
                 <TableCell>
                   <Select
                     value={lead.status}
