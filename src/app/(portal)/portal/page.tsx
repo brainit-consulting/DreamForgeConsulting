@@ -52,7 +52,13 @@ export default function PortalDashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-display">Welcome back, {data.client.name?.split(" ")[0] ?? data.client.company}</h1>
+        <h1 className="text-3xl font-display">Welcome back, {(() => {
+          const name = data.client.name;
+          if (!name) return data.client.company;
+          const parts = name.split(" ");
+          const titles = ["Dr.", "Mr.", "Mrs.", "Ms.", "Prof.", "Rev."];
+          return titles.includes(parts[0]) && parts.length > 1 ? parts.slice(0, 2).join(" ") : parts[0];
+        })()}</h1>
         <p className="mt-1 text-muted-foreground">
           Here&apos;s an overview of your projects and account.
         </p>
