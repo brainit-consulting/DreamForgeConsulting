@@ -1,6 +1,8 @@
 import { put, del, list } from "@vercel/blob";
 import { db } from "@/lib/db";
 import { getBackupConfig } from "@/lib/backup-config";
+import fs from "fs";
+import path from "path";
 
 export interface BackupEntry {
   url: string;
@@ -77,13 +79,9 @@ function getISOWeekNumber(date: Date): number {
 }
 
 // Main backup function — call from cron or manual trigger
-export async function runBackup(): Promise<BackupResult> {
+// Local filesystem backup for development (no Vercel Blob needed)
+async function runLocalBackup(): Promise<BackupResult> {
   const start = Date.now();
-
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    return { success: false, error: "BLOB_READ_WRITE_TOKEN not configured", durationMs: 0 };
-  }
-
   const deleted: string[] = [];
 
   try {
@@ -93,12 +91,85 @@ export async function runBackup(): Promise<BackupResult> {
     const dd = String(now.getUTCDate()).padStart(2, "0");
     const todayKey = `${yyyy}-${mm}-${dd}`;
 
-    // 1. Export DB
     const data = await exportDatabase();
     const json = JSON.stringify(data, null, 2);
     const bytes = Buffer.byteLength(json, "utf8");
 
-    // 2. Upload daily backup
+    const baseDir = path.join(process.cwd(), "backups");
+    for (const tier of ["daily", "weekly", "monthly"]) {
+      fs.mkdirSync(path.join(baseDir, tier), { recursive: true });
+    }
+
+    const dailyFile = path.join(baseDir, "daily", `${todayKey}.json`);
+    fs.writeFileSync(dailyFile, json, "utf8");
+
+    const promoted: { weekly?: string; monthly?: string } = {};
+    if (now.getUTCDay() === 0) {
+      const week = String(getISOWeekNumber(now)).padStart(2, "0");
+      const weeklyFile = path.join(baseDir, "weekly", `${yyyy}-W${week}.json`);
+      fs.writeFileSync(weeklyFile, json, "utf8");
+      promoted.weekly = weeklyFile;
+    }
+    if (now.getUTCDate() === 1) {
+      const monthlyFile = path.join(baseDir, "monthly", `${yyyy}-${mm}.json`);
+      fs.writeFileSync(monthlyFile, json, "utf8");
+      promoted.monthly = monthlyFile;
+    }
+
+    // Cleanup old local backups
+    const retention = await getBackupConfig();
+    const cutoffs = {
+      daily: new Date(now.getTime() - retention.retainDaily * 24 * 60 * 60 * 1000),
+      weekly: new Date(now.getTime() - retention.retainWeekly * 7 * 24 * 60 * 60 * 1000),
+      monthly: new Date(now.getTime() - retention.retainMonthly * 30 * 24 * 60 * 60 * 1000),
+    };
+
+    for (const [tier, cutoff] of Object.entries(cutoffs)) {
+      const dir = path.join(baseDir, tier);
+      if (!fs.existsSync(dir)) continue;
+      for (const file of fs.readdirSync(dir)) {
+        const filePath = path.join(dir, file);
+        const stat = fs.statSync(filePath);
+        if (stat.mtime < cutoff) {
+          fs.unlinkSync(filePath);
+          deleted.push(`backups/${tier}/${file}`);
+        }
+      }
+    }
+
+    return {
+      success: true,
+      dailyKey: dailyFile,
+      promoted,
+      deleted,
+      durationMs: Date.now() - start,
+      sizeBytes: bytes,
+    };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : String(err),
+      durationMs: Date.now() - start,
+    };
+  }
+}
+
+// Vercel Blob backup for production
+async function runBlobBackup(): Promise<BackupResult> {
+  const start = Date.now();
+  const deleted: string[] = [];
+
+  try {
+    const now = new Date();
+    const yyyy = now.getUTCFullYear();
+    const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(now.getUTCDate()).padStart(2, "0");
+    const todayKey = `${yyyy}-${mm}-${dd}`;
+
+    const data = await exportDatabase();
+    const json = JSON.stringify(data, null, 2);
+    const bytes = Buffer.byteLength(json, "utf8");
+
     const dailyPath = `backups/daily/${todayKey}.json`;
     const { url: dailyUrl } = await put(dailyPath, json, {
       access: "public",
@@ -108,9 +179,7 @@ export async function runBackup(): Promise<BackupResult> {
 
     const promoted: { weekly?: string; monthly?: string } = {};
 
-    // 3. Promote to weekly on Sunday (0)
-    const dayOfWeek = now.getUTCDay();
-    if (dayOfWeek === 0) {
+    if (now.getUTCDay() === 0) {
       const week = String(getISOWeekNumber(now)).padStart(2, "0");
       const weeklyPath = `backups/weekly/${yyyy}-W${week}.json`;
       await put(weeklyPath, json, {
@@ -121,9 +190,7 @@ export async function runBackup(): Promise<BackupResult> {
       promoted.weekly = weeklyPath;
     }
 
-    // 4. Promote to monthly on 1st of month
-    const dayOfMonth = now.getUTCDate();
-    if (dayOfMonth === 1) {
+    if (now.getUTCDate() === 1) {
       const monthlyPath = `backups/monthly/${yyyy}-${mm}.json`;
       await put(monthlyPath, json, {
         access: "public",
@@ -133,9 +200,7 @@ export async function runBackup(): Promise<BackupResult> {
       promoted.monthly = monthlyPath;
     }
 
-    // 5. Cleanup old backups
     const allBlobs = await list({ prefix: "backups/" });
-
     const retention = await getBackupConfig();
     const cutoffs = {
       daily: new Date(now.getTime() - retention.retainDaily * 24 * 60 * 60 * 1000),
@@ -176,6 +241,14 @@ export async function runBackup(): Promise<BackupResult> {
       durationMs: Date.now() - start,
     };
   }
+}
+
+// Main backup function — uses Vercel Blob in production, local filesystem in dev
+export async function runBackup(): Promise<BackupResult> {
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    return runBlobBackup();
+  }
+  return runLocalBackup();
 }
 
 export interface RestoreResult {
