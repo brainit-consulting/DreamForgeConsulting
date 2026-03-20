@@ -93,11 +93,12 @@ model Lead {
   website   String?
   address   String?    @db.Text
   sector    String?
-  cardSent  Boolean    @default(false)
-  status    LeadStatus @default(NEW)
-  source    String?
-  notes     String?    @db.Text
-  value     Float?
+  cardSent   Boolean    @default(false)
+  status     LeadStatus @default(NEW)
+  source     String?
+  pitchAngle String?    @db.Text
+  notes      String?    @db.Text
+  value      Float?
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 

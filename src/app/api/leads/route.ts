@@ -12,6 +12,7 @@ const createLeadSchema = z.object({
   address: z.string().optional(),
   source: z.string().optional(),
   sector: z.string().optional(),
+  pitchAngle: z.string().optional(),
   notes: z.string().optional(),
   value: z.number().optional(),
 });

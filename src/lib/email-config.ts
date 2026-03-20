@@ -31,6 +31,8 @@ export const emailConfigSchema = z.object({
   autoApprovalEmail: z.boolean(),
   bookingUrl: z.string(),
   bookingUrls: z.array(bookingUrlEntrySchema).optional().default([]),
+  includePitchAngle: z.boolean().optional().default(false),
+  pitchAngleWrapper: z.string().optional().default("{pitch}"),
 });
 
 export type EmailConfig = z.infer<typeof emailConfigSchema>;
@@ -47,6 +49,8 @@ export const DEFAULT_EMAIL_CONFIG: EmailConfig = {
   autoApprovalEmail: false,
   bookingUrl: "https://dreamforgeconsulting.vercel.app",
   bookingUrls: [],
+  includePitchAngle: false,
+  pitchAngleWrapper: "{pitch}",
 };
 
 let currentConfig: EmailConfig = { ...DEFAULT_EMAIL_CONFIG };

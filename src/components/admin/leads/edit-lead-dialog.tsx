@@ -30,6 +30,7 @@ export function EditLeadDialog({ lead, onUpdated, variant = "icon" }: { lead: Le
     address: lead.address ?? "",
     source: lead.source ?? "",
     sector: lead.sector ?? "",
+    pitchAngle: lead.pitchAngle ?? "",
     notes: lead.notes ?? "",
     value: lead.value?.toString() ?? "",
   });
@@ -45,6 +46,7 @@ export function EditLeadDialog({ lead, onUpdated, variant = "icon" }: { lead: Le
         address: lead.address ?? "",
         source: lead.source ?? "",
         sector: lead.sector ?? "",
+        pitchAngle: lead.pitchAngle ?? "",
         notes: lead.notes ?? "",
         value: lead.value?.toString() ?? "",
       });
@@ -150,6 +152,10 @@ export function EditLeadDialog({ lead, onUpdated, variant = "icon" }: { lead: Le
           <div className="space-y-1">
             <Label htmlFor="edit-notes">Notes</Label>
             <Textarea id="edit-notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="edit-pitch">Pitch Angle</Label>
+            <Textarea id="edit-pitch" value={form.pitchAngle} onChange={(e) => setForm({ ...form, pitchAngle: e.target.value })} rows={2} placeholder="e.g., No online booking — pitch custom scheduling portal" />
           </div>
           <DialogFooter>
             <Button type="submit" disabled={loading} className="w-full">

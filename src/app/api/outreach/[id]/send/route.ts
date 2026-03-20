@@ -36,6 +36,8 @@ export async function POST(
       leadName: email.lead.name,
       company: email.lead.company ?? "",
       body: email.body,
+      pitchAngle: email.lead.pitchAngle ?? undefined,
+      sector: email.lead.sector ?? undefined,
     });
 
     try {

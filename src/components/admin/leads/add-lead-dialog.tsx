@@ -20,7 +20,7 @@ export function AddLeadDialog({ onCreated }: { onCreated: () => void }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
-    name: "", email: "", company: "", phone: "", website: "", address: "", source: "", sector: "", notes: "", value: "",
+    name: "", email: "", company: "", phone: "", website: "", address: "", source: "", sector: "", pitchAngle: "", notes: "", value: "",
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -37,7 +37,7 @@ export function AddLeadDialog({ onCreated }: { onCreated: () => void }) {
       });
       if (res.ok) {
         toast.success("Lead created");
-        setForm({ name: "", email: "", company: "", phone: "", website: "", address: "", source: "", sector: "", notes: "", value: "" });
+        setForm({ name: "", email: "", company: "", phone: "", website: "", address: "", source: "", sector: "", pitchAngle: "", notes: "", value: "" });
         setOpen(false);
         onCreated();
       } else {
@@ -105,6 +105,10 @@ export function AddLeadDialog({ onCreated }: { onCreated: () => void }) {
           <div className="space-y-1">
             <Label htmlFor="lead-notes">Notes</Label>
             <Textarea id="lead-notes" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={2} />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="lead-pitch">Pitch Angle</Label>
+            <Textarea id="lead-pitch" value={form.pitchAngle} onChange={(e) => setForm({ ...form, pitchAngle: e.target.value })} rows={2} placeholder="e.g., No online booking — pitch custom scheduling portal" />
           </div>
           <DialogFooter>
             <Button type="submit" disabled={loading} className="w-full">

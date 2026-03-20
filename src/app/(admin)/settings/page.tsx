@@ -978,6 +978,36 @@ export default function SettingsPage() {
               />
             </div>
 
+            <div className="flex items-center justify-between rounded-lg border border-border p-3">
+              <div>
+                <p className="text-sm font-medium text-primary">Auto-include pitch angle in outreach</p>
+                <p className="text-xs text-muted-foreground">
+                  When ON, if your template doesn&apos;t use {"{{pitch}}"}, the lead&apos;s pitch angle is appended before the CTA button.
+                </p>
+              </div>
+              <Switch
+                checked={emailConfig.includePitchAngle ?? false}
+                onCheckedChange={(checked) =>
+                  setEmailConfig({ ...emailConfig, includePitchAngle: checked })
+                }
+              />
+            </div>
+            {emailConfig.includePitchAngle && (
+              <div className="space-y-1">
+                <Label htmlFor="pitch-wrapper">Pitch Angle Wrapper</Label>
+                <Input
+                  id="pitch-wrapper"
+                  value={emailConfig.pitchAngleWrapper ?? "{pitch}"}
+                  onChange={(e) => setEmailConfig({ ...emailConfig, pitchAngleWrapper: e.target.value })}
+                  placeholder="{pitch}"
+                  className="font-notes text-base"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Use <code className="text-primary/80">{"{pitch}"}</code> for the pitch text and <code className="text-primary/80">{"{company}"}</code> for the company name. Example: &quot;Specifically for {"{company}"}: {"{pitch}"}&quot;
+                </p>
+              </div>
+            )}
+
             <Separator />
 
             <div className="flex items-center gap-3">

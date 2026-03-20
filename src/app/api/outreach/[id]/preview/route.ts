@@ -29,6 +29,8 @@ export async function GET(
       leadName,
       company,
       body: email.body,
+      pitchAngle: email.lead?.pitchAngle ?? undefined,
+      sector: email.lead?.sector ?? "{{Sector}}",
     });
 
     return NextResponse.json({

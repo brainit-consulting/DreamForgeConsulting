@@ -52,6 +52,8 @@ export async function POST(req: Request) {
           leadName: lead.name,
           company: lead.company ?? "",
           body: template.body,
+          pitchAngle: lead.pitchAngle ?? undefined,
+          sector: lead.sector ?? undefined,
         });
 
         await sendEmail({

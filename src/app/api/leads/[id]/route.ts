@@ -14,6 +14,7 @@ const updateLeadSchema = z.object({
   status: z.enum(["NEW", "CONTACTED", "QUALIFIED", "PROPOSAL", "CONVERTED", "LOST"]).optional(),
   source: z.string().optional(),
   sector: z.string().optional(),
+  pitchAngle: z.string().optional(),
   notes: z.string().optional(),
   value: z.number().optional(),
 });

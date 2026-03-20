@@ -184,6 +184,7 @@ async function main() {
         address: lead.address || null,
         sector: lead.sector,
         source: lead.source,
+        pitchAngle: lead.pitchAngle || null,
         notes: lead.notes,
         value: lead.value,
       },
@@ -201,7 +202,8 @@ main().catch((e) => { console.error(e); process.exit(1); });
 Field mapping:
 - `sector`: The industry/sector from the interview (e.g., "Veterinary / Pet Care", "Elder Care / Home Health")
 - `source`: "Smart lead discovery"
-- `notes`: Include opportunity score, owner info, services offered, why they're a fit, website quality, suggested DreamForge service
+- `pitchAngle`: A concise, actionable pitch angle for outreach (e.g., "No online booking — pitch custom scheduling portal", "Uses paper intake forms — pitch digital workflow automation"). This is injected into outreach emails via merge fields. Keep it 1-2 sentences, focused on the specific gap and proposed solution.
+- `notes`: Include opportunity score, owner info, services offered, why they're a fit, website quality, verification summary. Do NOT duplicate the pitch angle here — keep notes for research context and pitch angle for outreach.
 - `value`: Estimate based on business size and project type (conservative — real quotes come later):
   - Shopify store setup/customization (boutique retail, <2k products): $800-1.5k — includes theme work, product import, AI agent add-on, automations
   - Website/digital presence: $1.5-3k

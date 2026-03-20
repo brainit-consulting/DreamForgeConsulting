@@ -341,6 +341,9 @@ export default function OutreachPage() {
                   className="font-notes !text-base"
                   required
                 />
+                <p className="text-xs text-muted-foreground">
+                  Merge fields: <code className="text-primary/80">{"{{name}}"}</code> <code className="text-primary/80">{"{{company}}"}</code> <code className="text-primary/80">{"{{sector}}"}</code> <code className="text-primary/80">{"{{pitch}}"}</code> — replaced per-lead at send time
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -649,6 +652,9 @@ export default function OutreachPage() {
                 className="font-notes !text-base"
                 required
               />
+              <p className="text-xs text-muted-foreground">
+                Merge fields: <code className="text-primary/80">{"{{name}}"}</code> <code className="text-primary/80">{"{{company}}"}</code> <code className="text-primary/80">{"{{sector}}"}</code> <code className="text-primary/80">{"{{pitch}}"}</code>
+              </p>
             </div>
             <DialogFooter>
               <Button type="submit" disabled={editSaving} className="w-full">

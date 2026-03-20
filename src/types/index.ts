@@ -46,6 +46,7 @@ export interface Lead {
   cardSent?: boolean;
   status: LeadStatus;
   source?: string;
+  pitchAngle?: string;
   notes?: string;
   value?: number;
   createdAt: Date;

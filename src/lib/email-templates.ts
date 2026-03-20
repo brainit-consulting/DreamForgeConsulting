@@ -65,22 +65,56 @@ export async function passwordResetEmail({
   };
 }
 
+/** Replace merge field tokens in text with lead data */
+function replaceMergeFields(
+  text: string,
+  fields: { name?: string; company?: string; sector?: string; pitch?: string },
+): string {
+  return text
+    .replace(/\{\{name\}\}/g, fields.name ?? "")
+    .replace(/\{\{company\}\}/g, fields.company ?? "")
+    .replace(/\{\{sector\}\}/g, fields.sector ?? "")
+    .replace(/\{\{pitch\}\}/g, fields.pitch ?? "")
+    .replace(/ {2,}/g, " ")
+    .trim();
+}
+
 export async function outreachEmail({
   leadName,
   company,
   body,
+  pitchAngle,
+  sector,
 }: {
   leadName: string;
   company: string;
   body: string;
+  pitchAngle?: string;
+  sector?: string;
 }): Promise<string> {
   const config = await getEmailConfig();
+
+  // Replace merge field tokens in body
+  let resolvedBody = replaceMergeFields(body, {
+    name: leadName,
+    company,
+    sector,
+    pitch: pitchAngle,
+  });
+
+  // Auto-append pitch angle if setting is ON and body doesn't already use {{pitch}}
+  if (config.includePitchAngle && pitchAngle && !body.includes("{{pitch}}")) {
+    const wrapped = config.pitchAngleWrapper
+      ? config.pitchAngleWrapper.replace("{pitch}", pitchAngle).replace("{company}", company)
+      : pitchAngle;
+    resolvedBody = resolvedBody + "\n" + wrapped;
+  }
 
   const parts: string[] = ["Hi"];
   if (config.greetingUseName && leadName) parts.push(leadName);
   if (config.greetingUseCompany && company) parts.push(`at ${company}`);
   const greeting = parts.length > 1 ? parts.join(" ") : "Hi there";
-  const paragraphs = body
+  const paragraphs = resolvedBody
     .split("\n")
     .filter((l) => l.trim())
     .map((p) => `<p style="color:#CCC;font-size:14px;line-height:1.6;margin:0 0 12px;">${p}</p>`)
