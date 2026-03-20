@@ -26,8 +26,9 @@ const statusVariant: Record<OutreachStatus, "default" | "success" | "destructive
   DRAFT: "default", SENT: "success", FAILED: "destructive",
 };
 
-const statusFilters: { label: string; value: OutreachStatus | "ALL" }[] = [
+const statusFilters: { label: string; value: OutreachStatus | "ALL" | "TEMPLATES" }[] = [
   { label: "All", value: "ALL" },
+  { label: "Templates", value: "TEMPLATES" },
   { label: "Draft", value: "DRAFT" },
   { label: "Sent", value: "SENT" },
   { label: "Failed", value: "FAILED" },
@@ -45,7 +46,7 @@ interface OutreachRow {
 
 export default function OutreachPage() {
   const [emails, setEmails] = useState<OutreachRow[]>([]);
-  const [filter, setFilter] = useState<OutreachStatus | "ALL">("ALL");
+  const [filter, setFilter] = useState<OutreachStatus | "ALL" | "TEMPLATES">("ALL");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const confirmAction = useConfirm();
@@ -286,7 +287,7 @@ export default function OutreachPage() {
     fetchEmails();
   }
 
-  const filtered = filter === "ALL" ? emails : emails.filter((e) => e.status === filter);
+  const filtered = filter === "ALL" ? emails : filter === "TEMPLATES" ? emails.filter((e) => !e.lead) : emails.filter((e) => e.status === filter);
   const draftCount = emails.filter((e) => e.status === "DRAFT").length;
   const sentCount = emails.filter((e) => e.status === "SENT").length;
   const failedCount = emails.filter((e) => e.status === "FAILED").length;
