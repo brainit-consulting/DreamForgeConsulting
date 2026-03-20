@@ -23,7 +23,7 @@ import { toast } from "sonner";
 import type { Lead, LeadStatus } from "@/types";
 
 const statusVariant: Record<LeadStatus, "info" | "default" | "ember" | "warning" | "success" | "destructive"> = {
-  NEW: "info", CONTACTED: "default", QUALIFIED: "ember",
+  NEW: "info", CONTACTED: "success", QUALIFIED: "ember",
   PROPOSAL: "warning", CONVERTED: "success", LOST: "destructive",
 };
 
