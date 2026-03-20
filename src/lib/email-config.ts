@@ -37,7 +37,7 @@ export type EmailConfig = z.infer<typeof emailConfigSchema>;
 
 export const DEFAULT_EMAIL_CONFIG: EmailConfig = {
   companyName: "DreamForge Consulting",
-  logoUrl: "/DreamForgeConsultingLogo-email.png",
+  logoUrl: "https://1airdrc8bpsbs6t9.public.blob.vercel-storage.com/logos/DreamForgeConsultingLogo-email.png",
   logoSize: 120,
   logos: [],
   signOff: "Best regards,\nDreamForge Consulting",
