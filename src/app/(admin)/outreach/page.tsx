@@ -49,6 +49,7 @@ export default function OutreachPage() {
   const [filter, setFilter] = useState<OutreachStatus | "ALL" | "TEMPLATES">("ALL");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [sendingAll, setSendingAll] = useState(false);
   const confirmAction = useConfirm();
 
   // Compose state
@@ -274,6 +275,30 @@ export default function OutreachPage() {
     }
   }
 
+  async function sendAllDrafts() {
+    const drafts = emails.filter((e) => e.status === "DRAFT" && e.lead?.email);
+    if (drafts.length === 0) return;
+    const ok = await confirmAction({
+      title: "Send All Drafts",
+      description: `Send ${drafts.length} draft email${drafts.length > 1 ? "s" : ""} to their assigned leads? This cannot be undone.`,
+      confirmLabel: `Send ${drafts.length} Email${drafts.length > 1 ? "s" : ""}`,
+      variant: "promote",
+    });
+    if (!ok) return;
+    setSendingAll(true);
+    let sent = 0, failed = 0;
+    for (const email of drafts) {
+      try {
+        const res = await fetch(`/api/outreach/${email.id}/send`, { method: "POST" });
+        if (res.ok) { sent++; } else { failed++; }
+      } catch { failed++; }
+    }
+    setSendingAll(false);
+    if (sent > 0) toast.success(`${sent} email${sent > 1 ? "s" : ""} sent`);
+    if (failed > 0) toast.error(`${failed} email${failed > 1 ? "s" : ""} failed`);
+    fetchEmails();
+  }
+
   async function deleteEmail(id: string) {
     const ok = await confirmAction({
       title: "Delete Draft",
@@ -427,6 +452,20 @@ export default function OutreachPage() {
             {f.label}
           </Button>
         ))}
+        {emails.some((e) => e.status === "DRAFT" && e.lead?.email) && (
+          <ActionTooltip label="Send all draft emails with assigned leads">
+            <Button
+              size="sm"
+              variant="outline"
+              className="ml-auto gap-2 text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/10"
+              onClick={sendAllDrafts}
+              disabled={sendingAll}
+            >
+              <Send className="h-3.5 w-3.5" />
+              {sendingAll ? "Sending..." : "Send All Drafts"}
+            </Button>
+          </ActionTooltip>
+        )}
       </div>
 
       {error && (
@@ -441,7 +480,7 @@ export default function OutreachPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Subject</TableHead>
+                <TableHead className="max-w-[280px]">Subject</TableHead>
                 <TableHead>Lead</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Status</TableHead>
@@ -458,7 +497,7 @@ export default function OutreachPage() {
               )}
               {filtered.map((email) => (
                 <TableRow key={email.id}>
-                  <TableCell className="font-medium text-sm">{email.subject}</TableCell>
+                  <TableCell className="font-medium text-sm max-w-[280px] truncate">{email.subject}</TableCell>
                   <TableCell>
                     {email.lead ? (
                       <div>
