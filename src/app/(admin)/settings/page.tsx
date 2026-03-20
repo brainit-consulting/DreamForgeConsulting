@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,7 @@ import {
   Mail,
   ChevronDown,
   Headphones,
+  CloudCheck,
 } from "lucide-react";
 import Image from "next/image";
 import type { AthenaConfig } from "@/lib/athena-config";
@@ -150,6 +151,17 @@ export default function SettingsPage() {
   const [supportSaving, setSupportSaving] = useState(false);
   const [supportSaved, setSupportSaved] = useState(false);
 
+  // Autosave cloud indicator
+  const [autoSaved, setAutoSaved] = useState<string | null>(null); // which section just autosaved
+  const athenaTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const emailTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const backupCfgTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const supportTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const athenaLoaded = useRef(false);
+  const emailLoaded = useRef(false);
+  const backupCfgLoaded = useRef(false);
+  const supportLoaded = useRef(false);
+
   // Backup state
   const [backups, setBackups] = useState<BackupList | null>(null);
   const [backupsLoading, setBackupsLoading] = useState(false);
@@ -162,17 +174,58 @@ export default function SettingsPage() {
   useEffect(() => {
     fetch("/api/athena/config")
       .then((r) => r.json())
-      .then(setConfig);
+      .then((d) => { setConfig(d); setTimeout(() => { athenaLoaded.current = true; }, 500); });
     fetch("/api/email/config")
       .then((r) => r.json())
-      .then(setEmailConfig);
+      .then((d) => { setEmailConfig(d); setTimeout(() => { emailLoaded.current = true; }, 500); });
     fetch("/api/backup/config")
       .then((r) => r.json())
-      .then(setBackupConfig);
+      .then((d) => { setBackupConfig(d); setTimeout(() => { backupCfgLoaded.current = true; }, 500); });
     fetch("/api/support/config")
       .then((r) => r.json())
-      .then(setSupportConfig);
+      .then((d) => { setSupportConfig(d); setTimeout(() => { supportLoaded.current = true; }, 500); });
   }, []);
+
+  // Debounced autosave effects (1.5s delay)
+  useEffect(() => {
+    if (!athenaLoaded.current || !config) return;
+    if (athenaTimer.current) clearTimeout(athenaTimer.current);
+    athenaTimer.current = setTimeout(() => {
+      handleSave().then(() => { setAutoSaved("athena"); setTimeout(() => setAutoSaved(null), 2000); });
+    }, 1500);
+    return () => { if (athenaTimer.current) clearTimeout(athenaTimer.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config]);
+
+  useEffect(() => {
+    if (!emailLoaded.current || !emailConfig) return;
+    if (emailTimer.current) clearTimeout(emailTimer.current);
+    emailTimer.current = setTimeout(() => {
+      handleEmailSave().then(() => { setAutoSaved("email"); setTimeout(() => setAutoSaved(null), 2000); });
+    }, 1500);
+    return () => { if (emailTimer.current) clearTimeout(emailTimer.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [emailConfig]);
+
+  useEffect(() => {
+    if (!backupCfgLoaded.current || !backupConfig) return;
+    if (backupCfgTimer.current) clearTimeout(backupCfgTimer.current);
+    backupCfgTimer.current = setTimeout(() => {
+      handleBackupConfigSave().then(() => { setAutoSaved("backup"); setTimeout(() => setAutoSaved(null), 2000); });
+    }, 1500);
+    return () => { if (backupCfgTimer.current) clearTimeout(backupCfgTimer.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [backupConfig]);
+
+  useEffect(() => {
+    if (!supportLoaded.current || !supportConfig) return;
+    if (supportTimer.current) clearTimeout(supportTimer.current);
+    supportTimer.current = setTimeout(() => {
+      handleSupportSave().then(() => { setAutoSaved("support"); setTimeout(() => setAutoSaved(null), 2000); });
+    }, 1500);
+    return () => { if (supportTimer.current) clearTimeout(supportTimer.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [supportConfig]);
 
   const loadBackups = useCallback(async () => {
     setBackupsLoading(true);
@@ -428,8 +481,9 @@ export default function SettingsPage() {
                 className="rounded-full"
               />
               <div>
-                <CardTitle className="font-display text-2xl text-primary">
+                <CardTitle className="font-display text-2xl text-primary flex items-center gap-2">
                   Athena Preferences
+                  {autoSaved === "athena" && <CloudCheck className="h-5 w-5 text-emerald-500 animate-pulse" />}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
                   Configure the AI assistant&apos;s behavior, personality, and limits.
@@ -608,8 +662,9 @@ export default function SettingsPage() {
                 <Mail className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <CardTitle className="font-display text-2xl text-primary">
+                <CardTitle className="font-display text-2xl text-primary flex items-center gap-2">
                   Email Preferences
+                  {autoSaved === "email" && <CloudCheck className="h-5 w-5 text-emerald-500 animate-pulse" />}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
                   Logo and company name used in all outgoing emails.
@@ -955,8 +1010,9 @@ export default function SettingsPage() {
                 <Database className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <CardTitle className="font-display text-2xl text-primary">
+                <CardTitle className="font-display text-2xl text-primary flex items-center gap-2">
                   Backups &amp; Cron
+                  {autoSaved === "backup" && <CloudCheck className="h-5 w-5 text-emerald-500 animate-pulse" />}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
                   Automated daily DB snapshots stored in Vercel Blob.
@@ -1164,8 +1220,9 @@ export default function SettingsPage() {
                 <Headphones className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <CardTitle className="font-display text-2xl text-primary">
+                <CardTitle className="font-display text-2xl text-primary flex items-center gap-2">
                   Support Plan Defaults
+                  {autoSaved === "support" && <CloudCheck className="h-5 w-5 text-emerald-500 animate-pulse" />}
                 </CardTitle>
                 <p className="text-sm text-muted-foreground">
                   Default rates for post-launch support retainers.
