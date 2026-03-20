@@ -703,6 +703,24 @@ export default function SettingsPage() {
                 <p className="text-xs text-muted-foreground/60">{3 - (emailConfig.logos?.length ?? 0)} slot{3 - (emailConfig.logos?.length ?? 0) !== 1 ? "s" : ""} remaining</p>
               </div>
 
+              {/* Current active logo preview (when no uploaded logos) */}
+              {(emailConfig.logos?.length ?? 0) === 0 && emailConfig.logoUrl && (
+                <div className="mt-3 rounded-lg border border-primary bg-primary/10 p-4 flex items-center gap-4">
+                  <img
+                    src={emailConfig.logoUrl}
+                    alt="Current logo"
+                    style={{ maxHeight: emailConfig.logoSize, maxWidth: emailConfig.logoSize * 2 }}
+                    className="object-contain"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                  />
+                  <div>
+                    <p className="text-sm font-medium text-primary">Current Logo</p>
+                    <p className="text-xs text-muted-foreground truncate">{emailConfig.logoUrl}</p>
+                    <p className="text-[10px] text-emerald-500 mt-1">Active — used in emails</p>
+                  </div>
+                </div>
+              )}
+
               {/* Logo gallery */}
               {(emailConfig.logos?.length ?? 0) > 0 && (
                 <div className="grid grid-cols-3 gap-3 mt-3">
