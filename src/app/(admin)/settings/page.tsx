@@ -647,16 +647,17 @@ export default function SettingsPage() {
               </p>
 
               {/* Drag & drop upload */}
-              <div
-                className="relative flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border p-6 text-center transition-colors hover:border-primary/50 cursor-pointer"
-                onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add("border-primary"); }}
-                onDragLeave={(e) => { e.currentTarget.classList.remove("border-primary"); }}
-                onDrop={async (e) => {
-                  e.preventDefault();
-                  e.currentTarget.classList.remove("border-primary");
-                  const file = e.dataTransfer.files[0];
-                  if (!file) return;
-                  if ((emailConfig.logos?.length ?? 0) >= 3) { toast.error("Maximum 3 logos"); return; }
+              {(() => {
+                // Ensure logos array always includes the default if not already present
+                const currentLogos = emailConfig.logos?.length
+                  ? emailConfig.logos
+                  : emailConfig.logoUrl
+                    ? [{ url: emailConfig.logoUrl, name: emailConfig.logoUrl.split("/").pop() ?? "default", active: true }]
+                    : [];
+
+                async function handleUpload(file: File) {
+                  if (!emailConfig) return;
+                  if (currentLogos.length >= 3) { toast.error("Maximum 3 logos"); return; }
                   if (!file.type.startsWith("image/")) { toast.error("Must be an image"); return; }
                   if (file.size > 2 * 1024 * 1024) { toast.error("Must be under 2MB"); return; }
                   const fd = new FormData();
@@ -664,114 +665,96 @@ export default function SettingsPage() {
                   const res = await fetch("/api/admin/logos", { method: "POST", body: fd });
                   if (res.ok) {
                     const data = await res.json();
-                    const isFirst = (emailConfig.logos?.length ?? 0) === 0;
-                    const newLogos = [...(emailConfig.logos ?? []), { url: data.url, name: data.name, active: isFirst }];
-                    setEmailConfig({ ...emailConfig, logos: newLogos, ...(isFirst ? { logoUrl: data.url } : {}) });
+                    const base = emailConfig.logos?.length ? emailConfig.logos : currentLogos;
+                    const newLogos = [...base, { url: data.url, name: data.name, active: false }];
+                    setEmailConfig({ ...emailConfig, logos: newLogos });
                     toast.success("Logo uploaded");
                   } else {
                     const text = await res.text();
                     try { const data = JSON.parse(text); toast.error(data.error ?? "Upload failed"); } catch { toast.error("Upload failed"); }
                   }
-                }}
-                onClick={() => {
-                  const input = document.createElement("input");
-                  input.type = "file";
-                  input.accept = "image/*";
-                  input.onchange = async () => {
-                    const file = input.files?.[0];
-                    if (!file) return;
-                    if ((emailConfig.logos?.length ?? 0) >= 3) { toast.error("Maximum 3 logos"); return; }
-                    if (file.size > 2 * 1024 * 1024) { toast.error("Must be under 2MB"); return; }
-                    const fd = new FormData();
-                    fd.append("file", file);
-                    const res = await fetch("/api/admin/logos", { method: "POST", body: fd });
-                    if (res.ok) {
-                      const data = await res.json();
-                      const isFirst = (emailConfig.logos?.length ?? 0) === 0;
-                      const newLogos = [...(emailConfig.logos ?? []), { url: data.url, name: data.name, active: isFirst }];
-                      setEmailConfig({ ...emailConfig, logos: newLogos, ...(isFirst ? { logoUrl: data.url } : {}) });
-                      toast.success("Logo uploaded");
-                    } else {
-                      const data = await res.json();
-                      toast.error(data.error ?? "Upload failed");
-                    }
-                  };
-                  input.click();
-                }}
-              >
-                <p className="text-sm text-muted-foreground">Drop an image here or click to browse</p>
-                <p className="text-xs text-muted-foreground/60">{3 - (emailConfig.logos?.length ?? 0)} slot{3 - (emailConfig.logos?.length ?? 0) !== 1 ? "s" : ""} remaining</p>
-              </div>
+                }
 
-              {/* Logo gallery — seed default if empty */}
-              {(() => {
-                const logos = emailConfig.logos?.length
-                  ? emailConfig.logos
-                  : emailConfig.logoUrl
-                    ? [{ url: emailConfig.logoUrl, name: emailConfig.logoUrl.split("/").pop() ?? "default", active: true }]
-                    : [];
-                if (logos.length === 0) return null;
-                return (
-                <div className="grid grid-cols-3 gap-3 mt-3">
-                  {logos.map((logo, i) => (
+                return (<>
+                  {currentLogos.length < 3 && (
                     <div
-                      key={logo.url}
-                      className={`relative rounded-lg border p-3 text-center transition-colors ${
-                        logo.active ? "border-primary bg-primary/10" : "border-border"
-                      }`}
+                      className="relative flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border p-6 text-center transition-colors hover:border-primary/50 cursor-pointer"
+                      onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add("border-primary"); }}
+                      onDragLeave={(e) => { e.currentTarget.classList.remove("border-primary"); }}
+                      onDrop={(e) => { e.preventDefault(); e.currentTarget.classList.remove("border-primary"); const f = e.dataTransfer.files[0]; if (f) handleUpload(f); }}
+                      onClick={() => {
+                        const input = document.createElement("input");
+                        input.type = "file";
+                        input.accept = "image/*";
+                        input.onchange = () => { const f = input.files?.[0]; if (f) handleUpload(f); };
+                        input.click();
+                      }}
                     >
-                      <img
-                        src={logo.url}
-                        alt={logo.name}
-                        className="mx-auto mb-2 object-contain"
-                        style={{ maxHeight: 80, maxWidth: 120 }}
-                      />
-                      <p className="text-[10px] text-muted-foreground truncate">{logo.name}</p>
-                      <div className="mt-2 flex items-center justify-center gap-2">
-                        <label className="flex items-center gap-1 text-xs cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={logo.active}
-                            className="accent-primary"
-                            onChange={() => {
-                              const allLogos = emailConfig.logos?.length ? emailConfig.logos : logos;
-                              const newLogos = allLogos.map((l, j) => ({
-                                ...l,
-                                active: j === i,
-                              }));
-                              const activeUrl = newLogos.find((l) => l.active)?.url ?? emailConfig.logoUrl;
-                              setEmailConfig({ ...emailConfig, logos: newLogos, logoUrl: activeUrl });
-                            }}
-                          />
-                          <span className={logo.active ? "text-primary" : "text-muted-foreground"}>Active</span>
-                        </label>
-                        {logos.length > 1 && (
-                          <button
-                            type="button"
-                            className="text-xs text-destructive hover:underline cursor-pointer"
-                            onClick={async () => {
-                              if (logo.url.startsWith("http")) {
-                                await fetch("/api/admin/logos", {
-                                  method: "DELETE",
-                                  headers: { "Content-Type": "application/json" },
-                                  body: JSON.stringify({ url: logo.url }),
-                                });
-                              }
-                              const newLogos = logos.filter((_, j) => j !== i);
-                              if (logo.active && newLogos.length > 0) newLogos[0].active = true;
-                              const activeUrl = newLogos.find((l) => l.active)?.url ?? "/DreamForgeConsultingLogo-email.png";
-                              setEmailConfig({ ...emailConfig, logos: newLogos, logoUrl: activeUrl });
-                              toast.success("Logo removed");
-                            }}
-                          >
-                            Remove
-                          </button>
-                        )}
-                      </div>
+                      <p className="text-sm text-muted-foreground">Drop an image here or click to browse</p>
+                      <p className="text-xs text-muted-foreground/60">{3 - currentLogos.length} slot{3 - currentLogos.length !== 1 ? "s" : ""} remaining</p>
                     </div>
-                  ))}
-                </div>
-              ); })()}
+                  )}
+
+                  {/* Logo gallery — all logos with active toggle */}
+                  {currentLogos.length > 0 && (
+                    <div className="grid grid-cols-3 gap-3 mt-3">
+                      {currentLogos.map((logo, i) => (
+                        <div
+                          key={logo.url}
+                          className={`relative rounded-lg border p-3 text-center transition-colors ${
+                            logo.active ? "border-primary bg-primary/10" : "border-border"
+                          }`}
+                        >
+                          <img
+                            src={logo.url}
+                            alt={logo.name}
+                            className="mx-auto mb-2 object-contain"
+                            style={{ maxHeight: 80, maxWidth: 120 }}
+                          />
+                          <p className="text-[10px] text-muted-foreground truncate">{logo.name}</p>
+                          <div className="mt-2 flex items-center justify-center gap-2">
+                            <label className="flex items-center gap-1 text-xs cursor-pointer">
+                              <input
+                                type="radio"
+                                name="active-logo"
+                                checked={logo.active}
+                                className="accent-primary"
+                                onChange={() => {
+                                  const newLogos = currentLogos.map((l, j) => ({ ...l, active: j === i }));
+                                  const activeUrl = newLogos[i].url;
+                                  setEmailConfig({ ...emailConfig, logos: newLogos, logoUrl: activeUrl });
+                                }}
+                              />
+                              <span className={logo.active ? "text-primary" : "text-muted-foreground"}>Active</span>
+                            </label>
+                            <button
+                              type="button"
+                              className="text-xs text-destructive hover:underline cursor-pointer"
+                              onClick={async () => {
+                                if (currentLogos.length <= 1) { toast.error("Must keep at least one logo"); return; }
+                                if (logo.url.startsWith("http")) {
+                                  await fetch("/api/admin/logos", {
+                                    method: "DELETE",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ url: logo.url }),
+                                  });
+                                }
+                                const newLogos = currentLogos.filter((_, j) => j !== i);
+                                if (logo.active && newLogos.length > 0) newLogos[0].active = true;
+                                const activeUrl = newLogos.find((l) => l.active)?.url ?? "/DreamForgeConsultingLogo-email.png";
+                                setEmailConfig({ ...emailConfig, logos: newLogos, logoUrl: activeUrl });
+                                toast.success("Logo removed");
+                              }}
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>);
+              })()}
 
               {/* Size slider */}
               <div className="mt-3 flex items-center gap-4">
