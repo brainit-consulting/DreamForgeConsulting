@@ -19,6 +19,7 @@ export async function GET(req: Request) {
 
   // Monthly support invoice generation — runs on the 1st of each month
   let invoicesCreated = 0;
+  let cronErrors = false;
   const now = new Date();
   if (now.getUTCDate() === 1) {
     try {
@@ -56,19 +57,29 @@ export async function GET(req: Request) {
           ? ` + ${overage.toFixed(1)}hrs overage × $${plan.overageRate}`
           : "";
 
-        // Create DRAFT invoice
+        // Create DRAFT invoice — idempotency check: skip if one already exists this month
         if (plan.project.clientId) {
-          await db.invoice.create({
-            data: {
-              clientId: plan.project.clientId,
+          const startOfMonth = new Date(now.getUTCFullYear(), now.getUTCMonth(), 1);
+          const existing = await db.invoice.findFirst({
+            where: {
               projectId: plan.project.id,
-              amount,
-              status: "DRAFT",
-              description: `${plan.planType === "ANNUAL" ? "Annual" : "Monthly"} support — ${plan.project.name}${overageDesc}`,
-              dueDate: new Date(now.getFullYear(), now.getMonth(), 15), // Due 15th
+              createdAt: { gte: startOfMonth },
+              description: { contains: "support" },
             },
           });
-          invoicesCreated++;
+          if (!existing) {
+            await db.invoice.create({
+              data: {
+                clientId: plan.project.clientId,
+                projectId: plan.project.id,
+                amount,
+                status: "DRAFT",
+                description: `${plan.planType === "ANNUAL" ? "Annual" : "Monthly"} support — ${plan.project.name}${overageDesc}`,
+                dueDate: new Date(now.getFullYear(), now.getMonth(), 15), // Due 15th
+              },
+            });
+            invoicesCreated++;
+          }
         }
 
         // Reset hours + increment counter
@@ -82,6 +93,7 @@ export async function GET(req: Request) {
       }
     } catch (err) {
       console.error("[Cron] Support invoice generation failed:", err);
+      cronErrors = true;
     }
   }
 
@@ -98,6 +110,7 @@ export async function GET(req: Request) {
     overdueMarked = overdue.count;
   } catch (err) {
     console.error("[Cron] Overdue invoice check failed:", err);
+    cronErrors = true;
   }
 
   // Prune old activities — keep 500 most recent per entity
@@ -106,10 +119,11 @@ export async function GET(req: Request) {
     activitiesPruned = await pruneActivities();
   } catch (err) {
     console.error("[Cron] Activity cleanup failed:", err);
+    cronErrors = true;
   }
 
   return NextResponse.json(
-    { ...backupResult, supportInvoicesCreated: invoicesCreated, overdueMarked, activitiesPruned },
-    { status: backupResult.success ? 200 : 500 }
+    { ...backupResult, supportInvoicesCreated: invoicesCreated, overdueMarked, activitiesPruned, cronErrors },
+    { status: backupResult.success && !cronErrors ? 200 : 500 }
   );
 }

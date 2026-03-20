@@ -61,19 +61,21 @@ export async function POST(req: Request) {
           html,
         });
 
-        await db.outreachEmail.update({
-          where: { id: record.id },
-          data: { status: "SENT", sentAt: new Date() },
-        });
-
-        await db.activity.create({
-          data: {
-            type: "email_outreach_sent",
-            description: `Bulk outreach sent to ${lead.name} (${lead.email})`,
-            entityType: "outreach",
-            entityId: record.id,
-          },
-        });
+        // H1: mark SENT + log activity atomically — prevents DRAFT orphan if one write fails
+        await db.$transaction([
+          db.outreachEmail.update({
+            where: { id: record.id },
+            data: { status: "SENT", sentAt: new Date() },
+          }),
+          db.activity.create({
+            data: {
+              type: "email_outreach_sent",
+              description: `Bulk outreach sent to ${lead.name}`,
+              entityType: "outreach",
+              entityId: record.id,
+            },
+          }),
+        ]);
 
         // Auto-update lead status to CONTACTED if still NEW
         if (lead.status === "NEW") {
@@ -90,7 +92,14 @@ export async function POST(req: Request) {
           await new Promise((r) => setTimeout(r, 200));
         }
       } catch (err) {
-        console.error(`[Bulk Outreach] Failed for ${lead.name}:`, err);
+        console.error(`[Bulk Outreach] Failed for lead ${lead.id}:`, err);
+        // Mark record as FAILED if it was created — prevents re-send of already-delivered emails
+        try {
+          await db.outreachEmail.updateMany({
+            where: { leadId: lead.id, status: "DRAFT", subject: template.subject },
+            data: { status: "FAILED" },
+          });
+        } catch { /* best-effort */ }
         failed++;
       }
     }

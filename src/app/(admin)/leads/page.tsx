@@ -83,9 +83,13 @@ export default function LeadsPage() {
       variant: "danger",
     });
     if (!ok) return;
-    await fetch(`/api/leads/${id}`, { method: "DELETE" });
-    toast.success("Lead deleted");
-    fetchLeads();
+    const res = await fetch(`/api/leads/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      toast.success("Lead deleted");
+      fetchLeads();
+    } else {
+      toast.error("Failed to delete lead");
+    }
   }
 
   async function promoteLead(id: string) {

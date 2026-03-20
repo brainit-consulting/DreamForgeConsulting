@@ -98,9 +98,13 @@ export default function ClientsPage() {
       variant: "danger",
     });
     if (!ok) return;
-    await fetch(`/api/clients/${id}`, { method: "DELETE" });
-    toast.success("Client deleted");
-    fetchClients();
+    const res = await fetch(`/api/clients/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      toast.success("Client deleted");
+      fetchClients();
+    } else {
+      toast.error("Failed to delete client");
+    }
   }
 
   const sectors = [...new Set(clients.map((c) => c.sector).filter(Boolean))] as string[];

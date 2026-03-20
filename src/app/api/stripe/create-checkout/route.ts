@@ -5,7 +5,7 @@ import { requireAuth, handleAuthError } from "@/lib/auth-helpers";
 
 export async function POST(req: NextRequest) {
   try {
-    await requireAuth();
+    const session = await requireAuth();
     const { invoiceId } = await req.json();
 
     // Look up invoice from DB — never trust client-provided amount
@@ -16,6 +16,14 @@ export async function POST(req: NextRequest) {
 
     if (!invoice) {
       return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
+    }
+
+    // C1: Clients may only pay their own invoices
+    if (session.user.role === "CLIENT") {
+      const clientRecord = await db.client.findUnique({ where: { userId: session.user.id } });
+      if (!clientRecord || invoice.clientId !== clientRecord.id) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
     }
 
     if (invoice.status === "PAID") {
@@ -42,7 +50,7 @@ export async function POST(req: NextRequest) {
     // Check for existing unpaid Stripe session to prevent double-charge
     const stripe = getStripe();
     const existingSessions = await stripe.checkout.sessions.list({
-      limit: 5,
+      limit: 100,
     });
     const activeSession = existingSessions.data.find(
       (s) =>
@@ -58,7 +66,7 @@ export async function POST(req: NextRequest) {
     const description =
       invoice.description || `Invoice for ${invoice.project?.name ?? "services"}`;
 
-    const session = await stripe.checkout.sessions.create({
+    const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
         {
@@ -76,7 +84,7 @@ export async function POST(req: NextRequest) {
       metadata: { invoiceId },
     });
 
-    return NextResponse.json({ url: session.url });
+    return NextResponse.json({ url: checkoutSession.url });
   } catch (error) {
     try {
       return handleAuthError(error);

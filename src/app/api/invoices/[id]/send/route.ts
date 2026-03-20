@@ -22,10 +22,10 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: "Client has no email address" }, { status: 400 });
   }
 
-  // Send email
+  // Send email — M1: return error if send fails, don't mark SENT without delivery
+  const emailCfg = await getEmailConfig();
+  const logoUrl = await getAbsoluteLogoUrl();
   try {
-    const emailCfg = await getEmailConfig();
-    const logoUrl = await getAbsoluteLogoUrl();
     await sendEmail({
       from: getFromAddress(),
       to: invoice.client.email,
@@ -59,9 +59,10 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     });
   } catch (emailError) {
     console.error("[Invoice] Email send failed:", emailError);
+    return NextResponse.json({ error: "Failed to send invoice email — please try again" }, { status: 500 });
   }
 
-  // Update status to SENT
+  // Update status to SENT — only reached if email delivery succeeded
   const updated = await db.invoice.update({
     where: { id },
     data: { status: "SENT" },

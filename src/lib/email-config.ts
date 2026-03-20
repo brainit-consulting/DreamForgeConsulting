@@ -51,9 +51,12 @@ export const DEFAULT_EMAIL_CONFIG: EmailConfig = {
 
 let currentConfig: EmailConfig = { ...DEFAULT_EMAIL_CONFIG };
 let loadedFromDb = false;
+let lastLoadTime = 0;
+const CACHE_TTL_MS = 60_000; // 60 seconds — picks up admin settings changes without restart
 
 async function loadFromDb(): Promise<void> {
-  if (loadedFromDb) return;
+  const now = Date.now();
+  if (loadedFromDb && now - lastLoadTime < CACHE_TTL_MS) return;
   try {
     const row = await db.appSettings.findUnique({ where: { key: SETTINGS_KEY } });
     if (row) {
@@ -61,6 +64,7 @@ async function loadFromDb(): Promise<void> {
       currentConfig = emailConfigSchema.parse({ ...DEFAULT_EMAIL_CONFIG, ...stored });
     }
     loadedFromDb = true;
+    lastLoadTime = now;
   } catch {
     // DB not available — do NOT cache, retry on next call
   }
@@ -100,6 +104,16 @@ export async function resetEmailConfig(): Promise<EmailConfig> {
 }
 
 const PROD_URL = "https://dreamforgeconsulting.vercel.app";
+
+/** Validate a URL is safe for injection into email HTML — must be http/https */
+export function isSafeUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" || parsed.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
 
 /** Get the app's public URL, always returning production URL (never localhost) */
 export function getAppUrl(): string {

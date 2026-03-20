@@ -35,19 +35,21 @@ export async function POST(req: Request) {
           const invoice = await db.invoice.findUnique({ where: { id: invoiceId } });
 
           if (invoice && invoice.status !== "PAID") {
-            await db.invoice.update({
-              where: { id: invoiceId },
-              data: { status: "PAID", paidAt: new Date() },
-            });
-
-            await db.activity.create({
-              data: {
-                type: "invoice_paid",
-                description: `Invoice #${invoiceId.slice(-6)} paid — $${invoice.amount.toLocaleString()}`,
-                entityType: "invoice",
-                entityId: invoiceId,
-              },
-            });
+            // H6: wrap both writes in a transaction — if activity.create fails, invoice stays unpaid and Stripe retries cleanly
+            await db.$transaction([
+              db.invoice.update({
+                where: { id: invoiceId },
+                data: { status: "PAID", paidAt: new Date() },
+              }),
+              db.activity.create({
+                data: {
+                  type: "invoice_paid",
+                  description: `Invoice #${invoiceId.slice(-6)} paid — $${invoice.amount.toLocaleString()}`,
+                  entityType: "invoice",
+                  entityId: invoiceId,
+                },
+              }),
+            ]);
 
             console.log(`[Stripe Webhook] Invoice ${invoiceId} marked PAID`);
           }
@@ -55,7 +57,7 @@ export async function POST(req: Request) {
         break;
       }
 
-      // Refund issued — mark invoice as REFUNDED
+      // Refund issued — mark invoice as REFUNDED (full refund only)
       case "charge.refunded": {
         const charge = event.data.object as Stripe.Charge;
         const paymentIntent = charge.payment_intent as string;
@@ -72,22 +74,36 @@ export async function POST(req: Request) {
           const invoice = await db.invoice.findUnique({ where: { id: invoiceId } });
           if (invoice && invoice.status === "PAID") {
             const refundedAmount = (charge.amount_refunded / 100).toLocaleString();
+            // H2: only mark REFUNDED for full refunds — partial refunds log a warning instead
+            const isFullRefund = Math.abs(charge.amount_refunded - invoice.amount * 100) < 50; // within $0.50
 
-            await db.invoice.update({
-              where: { id: invoiceId },
-              data: { status: "REFUNDED" },
-            });
-
-            await db.activity.create({
-              data: {
-                type: "invoice_refunded",
-                description: `Invoice #${invoiceId.slice(-6)} refunded — $${refundedAmount}`,
-                entityType: "invoice",
-                entityId: invoiceId,
-              },
-            });
-
-            console.log(`[Stripe Webhook] Invoice ${invoiceId} marked REFUNDED`);
+            if (isFullRefund) {
+              await db.$transaction([
+                db.invoice.update({
+                  where: { id: invoiceId },
+                  data: { status: "REFUNDED" },
+                }),
+                db.activity.create({
+                  data: {
+                    type: "invoice_refunded",
+                    description: `Invoice #${invoiceId.slice(-6)} refunded — $${refundedAmount}`,
+                    entityType: "invoice",
+                    entityId: invoiceId,
+                  },
+                }),
+              ]);
+              console.log(`[Stripe Webhook] Invoice ${invoiceId} marked REFUNDED`);
+            } else {
+              await db.activity.create({
+                data: {
+                  type: "invoice_partial_refund",
+                  description: `⚠ Partial refund of $${refundedAmount} on Invoice #${invoiceId.slice(-6)} — review manually in Stripe`,
+                  entityType: "invoice",
+                  entityId: invoiceId,
+                },
+              });
+              console.warn(`[Stripe Webhook] Partial refund on invoice ${invoiceId} — not marking REFUNDED`);
+            }
           }
         }
         break;

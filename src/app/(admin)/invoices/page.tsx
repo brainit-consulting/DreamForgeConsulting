@@ -45,6 +45,7 @@ export default function InvoicesPage() {
   const [invoices, setInvoices] = useState<InvoiceRow[]>([]);
   const [filter, setFilter] = useState<InvoiceStatus | "ALL">("ALL");
   const [loading, setLoading] = useState(true);
+  const [sendingIds, setSendingIds] = useState<Set<string>>(new Set());
 
   const confirmAction = useConfirm();
 
@@ -65,24 +66,34 @@ export default function InvoicesPage() {
   const drafts = invoices.filter((i) => i.status === "DRAFT").length;
 
   async function sendInvoice(id: string) {
-    const res = await fetch(`/api/invoices/${id}/send`, { method: "POST" });
-    if (res.ok) {
-      toast.success("Invoice sent to client via email");
-      fetchInvoices();
-    } else {
-      const data = await res.json();
-      toast.error(data.error);
+    if (sendingIds.has(id)) return;
+    setSendingIds((prev) => new Set(prev).add(id));
+    try {
+      const res = await fetch(`/api/invoices/${id}/send`, { method: "POST" });
+      if (res.ok) {
+        toast.success("Invoice sent to client via email");
+        fetchInvoices();
+      } else {
+        const data = await res.json();
+        toast.error(data.error);
+      }
+    } finally {
+      setSendingIds((prev) => { const n = new Set(prev); n.delete(id); return n; });
     }
   }
 
   async function markPaid(id: string) {
-    await fetch(`/api/invoices/${id}`, {
+    const res = await fetch(`/api/invoices/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: "PAID" }),
     });
-    toast.success("Invoice marked as paid");
-    fetchInvoices();
+    if (res.ok) {
+      toast.success("Invoice marked as paid");
+      fetchInvoices();
+    } else {
+      toast.error("Failed to mark as paid");
+    }
   }
 
   async function refundInvoice(id: string) {
@@ -111,9 +122,13 @@ export default function InvoicesPage() {
       variant: "danger",
     });
     if (!ok) return;
-    await fetch(`/api/invoices/${id}`, { method: "DELETE" });
-    toast.success("Invoice deleted");
-    fetchInvoices();
+    const res = await fetch(`/api/invoices/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      toast.success("Invoice deleted");
+      fetchInvoices();
+    } else {
+      toast.error("Failed to delete invoice");
+    }
   }
 
   const stats = [
@@ -194,7 +209,7 @@ export default function InvoicesPage() {
                   <div className="flex gap-1">
                     {inv.status === "DRAFT" && (
                       <ActionTooltip label="Send to client">
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-blue-500" onClick={() => sendInvoice(inv.id)}>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-blue-500" disabled={sendingIds.has(inv.id)} onClick={() => sendInvoice(inv.id)}>
                           <Mail className="h-3.5 w-3.5" />
                         </Button>
                       </ActionTooltip>

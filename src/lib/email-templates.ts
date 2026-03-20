@@ -1,4 +1,4 @@
-import { getEmailConfig, getAbsoluteLogoUrl } from "./email-config";
+import { getEmailConfig, getAbsoluteLogoUrl, isSafeUrl } from "./email-config";
 
 async function emailHeader(): Promise<string> {
   const config = await getEmailConfig();
@@ -7,9 +7,10 @@ async function emailHeader(): Promise<string> {
   const mainName = parts.slice(0, -1).join(" ") || config.companyName;
   const subtitle = parts.length > 1 ? parts[parts.length - 1].toUpperCase() : "";
 
+  const safeLogo = isSafeUrl(logoUrl) ? logoUrl : "";
   return `
     <div style="text-align:center;margin-bottom:32px;">
-      <img src="${logoUrl}" alt="${config.companyName}" width="${config.logoSize}" style="display:block;max-height:${config.logoSize}px;max-width:${config.logoSize * 2}px;margin:0 auto 12px;" />
+      ${safeLogo ? `<img src="${safeLogo}" alt="${config.companyName}" width="${config.logoSize}" style="display:block;max-height:${config.logoSize}px;max-width:${config.logoSize * 2}px;margin:0 auto 12px;" />` : ""}
       <h1 style="color:#F59E0B;font-size:28px;margin:0;">${mainName}</h1>
       ${subtitle ? `<p style="color:#888;font-size:12px;letter-spacing:3px;margin:4px 0 0;">${subtitle}</p>` : ""}
     </div>`;
@@ -104,7 +105,8 @@ export async function outreachEmail({
         const active = config.bookingUrls?.find((b: { active: boolean }) => b.active);
         const url = active?.url || config.bookingUrl;
         const label = active?.label || "Book a Free Discovery Call";
-        if (!url) return "";
+        // M4: only inject URLs that are safe http/https — never javascript: or data: URIs
+        if (!url || !isSafeUrl(url)) return "";
         return `<div style="margin-top:24px;text-align:center;">
         <a href="${url}" style="display:inline-block;background:#F59E0B;color:#0A0A0F;font-weight:600;font-size:14px;padding:12px 32px;border-radius:8px;text-decoration:none;">
           ${label}

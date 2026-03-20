@@ -43,10 +43,8 @@ export async function POST(req: Request) {
       const headersList = await headers();
       const origin = headersList.get("origin") ?? process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
-      // Delete old user (cascades sessions/accounts, SetNull on client)
-      await db.user.delete({ where: { id: client.userId } });
-
-      // Create new user with new password
+      // C2: Create new user FIRST with a temp email — only delete old user after confirming success
+      const tempEmail = `resend_${Date.now()}@temp.dreamforge.internal`;
       const signUpRes = await fetch(`${origin}/api/auth/sign-up/email`, {
         method: "POST",
         headers: {
@@ -55,7 +53,7 @@ export async function POST(req: Request) {
           Cookie: headersList.get("cookie") ?? "",
         },
         body: JSON.stringify({
-          email: client.email,
+          email: tempEmail,
           password: tempPassword,
           name: client.company,
         }),
@@ -64,6 +62,15 @@ export async function POST(req: Request) {
       if (!signUpRes.ok) {
         return NextResponse.json({ error: "Failed to reset credentials" }, { status: 500 });
       }
+
+      // New account confirmed — now safe to delete old user (cascades sessions/accounts)
+      await db.user.delete({ where: { id: client.userId } });
+
+      // Update the new user to the real email
+      await db.user.update({
+        where: { email: tempEmail },
+        data: { email: client.email },
+      });
 
       const newUser = await db.user.update({
         where: { email: client.email },
