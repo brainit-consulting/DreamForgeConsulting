@@ -641,18 +641,127 @@ export default function SettingsPage() {
             <Separator />
 
             <div className="space-y-2">
-              <Label htmlFor="email-logo" className="text-base text-primary">Logo URL</Label>
+              <Label className="text-base text-primary">Email Logo</Label>
               <p className="text-sm text-muted-foreground">
-                Path or full URL to the logo image displayed in email headers. Use a path like /logo.png for images in the public folder, or a full https:// URL.
+                Upload up to 3 logos. Check the one to use in emails. Drag & drop or click to upload (max 2MB, images only).
               </p>
-              <Input
-                id="email-logo"
-                value={emailConfig.logoUrl}
-                onChange={(e) =>
-                  setEmailConfig({ ...emailConfig, logoUrl: e.target.value })
-                }
-                placeholder="/DreamForgeConsultingLogo.png"
-              />
+
+              {/* Drag & drop upload */}
+              <div
+                className="relative flex flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border p-6 text-center transition-colors hover:border-primary/50 cursor-pointer"
+                onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add("border-primary"); }}
+                onDragLeave={(e) => { e.currentTarget.classList.remove("border-primary"); }}
+                onDrop={async (e) => {
+                  e.preventDefault();
+                  e.currentTarget.classList.remove("border-primary");
+                  const file = e.dataTransfer.files[0];
+                  if (!file) return;
+                  if ((emailConfig.logos?.length ?? 0) >= 3) { toast.error("Maximum 3 logos"); return; }
+                  if (!file.type.startsWith("image/")) { toast.error("Must be an image"); return; }
+                  if (file.size > 2 * 1024 * 1024) { toast.error("Must be under 2MB"); return; }
+                  const fd = new FormData();
+                  fd.append("file", file);
+                  const res = await fetch("/api/admin/logos", { method: "POST", body: fd });
+                  if (res.ok) {
+                    const data = await res.json();
+                    const isFirst = (emailConfig.logos?.length ?? 0) === 0;
+                    const newLogos = [...(emailConfig.logos ?? []), { url: data.url, name: data.name, active: isFirst }];
+                    setEmailConfig({ ...emailConfig, logos: newLogos, ...(isFirst ? { logoUrl: data.url } : {}) });
+                    toast.success("Logo uploaded");
+                  } else {
+                    const text = await res.text();
+                    try { const data = JSON.parse(text); toast.error(data.error ?? "Upload failed"); } catch { toast.error("Upload failed"); }
+                  }
+                }}
+                onClick={() => {
+                  const input = document.createElement("input");
+                  input.type = "file";
+                  input.accept = "image/*";
+                  input.onchange = async () => {
+                    const file = input.files?.[0];
+                    if (!file) return;
+                    if ((emailConfig.logos?.length ?? 0) >= 3) { toast.error("Maximum 3 logos"); return; }
+                    if (file.size > 2 * 1024 * 1024) { toast.error("Must be under 2MB"); return; }
+                    const fd = new FormData();
+                    fd.append("file", file);
+                    const res = await fetch("/api/admin/logos", { method: "POST", body: fd });
+                    if (res.ok) {
+                      const data = await res.json();
+                      const isFirst = (emailConfig.logos?.length ?? 0) === 0;
+                      const newLogos = [...(emailConfig.logos ?? []), { url: data.url, name: data.name, active: isFirst }];
+                      setEmailConfig({ ...emailConfig, logos: newLogos, ...(isFirst ? { logoUrl: data.url } : {}) });
+                      toast.success("Logo uploaded");
+                    } else {
+                      const data = await res.json();
+                      toast.error(data.error ?? "Upload failed");
+                    }
+                  };
+                  input.click();
+                }}
+              >
+                <p className="text-sm text-muted-foreground">Drop an image here or click to browse</p>
+                <p className="text-xs text-muted-foreground/60">{3 - (emailConfig.logos?.length ?? 0)} slot{3 - (emailConfig.logos?.length ?? 0) !== 1 ? "s" : ""} remaining</p>
+              </div>
+
+              {/* Logo gallery */}
+              {(emailConfig.logos?.length ?? 0) > 0 && (
+                <div className="grid grid-cols-3 gap-3 mt-3">
+                  {emailConfig.logos?.map((logo, i) => (
+                    <div
+                      key={logo.url}
+                      className={`relative rounded-lg border p-3 text-center transition-colors ${
+                        logo.active ? "border-primary bg-primary/10" : "border-border"
+                      }`}
+                    >
+                      <img
+                        src={logo.url}
+                        alt={logo.name}
+                        className="mx-auto mb-2 object-contain"
+                        style={{ maxHeight: 80, maxWidth: 120 }}
+                      />
+                      <p className="text-[10px] text-muted-foreground truncate">{logo.name}</p>
+                      <div className="mt-2 flex items-center justify-center gap-2">
+                        <label className="flex items-center gap-1 text-xs cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={logo.active}
+                            className="accent-primary"
+                            onChange={() => {
+                              const newLogos = emailConfig.logos!.map((l, j) => ({
+                                ...l,
+                                active: j === i,
+                              }));
+                              const activeUrl = newLogos.find((l) => l.active)?.url ?? emailConfig.logoUrl;
+                              setEmailConfig({ ...emailConfig, logos: newLogos, logoUrl: activeUrl });
+                            }}
+                          />
+                          <span className={logo.active ? "text-primary" : "text-muted-foreground"}>Active</span>
+                        </label>
+                        <button
+                          type="button"
+                          className="text-xs text-destructive hover:underline cursor-pointer"
+                          onClick={async () => {
+                            await fetch("/api/admin/logos", {
+                              method: "DELETE",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ url: logo.url }),
+                            });
+                            const newLogos = emailConfig.logos!.filter((_, j) => j !== i);
+                            if (logo.active && newLogos.length > 0) newLogos[0].active = true;
+                            const activeUrl = newLogos.find((l) => l.active)?.url ?? "/DreamForgeConsultingLogo-email.png";
+                            setEmailConfig({ ...emailConfig, logos: newLogos, logoUrl: activeUrl });
+                            toast.success("Logo removed");
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Size slider */}
               <div className="mt-3 flex items-center gap-4">
                 <Label htmlFor="email-logo-size" className="shrink-0 text-sm text-muted-foreground">
                   Size: {emailConfig.logoSize}px
@@ -670,18 +779,6 @@ export default function SettingsPage() {
                   title={`Logo size: ${emailConfig.logoSize}px`}
                 />
               </div>
-              {emailConfig.logoUrl && (
-                <div className="mt-3 rounded-lg border border-border bg-muted/30 p-4">
-                  <p className="mb-2 text-xs text-muted-foreground">Preview:</p>
-                  <img
-                    src={emailConfig.logoUrl}
-                    alt="Email logo preview"
-                    style={{ maxHeight: emailConfig.logoSize, maxWidth: emailConfig.logoSize * 2 }}
-                    className="object-contain"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                  />
-                </div>
-              )}
             </div>
 
             <Separator />
@@ -719,18 +816,74 @@ export default function SettingsPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email-booking-url" className="text-base text-primary">Booking URL</Label>
+              <Label className="text-base text-primary">Booking URLs</Label>
               <p className="text-sm text-muted-foreground">
-                URL for the &quot;Book a Discovery Call&quot; button in outreach emails. Leave empty to disable.
+                Up to 2 booking URLs. The active one is used for the CTA button in outreach emails. Clear both to disable.
               </p>
-              <Input
-                id="email-booking-url"
-                value={emailConfig.bookingUrl}
-                onChange={(e) =>
-                  setEmailConfig({ ...emailConfig, bookingUrl: e.target.value })
-                }
-                placeholder="https://dreamforgeconsulting.vercel.app"
-              />
+              {(emailConfig.bookingUrls ?? []).map((entry, i) => (
+                <div key={i} className={`flex items-center gap-2 rounded-lg border p-3 ${entry.active ? "border-primary bg-primary/10" : "border-border"}`}>
+                  <input
+                    type="checkbox"
+                    checked={entry.active}
+                    className="accent-primary shrink-0"
+                    title="Set as active for emails"
+                    onChange={() => {
+                      const updated = (emailConfig.bookingUrls ?? []).map((b, j) => ({ ...b, active: j === i }));
+                      const activeUrl = updated.find((b) => b.active)?.url ?? "";
+                      setEmailConfig({ ...emailConfig, bookingUrls: updated, bookingUrl: activeUrl });
+                    }}
+                  />
+                  <div className="flex-1 space-y-1">
+                    <Input
+                      value={entry.label}
+                      onChange={(e) => {
+                        const updated = [...(emailConfig.bookingUrls ?? [])];
+                        updated[i] = { ...updated[i], label: e.target.value };
+                        setEmailConfig({ ...emailConfig, bookingUrls: updated });
+                      }}
+                      placeholder="Button label (e.g., Book a Free Discovery Call)"
+                      className="h-7 text-xs"
+                    />
+                    <Input
+                      value={entry.url}
+                      onChange={(e) => {
+                        const updated = [...(emailConfig.bookingUrls ?? [])];
+                        updated[i] = { ...updated[i], url: e.target.value };
+                        if (updated[i].active) setEmailConfig({ ...emailConfig, bookingUrls: updated, bookingUrl: e.target.value });
+                        else setEmailConfig({ ...emailConfig, bookingUrls: updated });
+                      }}
+                      placeholder="https://..."
+                      className="h-7 text-xs"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="text-xs text-destructive hover:underline shrink-0 cursor-pointer"
+                    onClick={() => {
+                      const updated = (emailConfig.bookingUrls ?? []).filter((_, j) => j !== i);
+                      if (entry.active && updated.length > 0) updated[0].active = true;
+                      const activeUrl = updated.find((b) => b.active)?.url ?? "";
+                      setEmailConfig({ ...emailConfig, bookingUrls: updated, bookingUrl: activeUrl });
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+              {(emailConfig.bookingUrls ?? []).length < 2 && (
+                <button
+                  type="button"
+                  className="text-sm text-primary hover:underline cursor-pointer"
+                  onClick={() => {
+                    const isFirst = (emailConfig.bookingUrls ?? []).length === 0;
+                    const newEntry = { url: "", label: "Book a Free Discovery Call", active: isFirst };
+                    const updated = [...(emailConfig.bookingUrls ?? []), newEntry];
+                    setEmailConfig({ ...emailConfig, bookingUrls: updated });
+                  }}
+                >
+                  + Add Booking URL
+                </button>
+              )}
             </div>
 
             <Separator />

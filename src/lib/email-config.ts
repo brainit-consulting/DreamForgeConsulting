@@ -3,16 +3,34 @@ import { db } from "./db";
 
 const SETTINGS_KEY = "email";
 
+const logoEntrySchema = z.object({
+  url: z.string(),
+  name: z.string(),
+  active: z.boolean(),
+});
+
+export type LogoEntry = z.infer<typeof logoEntrySchema>;
+
+const bookingUrlEntrySchema = z.object({
+  url: z.string(),
+  label: z.string(),
+  active: z.boolean(),
+});
+
+export type BookingUrlEntry = z.infer<typeof bookingUrlEntrySchema>;
+
 export const emailConfigSchema = z.object({
   companyName: z.string().min(1),
   logoUrl: z.string(),
   logoSize: z.number().min(30).max(300),
+  logos: z.array(logoEntrySchema).optional().default([]),
   signOff: z.string().min(1),
   tagline: z.string(),
   greetingUseName: z.boolean(),
   greetingUseCompany: z.boolean(),
   autoApprovalEmail: z.boolean(),
   bookingUrl: z.string(),
+  bookingUrls: z.array(bookingUrlEntrySchema).optional().default([]),
 });
 
 export type EmailConfig = z.infer<typeof emailConfigSchema>;
@@ -21,12 +39,14 @@ export const DEFAULT_EMAIL_CONFIG: EmailConfig = {
   companyName: "DreamForge Consulting",
   logoUrl: "/DreamForgeConsultingLogo-email.png",
   logoSize: 120,
+  logos: [],
   signOff: "Best regards,\nDreamForge Consulting",
   tagline: "Crafting your digital future.",
   greetingUseName: true,
   greetingUseCompany: true,
   autoApprovalEmail: false,
   bookingUrl: "https://dreamforgeconsulting.vercel.app",
+  bookingUrls: [],
 };
 
 let currentConfig: EmailConfig = { ...DEFAULT_EMAIL_CONFIG };
