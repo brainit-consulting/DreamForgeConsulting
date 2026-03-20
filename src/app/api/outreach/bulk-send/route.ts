@@ -75,6 +75,14 @@ export async function POST(req: Request) {
           },
         });
 
+        // Auto-update lead status to CONTACTED if still NEW
+        if (lead.status === "NEW") {
+          await db.lead.update({
+            where: { id: lead.id },
+            data: { status: "CONTACTED" },
+          });
+        }
+
         sent++;
 
         // Rate limit: 200ms between sends to stay under Resend 5 req/sec

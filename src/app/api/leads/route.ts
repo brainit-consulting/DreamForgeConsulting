@@ -19,7 +19,16 @@ const createLeadSchema = z.object({
 export async function GET() {
   try {
     await requireAdmin();
-    const leads = await db.lead.findMany({ orderBy: { createdAt: "desc" } });
+    const leads = await db.lead.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        outreachEmails: {
+          select: { status: true, sentAt: true },
+          orderBy: { sentAt: "desc" },
+          take: 1,
+        },
+      },
+    });
     return NextResponse.json(leads);
   } catch (error) {
     return handleAuthError(error);

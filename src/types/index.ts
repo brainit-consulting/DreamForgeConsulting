@@ -49,6 +49,7 @@ export interface Lead {
   notes?: string;
   value?: number;
   createdAt: Date;
+  outreachEmails?: { status: string; sentAt?: string | null }[];
 }
 
 export interface Client {

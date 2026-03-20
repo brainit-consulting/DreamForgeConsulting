@@ -61,6 +61,14 @@ export async function POST(
         },
       });
 
+      // Auto-update lead status to CONTACTED if still NEW
+      if (email.lead.status === "NEW") {
+        await db.lead.update({
+          where: { id: email.lead.id },
+          data: { status: "CONTACTED" },
+        });
+      }
+
       return NextResponse.json(updated);
     } catch (sendError) {
       console.error("[Outreach] Email send failed:", sendError);

@@ -17,7 +17,7 @@ import { useConfirm } from "@/components/shared/confirm-dialog";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { Trash2, UserCheck, Search, Send, X, Eye } from "lucide-react";
+import { Trash2, UserCheck, Search, Send, X, Mail } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import type { Lead, LeadStatus } from "@/types";
@@ -296,7 +296,19 @@ export default function LeadsPage() {
                   />
                 </TableCell>
                 <TableCell className="truncate">
-                  <EditLeadDialog lead={lead} onUpdated={fetchLeads} variant="name" />
+                  <div className="flex items-center gap-1.5">
+                    <EditLeadDialog lead={lead} onUpdated={fetchLeads} variant="name" />
+                    {lead.outreachEmails?.[0]?.status === "SENT" && (
+                      <ActionTooltip label={`Outreach sent ${lead.outreachEmails[0].sentAt ? format(new Date(lead.outreachEmails[0].sentAt), "MMM d") : ""}`}>
+                        <Mail className="h-3 w-3 text-emerald-500 shrink-0" />
+                      </ActionTooltip>
+                    )}
+                    {lead.outreachEmails?.[0]?.status === "DRAFT" && (
+                      <ActionTooltip label="Outreach draft pending">
+                        <Mail className="h-3 w-3 text-amber-500 shrink-0" />
+                      </ActionTooltip>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell className="truncate">{lead.company ?? "—"}</TableCell>
                 <TableCell className="truncate text-muted-foreground">{lead.sector ?? "—"}</TableCell>
