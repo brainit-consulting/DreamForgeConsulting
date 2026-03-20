@@ -10,7 +10,7 @@ export default function PortalLayout({
   children: React.ReactNode;
 }) {
   return (
-    <HelpProvider>
+    <HelpProvider isPortal>
     <ConfirmProvider>
       <div className="flex h-screen overflow-hidden">
         <PortalSidebar />

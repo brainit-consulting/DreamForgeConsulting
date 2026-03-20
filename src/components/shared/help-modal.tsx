@@ -6,7 +6,7 @@ import { HelpCircle, X, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { helpContent, type HelpSection } from "@/lib/help-content";
-import { StandaloneHelpContent } from "@/components/shared/help-standalone";
+import { StandaloneHelpContent, PORTAL_SECTION_KEYS } from "@/components/shared/help-standalone";
 import { ActionTooltip } from "@/components/shared/action-tooltip";
 import { cn } from "@/lib/utils";
 
@@ -29,14 +29,16 @@ export function useHelp() {
   return ctx;
 }
 
-export function HelpProvider({ children }: { children: ReactNode }) {
+export function HelpProvider({ children, isPortal }: { children: ReactNode; isPortal?: boolean }) {
   const [state, setState] = useState<HelpModalState>({
     isOpen: false,
     sectionKey: "dashboard",
   });
 
-  const openHelp = useCallback((sectionKey: string) =>
-    setState({ isOpen: true, sectionKey }), []);
+  const openHelp = useCallback((sectionKey: string) => {
+    if (isPortal && !PORTAL_SECTION_KEYS.has(sectionKey)) return;
+    setState({ isOpen: true, sectionKey });
+  }, [isPortal]);
   const closeHelp = useCallback(() =>
     setState((prev) => ({ ...prev, isOpen: false })), []);
 
@@ -45,7 +47,7 @@ export function HelpProvider({ children }: { children: ReactNode }) {
     const channel = new BroadcastChannel("dreamforge-help");
     channel.onmessage = (e) => {
       if (e.data?.type === "pop-in" && e.data.sectionKey) {
-        openHelp(e.data.sectionKey);
+        openHelp(e.data.sectionKey); // openHelp already enforces portal allowlist
       }
     };
     return () => channel.close();

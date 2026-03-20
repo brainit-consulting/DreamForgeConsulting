@@ -234,7 +234,7 @@ function PortalGuideLayout({ tips }: { tips: string[] }) {
   );
 }
 
-const PORTAL_SECTION_KEYS = new Set(["portal", "projectDetail"]);
+export const PORTAL_SECTION_KEYS = new Set(["portal", "projectDetail"]);
 
 /** Shared help content renderer — used in both modal and standalone pop-out page */
 export function StandaloneHelpContent({ sectionKey, section }: { sectionKey: string; section: HelpSection }) {

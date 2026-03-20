@@ -5,11 +5,16 @@ import { Suspense } from "react";
 import { HelpCircle, ArrowLeftToLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { helpContent, type HelpSection } from "@/lib/help-content";
-import { StandaloneHelpContent } from "@/components/shared/help-standalone";
+import { StandaloneHelpContent, PORTAL_SECTION_KEYS } from "@/components/shared/help-standalone";
+import { useSession } from "@/lib/auth-client";
 
 function HelpPageInner() {
   const searchParams = useSearchParams();
-  const sectionKey = searchParams.get("section") ?? "adminGuide";
+  const { data: session } = useSession();
+  const isPortal = (session?.user as { role?: string } | undefined)?.role === "CLIENT";
+  const rawKey = searchParams.get("section") ?? "adminGuide";
+  // Portal users can only view portal-safe help sections
+  const sectionKey = isPortal && !PORTAL_SECTION_KEYS.has(rawKey) ? "portal" : rawKey;
   const section: HelpSection = helpContent[sectionKey] ?? {
     title: "Help",
     content: "No help content available.",
