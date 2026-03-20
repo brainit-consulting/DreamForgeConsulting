@@ -186,13 +186,19 @@ export default function SettingsPage() {
       .then((d) => { setSupportConfig(d); setTimeout(() => { supportLoaded.current = true; }, 500); });
   }, []);
 
+  // Silent autosave (no toast, no state update — just PUT to API)
+  async function silentSave(url: string, data: unknown, section: string) {
+    try {
+      const res = await fetch(url, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+      if (res.ok) { setAutoSaved(section); setTimeout(() => setAutoSaved(null), 2000); }
+    } catch { /* silent */ }
+  }
+
   // Debounced autosave effects (1.5s delay)
   useEffect(() => {
     if (!athenaLoaded.current || !config) return;
     if (athenaTimer.current) clearTimeout(athenaTimer.current);
-    athenaTimer.current = setTimeout(() => {
-      handleSave().then(() => { setAutoSaved("athena"); setTimeout(() => setAutoSaved(null), 2000); });
-    }, 1500);
+    athenaTimer.current = setTimeout(() => silentSave("/api/athena/config", config, "athena"), 1500);
     return () => { if (athenaTimer.current) clearTimeout(athenaTimer.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config]);
@@ -200,9 +206,7 @@ export default function SettingsPage() {
   useEffect(() => {
     if (!emailLoaded.current || !emailConfig) return;
     if (emailTimer.current) clearTimeout(emailTimer.current);
-    emailTimer.current = setTimeout(() => {
-      handleEmailSave().then(() => { setAutoSaved("email"); setTimeout(() => setAutoSaved(null), 2000); });
-    }, 1500);
+    emailTimer.current = setTimeout(() => silentSave("/api/email/config", emailConfig, "email"), 1500);
     return () => { if (emailTimer.current) clearTimeout(emailTimer.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [emailConfig]);
@@ -210,9 +214,7 @@ export default function SettingsPage() {
   useEffect(() => {
     if (!backupCfgLoaded.current || !backupConfig) return;
     if (backupCfgTimer.current) clearTimeout(backupCfgTimer.current);
-    backupCfgTimer.current = setTimeout(() => {
-      handleBackupConfigSave().then(() => { setAutoSaved("backup"); setTimeout(() => setAutoSaved(null), 2000); });
-    }, 1500);
+    backupCfgTimer.current = setTimeout(() => silentSave("/api/backup/config", backupConfig, "backup"), 1500);
     return () => { if (backupCfgTimer.current) clearTimeout(backupCfgTimer.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [backupConfig]);
@@ -220,9 +222,7 @@ export default function SettingsPage() {
   useEffect(() => {
     if (!supportLoaded.current || !supportConfig) return;
     if (supportTimer.current) clearTimeout(supportTimer.current);
-    supportTimer.current = setTimeout(() => {
-      handleSupportSave().then(() => { setAutoSaved("support"); setTimeout(() => setAutoSaved(null), 2000); });
-    }, 1500);
+    supportTimer.current = setTimeout(() => silentSave("/api/support/config", supportConfig, "support"), 1500);
     return () => { if (supportTimer.current) clearTimeout(supportTimer.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [supportConfig]);
@@ -252,8 +252,6 @@ export default function SettingsPage() {
         body: JSON.stringify(config),
       });
       if (res.ok) {
-        const updated = await res.json();
-        setConfig(updated);
         setSaved(true);
         toast.success("Athena settings saved");
         setTimeout(() => setSaved(false), 3000);
@@ -301,7 +299,6 @@ export default function SettingsPage() {
         body: JSON.stringify(emailConfig),
       });
       if (res.ok) {
-        setEmailConfig(await res.json());
         setEmailSaved(true);
         toast.success("Email preferences saved");
         setTimeout(() => setEmailSaved(false), 3000);
@@ -334,7 +331,6 @@ export default function SettingsPage() {
         body: JSON.stringify(backupConfig),
       });
       if (res.ok) {
-        setBackupConfig(await res.json());
         setBackupSaved(true);
         toast.success("Backup retention settings saved");
         setTimeout(() => setBackupSaved(false), 3000);
@@ -365,7 +361,6 @@ export default function SettingsPage() {
         body: JSON.stringify(supportConfig),
       });
       if (res.ok) {
-        setSupportConfig(await res.json());
         setSupportSaved(true);
         toast.success("Support defaults saved");
         setTimeout(() => setSupportSaved(false), 3000);
