@@ -225,8 +225,9 @@ export default function LandingPage() {
               </a>
             </div>
           </div>
-          <div className="mt-8 pt-6 border-t border-border/30 text-center text-xs text-muted-foreground">
-            © {new Date().getFullYear()} DreamForge Consulting. All Rights Reserved. Powered by Real People.
+          <div className="mt-8 pt-6 border-t border-border/30 text-center text-xs text-muted-foreground space-y-1">
+            <p>© {new Date().getFullYear()} DreamForge Consulting. All Rights Reserved. Powered by Real People.</p>
+            <p>Parent Company: BlueridgeWebServices LLC | L2400012602</p>
           </div>
         </div>
       </footer>
