@@ -18,7 +18,8 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
     return NextResponse.json({ error: "Only draft invoices can be sent" }, { status: 400 });
   }
 
-  if (!invoice.client.email) {
+  const client = invoice.client;
+  if (!client?.email) {
     return NextResponse.json({ error: "Client has no email address" }, { status: 400 });
   }
 
@@ -28,7 +29,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   try {
     await sendEmail({
       from: getFromAddress(),
-      to: invoice.client.email,
+      to: client.email,
       subject: `Invoice from ${emailCfg.companyName} — $${invoice.amount.toLocaleString()}`,
       html: `
 <!DOCTYPE html>
@@ -41,7 +42,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
       <p style="color:#888;font-size:12px;letter-spacing:2px;margin:0 0 32px;">INVOICE</p>
     </div>
     <div style="background:#16161E;border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:24px;">
-      <p style="color:#E8E4DF;font-size:16px;margin:0 0 16px;">Hi ${invoice.client.company},</p>
+      <p style="color:#E8E4DF;font-size:16px;margin:0 0 16px;">Hi ${client.company},</p>
       <p style="color:#AAA;font-size:14px;margin:0 0 24px;">
         You have a new invoice for <strong style="color:#E8E4DF;">${invoice.description ?? "services rendered"}</strong>.
       </p>
@@ -72,7 +73,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
   await db.activity.create({
     data: {
       type: "email_invoice_sent",
-      description: `Invoice emailed to ${invoice.client.company} — $${invoice.amount.toLocaleString()}`,
+      description: `Invoice emailed to ${client.company} — $${invoice.amount.toLocaleString()}`,
       entityType: "invoice",
       entityId: id,
     },

@@ -50,7 +50,8 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
   try {
     await requireAdmin();
     const { id } = await params;
-    await db.client.delete({ where: { id } });
+    // Soft-delete: preserve client record and related invoices/financial history
+    await db.client.update({ where: { id }, data: { deletedAt: new Date() } });
     return NextResponse.json({ success: true });
   } catch (error) {
     return handleAuthError(error);

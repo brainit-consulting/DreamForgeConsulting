@@ -18,6 +18,7 @@ export async function GET() {
   try {
     await requireAdmin();
     const clients = await db.client.findMany({
+      where: { deletedAt: null },
       orderBy: { createdAt: "desc" },
       include: { _count: { select: { projects: true } } },
     });

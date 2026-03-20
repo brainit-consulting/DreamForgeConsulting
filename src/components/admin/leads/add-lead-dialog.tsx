@@ -95,7 +95,7 @@ export function AddLeadDialog({ onCreated }: { onCreated: () => void }) {
             </div>
             <div className="space-y-1">
               <Label htmlFor="lead-value">Est. Value ($)</Label>
-              <Input id="lead-value" type="number" value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} />
+              <Input id="lead-value" type="number" min="0" value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} />
             </div>
           </div>
           <div className="space-y-1">

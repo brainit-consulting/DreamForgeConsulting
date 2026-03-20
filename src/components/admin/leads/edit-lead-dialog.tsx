@@ -140,7 +140,7 @@ export function EditLeadDialog({ lead, onUpdated, variant = "icon" }: { lead: Le
             </div>
             <div className="space-y-1">
               <Label htmlFor="edit-value">Est. Value ($)</Label>
-              <Input id="edit-value" type="number" value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} />
+              <Input id="edit-value" type="number" min="0" value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })} />
             </div>
           </div>
           <div className="space-y-1">

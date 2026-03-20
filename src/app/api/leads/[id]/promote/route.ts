@@ -15,7 +15,7 @@ export async function POST(_req: Request, { params }: { params: Promise<{ id: st
 
     // Check if a client with this email already exists (only if email is set)
     if (lead.email) {
-      const existingClient = await db.client.findFirst({ where: { email: lead.email } });
+      const existingClient = await db.client.findFirst({ where: { email: lead.email, deletedAt: null } });
       if (existingClient) {
         return NextResponse.json({ error: "A client with this email already exists" }, { status: 409 });
       }

@@ -5,15 +5,16 @@ import { requireAdmin, handleAuthError } from "@/lib/auth-helpers";
 export async function GET() {
   try {
   await requireAdmin();
+  const now = new Date();
+  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
   const invoices = await db.invoice.findMany({
-    where: { status: "PAID", paidAt: { not: null } },
+    where: { status: "PAID", paidAt: { gte: sixMonthsAgo } },
     select: { amount: true, paidAt: true },
-    orderBy: { paidAt: "asc" },
   });
 
   // Group by month (last 6 months)
   const months: Record<string, number> = {};
-  const now = new Date();
   for (let i = 5; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const key = d.toLocaleString("en-US", { month: "short" });
