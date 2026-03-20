@@ -36,7 +36,7 @@ export function TopBar() {
 
   return (
     <div className="flex h-12 items-center justify-end gap-1 border-b border-border px-6">
-      <span className="mr-auto font-display text-xs text-emerald-400/70">v0.2.0</span>
+      <span className="mr-auto font-display text-xs text-emerald-400/70">v0.3.0</span>
       {isAdmin && (
         <HelpButton sectionKey="adminGuide" icon={<BookOpen className="h-4 w-4" />} label="Admin Guide" />
       )}
