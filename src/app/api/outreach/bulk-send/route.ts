@@ -38,6 +38,11 @@ export async function POST(req: Request) {
 
     for (const lead of leads) {
       try {
+        // Clean up any existing DRAFT for this lead with the same subject
+        await db.outreachEmail.deleteMany({
+          where: { leadId: lead.id, subject: template.subject, status: "DRAFT" },
+        });
+
         // Create outreach record for this lead
         const record = await db.outreachEmail.create({
           data: {

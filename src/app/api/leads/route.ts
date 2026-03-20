@@ -25,7 +25,7 @@ export async function GET() {
       include: {
         outreachEmails: {
           select: { status: true, sentAt: true },
-          orderBy: { sentAt: "desc" },
+          orderBy: { createdAt: "desc" },
           take: 1,
         },
       },
