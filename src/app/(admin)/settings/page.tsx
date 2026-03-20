@@ -703,28 +703,17 @@ export default function SettingsPage() {
                 <p className="text-xs text-muted-foreground/60">{3 - (emailConfig.logos?.length ?? 0)} slot{3 - (emailConfig.logos?.length ?? 0) !== 1 ? "s" : ""} remaining</p>
               </div>
 
-              {/* Current active logo preview (when no uploaded logos) */}
-              {(emailConfig.logos?.length ?? 0) === 0 && emailConfig.logoUrl && (
-                <div className="mt-3 rounded-lg border border-primary bg-primary/10 p-4 flex items-center gap-4">
-                  <img
-                    src={emailConfig.logoUrl}
-                    alt="Current logo"
-                    style={{ maxHeight: emailConfig.logoSize, maxWidth: emailConfig.logoSize * 2 }}
-                    className="object-contain"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-                  />
-                  <div>
-                    <p className="text-sm font-medium text-primary">Current Logo</p>
-                    <p className="text-xs text-muted-foreground truncate">{emailConfig.logoUrl}</p>
-                    <p className="text-[10px] text-emerald-500 mt-1">Active — used in emails</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Logo gallery */}
-              {(emailConfig.logos?.length ?? 0) > 0 && (
+              {/* Logo gallery — seed default if empty */}
+              {(() => {
+                const logos = emailConfig.logos?.length
+                  ? emailConfig.logos
+                  : emailConfig.logoUrl
+                    ? [{ url: emailConfig.logoUrl, name: emailConfig.logoUrl.split("/").pop() ?? "default", active: true }]
+                    : [];
+                if (logos.length === 0) return null;
+                return (
                 <div className="grid grid-cols-3 gap-3 mt-3">
-                  {emailConfig.logos?.map((logo, i) => (
+                  {logos.map((logo, i) => (
                     <div
                       key={logo.url}
                       className={`relative rounded-lg border p-3 text-center transition-colors ${
@@ -745,7 +734,8 @@ export default function SettingsPage() {
                             checked={logo.active}
                             className="accent-primary"
                             onChange={() => {
-                              const newLogos = emailConfig.logos!.map((l, j) => ({
+                              const allLogos = emailConfig.logos?.length ? emailConfig.logos : logos;
+                              const newLogos = allLogos.map((l, j) => ({
                                 ...l,
                                 active: j === i,
                               }));
@@ -755,29 +745,33 @@ export default function SettingsPage() {
                           />
                           <span className={logo.active ? "text-primary" : "text-muted-foreground"}>Active</span>
                         </label>
-                        <button
-                          type="button"
-                          className="text-xs text-destructive hover:underline cursor-pointer"
-                          onClick={async () => {
-                            await fetch("/api/admin/logos", {
-                              method: "DELETE",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify({ url: logo.url }),
-                            });
-                            const newLogos = emailConfig.logos!.filter((_, j) => j !== i);
-                            if (logo.active && newLogos.length > 0) newLogos[0].active = true;
-                            const activeUrl = newLogos.find((l) => l.active)?.url ?? "/DreamForgeConsultingLogo-email.png";
-                            setEmailConfig({ ...emailConfig, logos: newLogos, logoUrl: activeUrl });
-                            toast.success("Logo removed");
-                          }}
-                        >
-                          Remove
-                        </button>
+                        {logos.length > 1 && (
+                          <button
+                            type="button"
+                            className="text-xs text-destructive hover:underline cursor-pointer"
+                            onClick={async () => {
+                              if (logo.url.startsWith("http")) {
+                                await fetch("/api/admin/logos", {
+                                  method: "DELETE",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({ url: logo.url }),
+                                });
+                              }
+                              const newLogos = logos.filter((_, j) => j !== i);
+                              if (logo.active && newLogos.length > 0) newLogos[0].active = true;
+                              const activeUrl = newLogos.find((l) => l.active)?.url ?? "/DreamForgeConsultingLogo-email.png";
+                              setEmailConfig({ ...emailConfig, logos: newLogos, logoUrl: activeUrl });
+                              toast.success("Logo removed");
+                            }}
+                          >
+                            Remove
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
                 </div>
-              )}
+              ); })()}
 
               {/* Size slider */}
               <div className="mt-3 flex items-center gap-4">
