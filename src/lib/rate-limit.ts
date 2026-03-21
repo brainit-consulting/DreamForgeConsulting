@@ -1,3 +1,43 @@
+// ── General IP-based sliding-window rate limiter ──────────────────
+
+interface RateLimitEntry {
+  count: number;
+  windowStart: number;
+}
+
+const limitStore = new Map<string, RateLimitEntry>();
+
+export function checkLimit(
+  key: string,
+  maxRequests: number,
+  windowMs: number
+): { allowed: boolean; remaining: number; resetIn: number } {
+  const now = Date.now();
+  const entry = limitStore.get(key);
+
+  if (!entry || now - entry.windowStart >= windowMs) {
+    limitStore.set(key, { count: 1, windowStart: now });
+    return { allowed: true, remaining: maxRequests - 1, resetIn: windowMs };
+  }
+
+  if (entry.count >= maxRequests) {
+    return {
+      allowed: false,
+      remaining: 0,
+      resetIn: windowMs - (now - entry.windowStart),
+    };
+  }
+
+  entry.count++;
+  return {
+    allowed: true,
+    remaining: maxRequests - entry.count,
+    resetIn: windowMs - (now - entry.windowStart),
+  };
+}
+
+// ── Resend email throttle ─────────────────────────────────────────
+
 const MAX_REQUESTS_PER_SECOND = 4; // Stay under Resend's 5/sec limit
 const WINDOW_MS = 1000;
 
